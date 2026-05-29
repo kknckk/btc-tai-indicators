@@ -7,42 +7,61 @@ Każdy plik CSV w folderze `data_ingestion/csv/` zawiera zawsze dwie kolumny:
 - `time` - data w formacie `YYYY-MM-DD`
 - `[Nazwa_Wskaznika]` - wartość numeryczna wskaźnika dla danego dnia
 
-Dane w plikach CSV obejmują pełną historię (od początku rejestracji wskaźnika) do dnia **2026-06-01**.
+Dane w plikach CSV obejmują pełną historię (od początku sieci) do dnia **2026-06-01**.
 
-## Lista Wskaźników
+## Wygenerowane Wskaźniki (Gotowe w repozytorium jako CSV)
 
-| Wskaźnik | Opis | Źródło Danych | Interwał Workera (GCP) | Plik CSV (do 2026-06-01) |
-|---|---|---|---|---|
-| **CapRealUSD** | Realized Capitalization (USD). Wycena UTXO po cenie w momencie ich powstania. | CoinMetrics | 1D (Dziennie) | [csv/CapRealUSD.csv](data_ingestion/csv/CapRealUSD.csv) |
-| **SplyAct30d** | Active Supply 30d. Ilość BTC, która zmieniła adres w ciągu ostatnich 30 dni. | CoinMetrics | 1D (Dziennie) | [csv/SplyAct30d.csv](data_ingestion/csv/SplyAct30d.csv) |
-| **SplyAct180d** | Active Supply 180d. | CoinMetrics | 1D (Dziennie) | [csv/SplyAct180d.csv](data_ingestion/csv/SplyAct180d.csv) |
-| **SplyAct1yr** | Active Supply 1y. | CoinMetrics | 1D (Dziennie) | [csv/SplyAct1yr.csv](data_ingestion/csv/SplyAct1yr.csv) |
-| **TxTfrValDayDst** | Coin Days Destroyed (CDD). Suma (wiek_utxo_w_dniach * wartość_btc). | BigQuery (SQL) | 1D (Dziennie) | *Do wyliczenia via BQ* |
-| **FeeMedNtv** | Median Fee (BTC). | mempool.space | Per-Block -> Agg do 1D | *Czeka na pobranie* |
-| **FeeMedUSD** | Median Fee (USD). | mempool.space / BQ | Per-Block -> Agg do 1D | *Czeka na pobranie* |
-| **TxTfrValAdjNtv** | Adjusted Transfer Volume (BTC). Usuwa tzw. change outputs. | CoinMetrics | 1D (Dziennie) | [csv/TxTfrValAdjNtv.csv](data_ingestion/csv/TxTfrValAdjNtv.csv) |
-| **TxTfrValAdjUSD** | Adjusted Transfer Volume (USD). | CoinMetrics | 1D (Dziennie) | [csv/TxTfrValAdjUSD.csv](data_ingestion/csv/TxTfrValAdjUSD.csv) |
-| **CapAct1yrUSD** | Active Cap 1y (USD). Realized Cap tylko dla monet aktywnych w < 1y. | CoinMetrics | 1D (Dziennie) | [csv/CapAct1yrUSD.csv](data_ingestion/csv/CapAct1yrUSD.csv) |
-| **SOPR** | Spent Output Profit Ratio. Zysk/strata na przenoszonych monetach. | Wyliczane / BQ | 1D (Dziennie) | *Do wyliczenia via BQ* |
-| **NUPL** | Net Unrealized Profit/Loss. | Wyliczane (MVRV pochodna)| 1D (Dziennie) | *Do wyliczenia via BQ* |
-| **MVRV_Z** | MVRV Z-Score. Odchylenie standardowe Market Cap od Realized Cap. | Wyliczane z CSV | 1D (Dziennie) | *Do wyliczenia via BQ* |
-| **RealizedPrice** | CapRealUSD / SplyCur | Wyliczane z CSV | 1D (Dziennie) | *Do wyliczenia via BQ* |
-| **PuellMultiple** | Przychód z wydobycia / 365d_MA(Przychód). | Wyliczane z CSV | 1D (Dziennie) | *Do wyliczenia via BQ* |
-| **ExchangeFlowIn** | Napływ na giełdy. Wymaga clusteringu adresów. | Zewn. API (np. Dune)| 1D (Dziennie) | *Brak otwartego darmowego źródła* |
-| **ExchangeFlowOut**| Odpływ z giełd. | Zewn. API (np. Dune)| 1D (Dziennie) | *Brak otwartego darmowego źródła* |
-| **AdrActCnt** | Liczba aktywnych adresów (wysyłające + odbierające). | CoinMetrics | 1D (Dziennie) | [csv/AdrActCnt.csv](data_ingestion/csv/AdrActCnt.csv) |
-| **AdrBalCnt** | Liczba adresów z niezerowym balansem. | CoinMetrics | 1D (Dziennie) | [csv/AdrBalCnt.csv](data_ingestion/csv/AdrBalCnt.csv) |
-| **BlkCnt** | Liczba bloków wydobytych dziennie. | CoinMetrics | 1D (Dziennie) | [csv/BlkCnt.csv](data_ingestion/csv/BlkCnt.csv) |
-| **BlkSizeMeanByte**| Średni rozmiar bloku (bajty). | CoinMetrics | 1D (Dziennie) | [csv/BlkSizeMeanByte.csv](data_ingestion/csv/BlkSizeMeanByte.csv) |
-| **UTXOCnt** | Całkowita liczba niespendowanych wyjść. | CoinMetrics | 1D (Dziennie) | [csv/UTXOCnt.csv](data_ingestion/csv/UTXOCnt.csv) |
-| **CapMrktCurUSD** | Bieżąca kapitalizacja rynkowa (USD). | CoinMetrics | 1D (Dziennie) | [csv/CapMrktCurUSD.csv](data_ingestion/csv/CapMrktCurUSD.csv) |
-| **DiffMean** | Średnia trudność wydobycia. | CoinMetrics | 1D (Dziennie) | [csv/DiffMean.csv](data_ingestion/csv/DiffMean.csv) |
-| **HashRate** | Szacunkowy hashrate. | CoinMetrics | 1D (Dziennie) | [csv/HashRate.csv](data_ingestion/csv/HashRate.csv) |
-| **SplyCur** | Bieżąca podaż BTC w obiegu. | CoinMetrics | 1D (Dziennie) | [csv/SplyCur.csv](data_ingestion/csv/SplyCur.csv) |
-| **TxCnt** | Liczba potwierdzonych transakcji dziennie. | CoinMetrics | 1D (Dziennie) | [csv/TxCnt.csv](data_ingestion/csv/TxCnt.csv) |
-| **FeeTotNtv** | Całkowita suma opłat (BTC). | CoinMetrics | 1D (Dziennie) | [csv/FeeTotNtv.csv](data_ingestion/csv/FeeTotNtv.csv) |
-| **FeeTotUSD** | Całkowita suma opłat (USD). | CoinMetrics | 1D (Dziennie) | [csv/FeeTotUSD.csv](data_ingestion/csv/FeeTotUSD.csv) |
+Te 34 wskaźniki zostały skutecznie pobrane z darmowego API CoinMetrics Community, a brakujące (jak np. Realized Cap, NUPL czy MVRV_Z) zostały samodzielnie wyliczone w bibliotece Pandas przez skrypt `derive_metrics.py`.
 
-## Uwagi
-- Wskaźniki pochodne ("DERIVED") takie jak MVRV Z-Score, Puell Multiple, czy Realized Price są w architekturze GCP wyliczane w locie za pomocą zapytań SQL z wykorzystaniem metryk podstawowych (takich jak `CapRealUSD` czy `SplyCur`).
-- CSV dla wskaźników podstawowych zostało wygenerowane w folderze `data_ingestion/csv` i zatrzymuje się na dacie `2026-06-01`. Następne pobrania dopisują wiersze codziennie poprzez Cloud Functions.
+| Wskaźnik | Opis | Źródło / Formuła (dla DERIVED) | Link do CSV |
+|---|---|---|---|
+| **CapRealUSD** | Realized Capitalization (USD). Wycena UTXO po cenie w momencie ich powstania. | *Derived: CapMrktCurUSD / CapMVRVCur* | [CapRealUSD.csv](data_ingestion/csv/CapRealUSD.csv) |
+| **CapMrktCurUSD** | Bieżąca kapitalizacja rynkowa (USD). | CoinMetrics | [CapMrktCurUSD.csv](data_ingestion/csv/CapMrktCurUSD.csv) |
+| **CapMVRVCur** | Wskaźnik MVRV (Market Value to Realized Value). | CoinMetrics | [CapMVRVCur.csv](data_ingestion/csv/CapMVRVCur.csv) |
+| **MVRV_Z** | MVRV Z-Score. Odchylenie standardowe Market Cap od Realized Cap. | *Derived: (CapMrkt - CapReal) / std(CapMrkt)* | [MVRV_Z.csv](data_ingestion/csv/MVRV_Z.csv) |
+| **NUPL** | Net Unrealized Profit/Loss. | *Derived: (CapMrkt - CapReal) / CapMrkt* | [NUPL.csv](data_ingestion/csv/NUPL.csv) |
+| **RealizedPrice** | Zrealizowana cena rynkowa. | *Derived: CapRealUSD / SplyCur* | [RealizedPrice.csv](data_ingestion/csv/RealizedPrice.csv) |
+| **PuellMultiple** | Puell Multiple (Przychód z wydobycia vs jego średnia 365d). | *Derived: RevUSD / MA365(RevUSD)* | [PuellMultiple.csv](data_ingestion/csv/PuellMultiple.csv) |
+| **RevUSD** | Całkowity przychód górników w USD (subsydium + opłaty). | *Derived: IssTotUSD + FeeTotUSD* | [RevUSD.csv](data_ingestion/csv/RevUSD.csv) |
+| **FeeTotNtv** | Całkowita suma opłat zapłacona górnikom (w BTC). | CoinMetrics | [FeeTotNtv.csv](data_ingestion/csv/FeeTotNtv.csv) |
+| **FeeTotUSD** | Całkowita suma opłat zapłacona górnikom (w USD). | *Derived: FeeTotNtv * PriceUSD* | [FeeTotUSD.csv](data_ingestion/csv/FeeTotUSD.csv) |
+| **FeeMeanNtv** | Średnia opłata za transakcję (BTC). | *Derived: FeeTotNtv / TxCnt* | [FeeMeanNtv.csv](data_ingestion/csv/FeeMeanNtv.csv) |
+| **FeeMeanUSD** | Średnia opłata za transakcję (USD). | *Derived: FeeTotUSD / TxCnt* | [FeeMeanUSD.csv](data_ingestion/csv/FeeMeanUSD.csv) |
+| **FeeRevPct** | Procentowy udział opłat w całkowitym przychodzie górników. | *Derived: 100 * FeeTotUSD / RevUSD* | [FeeRevPct.csv](data_ingestion/csv/FeeRevPct.csv) |
+| **AdrActCnt** | Liczba aktywnych adresów (wysyłające + odbierające). | CoinMetrics | [AdrActCnt.csv](data_ingestion/csv/AdrActCnt.csv) |
+| **AdrBalCnt** | Liczba adresów z niezerowym balansem. | CoinMetrics | [AdrBalCnt.csv](data_ingestion/csv/AdrBalCnt.csv) |
+| **TxCnt** | Liczba potwierdzonych transakcji dziennie. | CoinMetrics | [TxCnt.csv](data_ingestion/csv/TxCnt.csv) |
+| **TxCntSec** | Transakcje na sekundę (TPS) jako średnia dzienna. | *Derived: TxCnt / 86400* | [TxCntSec.csv](data_ingestion/csv/TxCntSec.csv) |
+| **TxTfrCnt** | Ilość transferów BTC (po usunięciu change outputs CoinMetrics).| CoinMetrics | [TxTfrCnt.csv](data_ingestion/csv/TxTfrCnt.csv) |
+| **BlkCnt** | Liczba bloków wydobytych dziennie. | CoinMetrics | [BlkCnt.csv](data_ingestion/csv/BlkCnt.csv) |
+| **BlkIntMean** | Średni czas bloku (w sekundach). | *Derived: 86400 / BlkCnt* | [BlkIntMean.csv](data_ingestion/csv/BlkIntMean.csv) |
+| **HashRate** | Szacunkowy hashrate sieci (EH/s). | CoinMetrics | [HashRate.csv](data_ingestion/csv/HashRate.csv) |
+| **SplyCur** | Bieżąca podaż BTC w obiegu. | CoinMetrics | [SplyCur.csv](data_ingestion/csv/SplyCur.csv) |
+| **IssTotNtv** | Dzienna emisja BTC (subsydium z nowych bloków). | CoinMetrics | [IssTotNtv.csv](data_ingestion/csv/IssTotNtv.csv) |
+| **IssTotUSD** | Dzienna emisja BTC w przeliczeniu na USD. | CoinMetrics | [IssTotUSD.csv](data_ingestion/csv/IssTotUSD.csv) |
+| **IssContPctDay** | Roczna stopa inflacji na dzień wczorajszy (Dzienna Emisja / Podaż). | *Derived: IssTotNtv / SplyCur* | [IssContPctDay.csv](data_ingestion/csv/IssContPctDay.csv) |
+| **IssContPctAnn** | Przewidywana roczna stopa inflacji w ujęciu rocznym. | *Derived: IssContPctDay * 365* | [IssContPctAnn.csv](data_ingestion/csv/IssContPctAnn.csv) |
+| **SplyExpFut10yr**| Oczekiwana nowa podaż przez następne 10 lat (bazowana na harmonogramie). | CoinMetrics | [SplyExpFut10yr.csv](data_ingestion/csv/SplyExpFut10yr.csv) |
+| **CapFutExp10yrUSD**| Wartość oczekiwanej nowej podaży 10yr w USD (Cap Dilution). | *Derived: SplyExpFut10yr * PriceUSD* | [CapFutExp10yrUSD.csv](data_ingestion/csv/CapFutExp10yrUSD.csv) |
+| **FlowInExNtv** | Napływ na znane giełdy w BTC. | CoinMetrics | [FlowInExNtv.csv](data_ingestion/csv/FlowInExNtv.csv) |
+| **FlowInExUSD** | Napływ na znane giełdy w USD. | CoinMetrics | [FlowInExUSD.csv](data_ingestion/csv/FlowInExUSD.csv) |
+| **FlowOutExNtv**| Odpływ ze znanych giełd w BTC. | CoinMetrics | [FlowOutExNtv.csv](data_ingestion/csv/FlowOutExNtv.csv) |
+| **FlowOutExUSD**| Odpływ ze znanych giełd w USD. | CoinMetrics | [FlowOutExUSD.csv](data_ingestion/csv/FlowOutExUSD.csv) |
+| **PriceBTC** | Oczywiście 1 | CoinMetrics | [PriceBTC.csv](data_ingestion/csv/PriceBTC.csv) |
+| **PriceUSD** | Dzienna referencyjna cena zamknięcia w USD. | CoinMetrics | [PriceUSD.csv](data_ingestion/csv/PriceUSD.csv) |
+
+---
+
+## Metryki Premium / Zaawansowane (Do Wdrożenia)
+
+Pozostałe wskaźniki wymieniane wcześniej w zakresie (tzw. "Premium" w CoinMetrics lub wymagające pełnego węzła), **nie są wylistowane jako gotowe CSV**, ponieważ ich samodzielne policzenie lokalnie w kilka sekund jest niemożliwe. Zostaną zrealizowane z poziomu BigQuery jako oddzielny Data Ingestion pipeline w GCP:
+
+- **SplyAct30d / SplyAct180d / SplyAct1yr** (Active Supply - wymaga zmapowania wieku każdego pojedynczego UTXO).
+- **TxTfrValDayDst** (CDD - wymaga złączenia każdego wejścia transakcyjnego z dniem utworzenia jego oryginalnego UTXO).
+- **CapAct1yrUSD** (Podzbiór Realized Cap - wymaga UTXO set analysis).
+- **TxTfrValAdjNtv / TxTfrValAdjUSD** (Wymagają skomplikowanych własnych heurystyk do detekcji tzw. *Change Outputs* w poszczególnych transakcjach).
+- **FeeMedNtv / FeeMedUSD** (Mediany Opłat blokowych. Będą w GCP pobierane codziennie skryptem z API `mempool.space`, jednakże historyczny fetch wymagałby tysięcy zapytań API do Mempool, więc jest pominięty na rzecz Cloud Schedulera w chmurze).
+
+## Instrukcje dla Agenta AI na innej maszynie
+1. Aby wygenerować na nowo całą paczkę wyżej wylistowanych CSV, użyj skryptu: `python data_ingestion/derive_metrics.py`. 
+2. Skrypt automatycznie łączy się z Community API, wylicza wartości pochodne metodami Pandasa (np. `df["CapRealUSD"] = df["CapMrktCurUSD"] / df["CapMVRVCur"]`) i wyrzuca 34 pliki.
