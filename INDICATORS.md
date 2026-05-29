@@ -11,7 +11,10 @@ Dane w plikach CSV obejmują pełną historię (od początku sieci) do dnia **20
 
 ## Wygenerowane Wskaźniki (Gotowe w repozytorium jako CSV)
 
-Te 34 wskaźniki zostały skutecznie pobrane z darmowego API CoinMetrics Community, a brakujące (jak np. Realized Cap, NUPL czy MVRV_Z) zostały samodzielnie wyliczone w bibliotece Pandas przez skrypt `derive_metrics.py`.
+Poniższe 38 wskaźników zostało skutecznie pobranych i wygenerowanych (Faza 0 oraz Faza 1):
+1. Podstawowe z **CoinMetrics**.
+2. Pochodne wyliczone za pomocą pandasa.
+3. Dodatkowe z darmowego API **blockchain.com**.
 
 | Wskaźnik | Opis | Źródło / Formuła (dla DERIVED) | Link do CSV |
 |---|---|---|---|
@@ -33,8 +36,11 @@ Te 34 wskaźniki zostały skutecznie pobrane z darmowego API CoinMetrics Communi
 | **TxCnt** | Liczba potwierdzonych transakcji dziennie. | CoinMetrics | [TxCnt.csv](data_ingestion/csv/TxCnt.csv) |
 | **TxCntSec** | Transakcje na sekundę (TPS) jako średnia dzienna. | *Derived: TxCnt / 86400* | [TxCntSec.csv](data_ingestion/csv/TxCntSec.csv) |
 | **TxTfrCnt** | Ilość transferów BTC (po usunięciu change outputs CoinMetrics).| CoinMetrics | [TxTfrCnt.csv](data_ingestion/csv/TxTfrCnt.csv) |
+| **TxTfrValNtv** | Wolumen transferu w BTC (adjusted/estimated). | blockchain.com | [TxTfrValNtv.csv](data_ingestion/csv/TxTfrValNtv.csv) |
+| **TxTfrValUSD** | Wolumen transferu w USD (adjusted/estimated). | blockchain.com | [TxTfrValUSD.csv](data_ingestion/csv/TxTfrValUSD.csv) |
 | **BlkCnt** | Liczba bloków wydobytych dziennie. | CoinMetrics | [BlkCnt.csv](data_ingestion/csv/BlkCnt.csv) |
 | **BlkIntMean** | Średni czas bloku (w sekundach). | *Derived: 86400 / BlkCnt* | [BlkIntMean.csv](data_ingestion/csv/BlkIntMean.csv) |
+| **BlkSizeMeanByte** | Średni rozmiar bloku (w Bajtach). | blockchain.com | [BlkSizeMeanByte.csv](data_ingestion/csv/BlkSizeMeanByte.csv) |
 | **HashRate** | Szacunkowy hashrate sieci (EH/s). | CoinMetrics | [HashRate.csv](data_ingestion/csv/HashRate.csv) |
 | **SplyCur** | Bieżąca podaż BTC w obiegu. | CoinMetrics | [SplyCur.csv](data_ingestion/csv/SplyCur.csv) |
 | **IssTotNtv** | Dzienna emisja BTC (subsydium z nowych bloków). | CoinMetrics | [IssTotNtv.csv](data_ingestion/csv/IssTotNtv.csv) |
@@ -43,6 +49,7 @@ Te 34 wskaźniki zostały skutecznie pobrane z darmowego API CoinMetrics Communi
 | **IssContPctAnn** | Przewidywana roczna stopa inflacji w ujęciu rocznym. | *Derived: IssContPctDay * 365* | [IssContPctAnn.csv](data_ingestion/csv/IssContPctAnn.csv) |
 | **SplyExpFut10yr**| Oczekiwana nowa podaż przez następne 10 lat (bazowana na harmonogramie). | CoinMetrics | [SplyExpFut10yr.csv](data_ingestion/csv/SplyExpFut10yr.csv) |
 | **CapFutExp10yrUSD**| Wartość oczekiwanej nowej podaży 10yr w USD (Cap Dilution). | *Derived: SplyExpFut10yr * PriceUSD* | [CapFutExp10yrUSD.csv](data_ingestion/csv/CapFutExp10yrUSD.csv) |
+| **UTXOCnt** | Całkowita liczba niespendowanych wyjść. | blockchain.com | [UTXOCnt.csv](data_ingestion/csv/UTXOCnt.csv) |
 | **FlowInExNtv** | Napływ na znane giełdy w BTC. | CoinMetrics | [FlowInExNtv.csv](data_ingestion/csv/FlowInExNtv.csv) |
 | **FlowInExUSD** | Napływ na znane giełdy w USD. | CoinMetrics | [FlowInExUSD.csv](data_ingestion/csv/FlowInExUSD.csv) |
 | **FlowOutExNtv**| Odpływ ze znanych giełd w BTC. | CoinMetrics | [FlowOutExNtv.csv](data_ingestion/csv/FlowOutExNtv.csv) |
@@ -52,16 +59,17 @@ Te 34 wskaźniki zostały skutecznie pobrane z darmowego API CoinMetrics Communi
 
 ---
 
-## Metryki Premium / Zaawansowane (Do Wdrożenia)
+## Metryki Premium / Zaawansowane (Czekające na wdrożenie GCP)
 
-Pozostałe wskaźniki wymieniane wcześniej w zakresie (tzw. "Premium" w CoinMetrics lub wymagające pełnego węzła), **nie są wylistowane jako gotowe CSV**, ponieważ ich samodzielne policzenie lokalnie w kilka sekund jest niemożliwe. Zostaną zrealizowane z poziomu BigQuery jako oddzielny Data Ingestion pipeline w GCP:
+Pozostałe wskaźniki (Faza 2 i Faza 3 w ROADMAP.md), **nie są wylistowane jako gotowe CSV**, ponieważ ich samodzielne policzenie lokalnie jest niemożliwe bez analizy blok po bloku. Zostaną zrealizowane z poziomu BigQuery jako oddzielny Data Ingestion pipeline w GCP:
 
 - **SplyAct30d / SplyAct180d / SplyAct1yr** (Active Supply - wymaga zmapowania wieku każdego pojedynczego UTXO).
 - **TxTfrValDayDst** (CDD - wymaga złączenia każdego wejścia transakcyjnego z dniem utworzenia jego oryginalnego UTXO).
 - **CapAct1yrUSD** (Podzbiór Realized Cap - wymaga UTXO set analysis).
-- **TxTfrValAdjNtv / TxTfrValAdjUSD** (Wymagają skomplikowanych własnych heurystyk do detekcji tzw. *Change Outputs* w poszczególnych transakcjach).
-- **FeeMedNtv / FeeMedUSD** (Mediany Opłat blokowych. Będą w GCP pobierane codziennie skryptem z API `mempool.space`, jednakże historyczny fetch wymagałby tysięcy zapytań API do Mempool, więc jest pominięty na rzecz Cloud Schedulera w chmurze).
+- **FeeMedNtv / FeeMedUSD** (Mediany Opłat blokowych. Będą w GCP pobierane codziennie skryptem z API `mempool.space`).
 
 ## Instrukcje dla Agenta AI na innej maszynie
-1. Aby wygenerować na nowo całą paczkę wyżej wylistowanych CSV, użyj skryptu: `python data_ingestion/derive_metrics.py`. 
-2. Skrypt automatycznie łączy się z Community API, wylicza wartości pochodne metodami Pandasa (np. `df["CapRealUSD"] = df["CapMrktCurUSD"] / df["CapMVRVCur"]`) i wyrzuca 34 pliki.
+1. Aby wygenerować na nowo całą paczkę wyżej wylistowanych CSV, użyj skryptów: 
+   - `python data_ingestion/derive_metrics.py` (CoinMetrics)
+   - `python data_ingestion/blockchain_fetcher.py` (Blockchain.com)
+2. Skrypty automatycznie zapisują dane do folderu `data_ingestion/csv/`. Upewnij się, że używasz środowiska wirtualnego opisanego w `SCRIPTS.md`.
