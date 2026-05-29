@@ -57,6 +57,11 @@ def fetch_and_upload():
     
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
     
+    csv_filename = "coinmetrics_history.csv"
+    print(f"Zapisywanie wyfiltrowanych danych do lokalnego pliku {csv_filename}...")
+    df.to_csv(csv_filename, index=False)
+    print("Zapisano CSV lokalnie. Gotowe do analizy lub eksportu gdzie indziej.")
+
     # Konfiguracja joba (nadpisywanie lub dopisywanie - tutaj nadpisujemy, bo to pełna historia)
     job_config = bigquery.LoadJobConfig(
         write_disposition="WRITE_TRUNCATE",
