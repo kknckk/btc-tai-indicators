@@ -4,6 +4,7 @@ import React, { use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Chart, { ChartSeries } from "@/components/Chart";
+import ApiTester from "@/components/ApiTester";
 import { useIndicators } from "@/hooks/useIndicators";
 
 interface PageProps {
@@ -71,7 +72,7 @@ export default function IndicatorPage({ params }: PageProps) {
           </div>
         </header>
 
-        <main>
+        <main className="space-y-8">
           <section>
             {isLoading ? (
               <div className="w-full h-[500px] bg-slate-900 rounded-xl flex items-center justify-center border border-slate-800 shadow-xl">
@@ -87,6 +88,10 @@ export default function IndicatorPage({ params }: PageProps) {
             ) : (
               <Chart series={series} title={`Bitcoin: ${indicatorId}`} />
             )}
+          </section>
+
+          <section>
+            <ApiTester initialMetric={indicatorId} />
           </section>
         </main>
       </div>

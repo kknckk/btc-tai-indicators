@@ -49,13 +49,13 @@ def get_available_metrics():
     else:
         return {
             "indicators": [
-                "CapRealUSD", "SplyAct30d", "SplyAct180d", "SplyAct1yr",
-                "FeeTotNtv", "FeeTotUSD", "CapAct1yrUSD", "AdrActCnt",
-                "AdrBalCnt", "BlkCnt", "BlkSizeMeanByte", "UTXOCnt",
-                "CapMrktCurUSD", "DiffMean", "HashRate", "SplyCur",
-                "TxCnt", "TxTfrValNtv", "TxTfrValUSD", "TxTfrValAdjNtv",
-                "TxTfrValAdjUSD", "MVRV_Z", "SOPR", "NUPL", "RealizedPrice",
-                "PuellMultiple", "FeeMedNtv"
+                "CapRealUSD", "RealizedPrice", "NUPL", "MVRV_Z", "FeeTotUSD", "RevUSD", 
+                "FeeRevPct", "PuellMultiple", "FeeMeanNtv", "FeeMeanUSD", "BlkIntMean",
+                "CapFutExp10yrUSD", "IssContPctDay", "IssContPctAnn", "TxCntSec",
+                "AdrActCnt", "AdrBalCnt", "BlkCnt", "CapMVRVCur", "CapMrktCurUSD", 
+                "FeeTotNtv", "FlowInExNtv", "FlowInExUSD", "FlowOutExNtv", "FlowOutExUSD",
+                "HashRate", "IssTotNtv", "IssTotUSD", "PriceBTC", "PriceUSD", 
+                "SplyCur", "SplyExpFut10yr", "TxCnt", "TxTfrCnt"
             ]
         }
 

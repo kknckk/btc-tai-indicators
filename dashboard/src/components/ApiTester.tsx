@@ -2,8 +2,12 @@
 import React, { useState } from 'react';
 import { Play, Code } from 'lucide-react';
 
-export default function ApiTester() {
-  const [metric, setMetric] = useState('MVRV_Z');
+interface ApiTesterProps {
+  initialMetric?: string;
+}
+
+export default function ApiTester({ initialMetric = 'MVRV_Z' }: ApiTesterProps) {
+  const [metric, setMetric] = useState(initialMetric);
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2024-05-01');
   const [response, setResponse] = useState<any>(null);
@@ -12,8 +16,8 @@ export default function ApiTester() {
   const testApi = async () => {
     setLoading(true);
     try {
-      // W środowisku deweloperskim zakładamy, że API działa na porcie 8080
-      const res = await fetch(`http://localhost:8080/api/v1/metrics/values?metrics=${metric}&start_date=${startDate}&end_date=${endDate}`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-ml3nc7w4ja-lm.a.run.app";
+      const res = await fetch(`${baseUrl}/api/v1/metrics/values?metrics=${metric}&start_date=${startDate}&end_date=${endDate}`);
       const data = await res.json();
       setResponse(data);
     } catch (err: any) {

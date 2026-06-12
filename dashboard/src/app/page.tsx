@@ -3,7 +3,6 @@ import React from "react";
 import Link from "next/link";
 import { useAvailableIndicators } from "@/hooks/useIndicators";
 import { Loader2, Activity } from "lucide-react";
-import ApiTester from "@/components/ApiTester";
 
 export default function Home() {
   const { data, isLoading, isError } = useAvailableIndicators();
@@ -54,10 +53,6 @@ export default function Home() {
                 ))}
               </div>
             )}
-          </section>
-
-          <section>
-            <ApiTester />
           </section>
         </main>
       </div>
