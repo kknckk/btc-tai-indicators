@@ -25,7 +25,7 @@ export function useIndicators(metrics: string[], startDate: string = "2010-01-01
   queryParams.append('end_date', endDate);
   
   // Wykorzystujemy adres publiczny API na Cloud Run lub lokalny w razie zmiennej srodowiskowej
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-ml3nc7w4ja-lm.a.run.app";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-203925818774.europe-central2.run.app";
   const url = `${baseUrl}/api/v1/metrics/values?${queryParams.toString()}`;
   
   const { data, error, isLoading } = useSWR<IndicatorResponse[]>(url, fetcher);
@@ -42,7 +42,7 @@ export interface AvailableIndicatorsResponse {
 }
 
 export function useAvailableIndicators() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-ml3nc7w4ja-lm.a.run.app";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-203925818774.europe-central2.run.app";
   const url = `${baseUrl}/api/v1/metrics/available`;
   
   const { data, error, isLoading } = useSWR<AvailableIndicatorsResponse>(url, fetcher);

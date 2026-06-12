@@ -16,7 +16,7 @@ export default function ApiTester({ initialMetric = 'MVRV_Z' }: ApiTesterProps) 
   const testApi = async () => {
     setLoading(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-ml3nc7w4ja-lm.a.run.app";
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-203925818774.europe-central2.run.app";
       const res = await fetch(`${baseUrl}/api/v1/metrics/values?metrics=${metric}&start_date=${startDate}&end_date=${endDate}`);
       const data = await res.json();
       setResponse(data);
