@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 import Link from 'next/link';
-import { Database, LayoutDashboard, LineChart } from 'lucide-react';
+import { Database, LayoutDashboard, LineChart, Activity } from 'lucide-react';
 
 export default function RootLayout({
   children,
@@ -41,6 +41,11 @@ export default function RootLayout({
             <Link href="/compare" className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors">
               <LineChart className="w-5 h-5" />
               <span className="font-medium">Porównaj</span>
+            </Link>
+
+            <Link href="/correlation" className="flex items-center gap-2 text-slate-400 hover:text-fuchsia-400 transition-colors">
+              <Activity className="w-5 h-5" />
+              <span className="font-medium">Korelacje</span>
             </Link>
 
             <Link href="/data" className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors">

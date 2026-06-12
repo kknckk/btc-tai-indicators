@@ -53,3 +53,21 @@ export function useAvailableIndicators() {
     isError: error
   };
 }
+
+export interface CorrelationResponse {
+  indicator: string;
+  correlation: number;
+}
+
+export function useCorrelation(days: number = 90, targetMetric: string = "PriceUSD") {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-203925818774.europe-central2.run.app";
+  const url = `${baseUrl}/api/v1/metrics/correlation?days=${days}&target_metric=${targetMetric}`;
+  
+  const { data, error, isLoading } = useSWR<CorrelationResponse[]>(url, fetcher);
+  
+  return {
+    data,
+    isLoading,
+    isError: error
+  };
+}
