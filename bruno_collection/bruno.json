@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "BTC Indicators API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

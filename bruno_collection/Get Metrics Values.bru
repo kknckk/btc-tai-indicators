@@ -1,0 +1,18 @@
+meta {
+  name: Get Metrics Values
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/v1/metrics/values?metrics=PriceUSD&metrics=MVRV_Z&start_date=2012-01-01&end_date=2026-12-31
+  body: none
+  auth: none
+}
+
+query {
+  metrics: PriceUSD
+  metrics: MVRV_Z
+  start_date: 2012-01-01
+  end_date: 2026-12-31
+}

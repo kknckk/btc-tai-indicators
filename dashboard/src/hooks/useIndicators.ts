@@ -36,3 +36,20 @@ export function useIndicators(metrics: string[], startDate: string = "2010-01-01
     isError: error
   };
 }
+
+export interface AvailableIndicatorsResponse {
+  indicators: string[];
+}
+
+export function useAvailableIndicators() {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-ml3nc7w4ja-lm.a.run.app";
+  const url = `${baseUrl}/api/v1/metrics/available`;
+  
+  const { data, error, isLoading } = useSWR<AvailableIndicatorsResponse>(url, fetcher);
+  
+  return {
+    data,
+    isLoading,
+    isError: error
+  };
+}

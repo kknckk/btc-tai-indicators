@@ -1,0 +1,11 @@
+meta {
+  name: Get Available Metrics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/api/v1/metrics/available
+  body: none
+  auth: none
+}

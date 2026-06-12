@@ -1,0 +1,93 @@
+{
+  "info": {
+    "name": "BTC Indicators API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Available Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/metrics/available",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "metrics",
+            "available"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Metrics Values",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/metrics/values?metrics=PriceUSD&metrics=MVRV_Z&start_date=2012-01-01&end_date=2026-12-31",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "metrics",
+            "values"
+          ],
+          "query": [
+            {
+              "key": "metrics",
+              "value": "PriceUSD"
+            },
+            {
+              "key": "metrics",
+              "value": "MVRV_Z"
+            },
+            {
+              "key": "start_date",
+              "value": "2012-01-01"
+            },
+            {
+              "key": "end_date",
+              "value": "2026-12-31"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://btc-api-ml3nc7w4ja-lm.a.run.app",
+      "type": "string"
+    }
+  ]
+}
