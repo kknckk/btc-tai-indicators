@@ -1,16 +1,29 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
+import React, { useEffect, useRef } from 'react';
+import { createChart, ColorType, IChartApi, PriceScaleMode, LineSeries } from 'lightweight-charts';
+
+export interface SeriesData {
+  time: string;
+  value: number;
+}
+
+export interface ChartSeries {
+  id: string;
+  name: string;
+  color: string;
+  data: SeriesData[];
+  axis: 'left' | 'right';
+  logarithmic?: boolean;
+}
 
 interface ChartProps {
-  data: { time: string; value: number }[];
+  series: ChartSeries[];
   title: string;
 }
 
-export default function Chart({ data, title }: ChartProps) {
+export default function Chart({ series, title }: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<"Line"> | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -25,33 +38,45 @@ export default function Chart({ data, title }: ChartProps) {
         horzLines: { color: 'rgba(42, 46, 57, 0.5)' },
       },
       width: chartContainerRef.current.clientWidth,
-      height: 400,
+      height: 500,
       timeScale: {
         timeVisible: true,
         secondsVisible: false,
       },
     });
 
-    const series = chart.addLineSeries({
-      color: '#3b82f6',
-      lineWidth: 2,
+    const seriesRefs: any[] = [];
+
+    series.forEach((s) => {
+      // Configure price scale for the axis
+      chart.priceScale(s.axis).applyOptions({
+        visible: true,
+        mode: s.logarithmic ? PriceScaleMode.Logarithmic : PriceScaleMode.Normal,
+      });
+
+      const lineSeries = chart.addSeries(LineSeries, {
+        color: s.color,
+        lineWidth: 2,
+        priceScaleId: s.axis,
+        title: s.name,
+      });
+      
+      const formattedData = s.data.map(d => ({
+        time: d.time as any,
+        value: d.value
+      }));
+
+      // Sort chronological
+      formattedData.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+      if(formattedData.length > 0) {
+        lineSeries.setData(formattedData);
+      }
+
+      seriesRefs.push(lineSeries);
     });
-    
-    // Konwersja czasu na timestamp lub format 'yyyy-mm-dd'
-    const formattedData = data.map(d => ({
-      time: d.time as any,
-      value: d.value
-    }));
-
-    // Posortuj dane rosnąco po czasie
-    formattedData.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-
-    if(formattedData.length > 0) {
-      series.setData(formattedData);
-    }
 
     chartRef.current = chart;
-    seriesRef.current = series;
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
@@ -67,14 +92,14 @@ export default function Chart({ data, title }: ChartProps) {
         chartRef.current.remove();
       }
     };
-  }, [data]);
+  }, [series]);
 
   return (
     <div className="w-full h-full bg-slate-900 rounded-xl p-4 border border-slate-800 shadow-xl">
       <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
         {title}
       </h2>
-      <div ref={chartContainerRef} className="w-full h-[400px]" />
+      <div ref={chartContainerRef} className="w-full h-[500px]" />
     </div>
   );
 }

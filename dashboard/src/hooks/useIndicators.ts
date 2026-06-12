@@ -1,0 +1,32 @@
+import useSWR from 'swr';
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+export interface DataPoint {
+  time: string;
+  value: number;
+}
+
+export interface IndicatorResponse {
+  indicator: string;
+  data: DataPoint[];
+}
+
+export function useIndicators(metrics: string[], startDate: string = "2010-01-01", endDate: string = "2030-01-01") {
+  const queryParams = new URLSearchParams();
+  metrics.forEach(m => queryParams.append('metrics', m));
+  queryParams.append('start_date', startDate);
+  queryParams.append('end_date', endDate);
+  
+  // Wykorzystujemy adres publiczny API na Cloud Run lub lokalny w razie zmiennej srodowiskowej
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://btc-api-ml3nc7w4ja-lm.a.run.app";
+  const url = `${baseUrl}/api/v1/metrics/values?${queryParams.toString()}`;
+  
+  const { data, error, isLoading } = useSWR<IndicatorResponse[]>(url, fetcher);
+  
+  return {
+    data,
+    isLoading,
+    isError: error
+  };
+}

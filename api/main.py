@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "twoj-projekt-gcp")
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "btc-ind")
 DATASET_ID = "btc_indicators"
 COINMETRICS_TABLE = "coinmetrics_daily"
 USE_LOCAL_CSV = os.environ.get("USE_LOCAL_CSV", "false").lower() == "true"
