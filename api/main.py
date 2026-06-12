@@ -49,13 +49,14 @@ def get_available_metrics():
     else:
         return {
             "indicators": [
-                "CapRealUSD", "SplyAct30d", "SplyAct180d", "SplyAct1yr",
-                "FeeTotNtv", "FeeTotUSD", "CapAct1yrUSD", "AdrActCnt",
-                "AdrBalCnt", "BlkCnt", "BlkSizeMeanByte", "UTXOCnt",
-                "CapMrktCurUSD", "DiffMean", "HashRate", "SplyCur",
-                "TxCnt", "TxTfrValNtv", "TxTfrValUSD", "TxTfrValAdjNtv",
-                "TxTfrValAdjUSD", "MVRV_Z", "SOPR", "NUPL", "RealizedPrice",
-                "PuellMultiple", "FeeMedNtv", "CDD"
+                "AdrActCnt", "AdrBalCnt", "BlkCnt", "BlkIntMean", "BlkSizeMeanByte",
+                "CapAct1yrUSD", "CapFutExp10yrUSD", "CapMrktCurUSD", "CapMVRVCur", "CapRealUSD",
+                "CDD", "FeeMeanNtv", "FeeMeanUSD", "FeeMedNtv", "FeeRevPct", "FeeTotNtv", "FeeTotUSD",
+                "FlowInExNtv", "FlowInExUSD", "FlowOutExNtv", "FlowOutExUSD", "HashRate",
+                "IssContPctAnn", "IssContPctDay", "IssTotNtv", "IssTotUSD", "MVRV_Z", "NUPL",
+                "PriceBTC", "PriceUSD", "PuellMultiple", "RealizedPrice", "RevUSD", "SOPR",
+                "SplyAct180d", "SplyAct1yr", "SplyAct30d", "SplyCur", "SplyExpFut10yr", "TxCnt",
+                "TxCntSec", "TxTfrCnt", "TxTfrValNtv", "TxTfrValUSD", "UTXOCnt"
             ]
         }
 
