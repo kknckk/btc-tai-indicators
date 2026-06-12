@@ -102,7 +102,7 @@ def get_metrics_values(
                 CAST(time AS STRING) as time,
                 {select_columns}
             FROM `{PROJECT_ID}.{DATASET_ID}.{COINMETRICS_TABLE}`
-            WHERE time >= DATE(@start_date) AND time <= DATE(@end_date)
+            WHERE DATE(time) >= DATE(@start_date) AND DATE(time) <= DATE(@end_date)
             ORDER BY time ASC
         """
         
