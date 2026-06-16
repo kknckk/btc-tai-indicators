@@ -20,6 +20,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from routers import literature
+app.include_router(literature.router)
+
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "btc-ind")
 DATASET_ID = "btc_indicators"
 COINMETRICS_TABLE = "coinmetrics_daily"
@@ -53,7 +56,7 @@ class CorrelationResponse(BaseModel):
 def get_dynamic_available_metrics() -> List[str]:
     """Zwraca listę dostępnych wskaźników dynamicznie."""
     if USE_LOCAL_CSV:
-        csv_dir = os.path.join(os.path.dirname(__file__), "..", "data_ingestion", "csv")
+        csv_dir = os.path.join(os.path.dirname(__file__), "csv")
         if not os.path.exists(csv_dir):
             return []
         return [f.replace(".csv", "") for f in os.listdir(csv_dir) if f.endswith(".csv")]
@@ -81,7 +84,7 @@ def get_available_metrics():
 def fetch_metrics_data(valid_metrics_tuple: tuple, start_date: str, end_date: str):
     valid_metrics = list(valid_metrics_tuple)
     if USE_LOCAL_CSV:
-        csv_dir = os.path.join(os.path.dirname(__file__), "..", "data_ingestion", "csv")
+        csv_dir = os.path.join(os.path.dirname(__file__), "csv")
         final_response = []
         for m in valid_metrics:
             filepath = os.path.join(csv_dir, f"{m}.csv")

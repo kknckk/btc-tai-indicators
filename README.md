@@ -17,8 +17,15 @@
 ### What Needs To Be Done Next (Action Plan for You)
 1. **Execute Data Ingestion**: The scripts in `data_ingestion` need to be actually executed on a machine or GCP Cloud Function against a real GCP project with BigQuery enabled.
 2. **GCP Project Setup**: Provision BigQuery datasets (`btc_indicators`), Cloud Run services, and Cloud Scheduler for daily syncs. Currently, these scripts use placeholder `GCP_PROJECT_ID`.
-3. **Advanced Metrics**: Some metrics like `ExchangeFlowIn/Out` require advanced address clustering. Investigate Dune Analytics public API or academic datasets to backfill these without a full node.
-4. **CSV Exporting**: The user expressed interest in outputting physical `.csv` files up to 2026-06-01. Modify the ingestion scripts to explicitly save to `.csv` before pushing to BigQuery or Cloud Storage.
+3. **Advanced Metrics (Group 3 & 4 Disclaimers)**: 
+   - **Exchange Flows (Group 4)**: Computing napływy/odpływy z giełd (Exchange In/Out) za pomocą BigQuery jest niemożliwe bez zewnętrznych **Etykiet Adresów** (Address Labels). Jednakże z powodzeniem wyciągnęliśmy te wskaźniki (`FlowInExUSD`, `FlowOutExUSD`) korzystając z darmowej paczki `btc.csv` od **CoinMetrics**.
+   - **LTH/STH Split & UTXO (Group 3)**: Samodzielne odtworzenie wieku UTXO dla całego blockchaina z BigQuery to gigantyczne i kosztowne wyzwanie inżynieryjne. Na szczęście omijamy ten problem korzystając z darmowego API **BGeometrics**, z którego ściągamy wskaźniki `LTH_MVRV`, `STH_MVRV`, `SOPR` oraz `CDD`.
+4. **Data Sources Pivot & Derived Metrics**: Z uwagi na fakt, że CoinMetrics usunęło ze swojego darmowego API wiele podstawowych wskaźników (np. `TxMeanByte`, `DiffMean`, `FeeMedUSD`), nasz pipeline został zmuszony do wyliczania braków we własnym zakresie:
+   - `bq_easy_metrics.py` odpytuje bezpośrednio BigQuery dla darmowych/prostych wskaźników (oraz parsuje historyczną trudność `DiffMean` z hexadecymalnego pola `bits` w blokach).
+   - `coinmetrics_fetcher.py` pełni rolę workera pobierającego to co zostało darmowe w CoinMetrics (np. Exchange Flows, kapitalizacje).
+   - `bgeometrics_fetcher.py` zasila nas zaawansowanymi wskaźnikami zachowania inwestorów (LTH/STH).
+   - `compute_derived_metrics.py` na koniec przetwarza pobrane CSV i **wylicza matematycznie** utracone wskaźniki bez konieczności płacenia (np. "Naiwne NVT" ze stosunku kapitalizacji do transferów, średnią wartość transferu przez podzielenie surowego `TxTfrValUSD` przez liczność, czy też wylicza "Naiwną Prędkość"). Skrypt dokonuje też aliasingu `IssTotNtv` do `IssContNtv` (oba oznaczają ciągłą nową inflację bazową BTC).
+   Wszystkie te skrypty generują ostatecznie proste pliki `.csv` podawane przez REST API z Cloud Run.
 5. **Dashboard Wiring**: Connect the Next.js frontend directly to the deployed Cloud Run API endpoint (currently it defaults to `localhost:8080` in `ApiTester.tsx`).
 
 ## Deployment

@@ -4,7 +4,9 @@ import os
 
 ENDPOINTS = {
     "SOPR": "https://api.bitcoin-data.com/v1/sopr",
-    "CDD": "https://api.bitcoin-data.com/v1/cdd"
+    "CDD": "https://api.bitcoin-data.com/v1/cdd",
+    "LTH_MVRV": "https://api.bitcoin-data.com/v1/lth-mvrv",
+    "STH_MVRV": "https://api.bitcoin-data.com/v1/sth-mvrv"
 }
 
 def fetch_bgeometrics():
@@ -21,7 +23,11 @@ def fetch_bgeometrics():
             # format: [{"d":"2022-06-12","unixTs":1654992000,"sopr":0.9935}, ...]
             df = pd.DataFrame(data)
             
+            # Heurystyka klucza json (np. LTH_MVRV -> lthMvrv, SOPR -> sopr)
             val_col = metric_name.lower()
+            if metric_name == "LTH_MVRV": val_col = "lthMvrv"
+            if metric_name == "STH_MVRV": val_col = "sthMvrv"
+            
             if val_col not in df.columns:
                 print(f"Brak kolumny {val_col} w odpowiedzi dla {metric_name}")
                 continue

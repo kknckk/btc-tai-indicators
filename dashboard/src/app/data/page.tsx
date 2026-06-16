@@ -54,14 +54,15 @@ export default function DataPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {indicators.map((indicator) => (
+                {indicators.map((indicator, index) => (
                   <a
                     key={indicator}
                     href={`/csv/${indicator}.csv`}
                     download={`${indicator}.csv`}
                     className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 rounded-xl transition-all group"
                   >
-                    <span className="text-slate-300 font-medium group-hover:text-emerald-400 transition-colors">
+                    <span className="text-slate-300 font-medium group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                      <span className="text-slate-500 text-sm font-bold min-w-[24px]">{index + 1}.</span>
                       {indicator}.csv
                     </span>
                     <Download className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition-colors" />

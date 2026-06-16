@@ -69,3 +69,20 @@ def test_derived_nupl_math():
         
         # Sprawdzamy czy nasza zapisana wartość różni się nie więcej niż margines błędu float
         assert abs(nupl - expected_nupl) < 0.001, f"NUPL wyliczony na dacie {index} jest błędny! Oczekiwany: {expected_nupl}, Zapisany: {nupl}"
+
+def test_tx_mean_byte_exists():
+    """Weryfikuje czy poprawnie wygenerowano plik TxMeanByte.csv z BigQuery."""
+    filepath = os.path.join(CSV_DIR, "TxMeanByte.csv")
+    assert os.path.exists(filepath), "Brak pliku TxMeanByte.csv"
+    df = pd.read_csv(filepath)
+    assert not df.empty, "Plik TxMeanByte.csv jest pusty"
+    # Średnia waga transakcji w historii BTC powinna wynosić ponad 200 bajtów
+    assert df['TxMeanByte'].mean() > 200, "Zbyt mała średnia wielkość transakcji (błąd parsowania?)"
+
+def test_lth_mvrv_exists():
+    """Weryfikuje czy poprawnie pobrano LTH_MVRV z BGeometrics."""
+    filepath = os.path.join(CSV_DIR, "LTH_MVRV.csv")
+    assert os.path.exists(filepath), "Brak pliku LTH_MVRV.csv"
+    df = pd.read_csv(filepath)
+    assert not df.empty, "Plik LTH_MVRV.csv jest pusty"
+    assert 'LTH_MVRV' in df.columns, "Brak kolumny LTH_MVRV w pobranym pliku"
