@@ -1,18 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { Database, Download, FileSpreadsheet } from "lucide-react";
-import { useAvailableIndicators } from "@/hooks/useIndicators";
+import { useAvailableIndicators, getIndicatorGroup, GROUP_ORDER } from "@/hooks/useIndicators";
 
 export default function DataPage() {
   const { data, isLoading, isError } = useAvailableIndicators();
-  const [indicators, setIndicators] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (data && data.indicators) {
-      // Sortowanie alfabetyczne
-      setIndicators([...data.indicators].sort());
-    }
+  const groupedIndicators = useMemo(() => {
+    if (!data?.indicators) return {};
+    const groups: Record<string, string[]> = {};
+    data.indicators.forEach((indicator) => {
+      const group = getIndicatorGroup(indicator);
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(indicator);
+    });
+    // Sort within groups
+    Object.keys(groups).forEach(g => groups[g].sort());
+    return groups;
   }, [data]);
 
   return (
@@ -27,7 +32,7 @@ export default function DataPage() {
               Baza Danych (CSV)
             </h1>
             <p className="text-slate-400 mt-2">
-              Pobierz surowe zbiory danych historycznych (do 01.06.2026) wyliczone przez potok BigQuery.
+              Pobierz surowe zbiory danych historycznych wyliczone przez potok BigQuery.
             </p>
           </div>
         </header>
@@ -37,11 +42,8 @@ export default function DataPage() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <FileSpreadsheet className="text-emerald-500" />
-                Zbiory danych
+                Zbiory danych ({data?.indicators?.length || 0} plików)
               </h2>
-              <span className="text-sm font-medium text-slate-500 bg-slate-800 px-3 py-1 rounded-full">
-                {indicators.length} Plików
-              </span>
             </div>
 
             {isLoading ? (
@@ -53,21 +55,35 @@ export default function DataPage() {
                 Wystąpił błąd podczas ładowania listy plików.
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {indicators.map((indicator, index) => (
-                  <a
-                    key={indicator}
-                    href={`/csv/${indicator}.csv`}
-                    download={`${indicator}.csv`}
-                    className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 rounded-xl transition-all group"
-                  >
-                    <span className="text-slate-300 font-medium group-hover:text-emerald-400 transition-colors flex items-center gap-2">
-                      <span className="text-slate-500 text-sm font-bold min-w-[24px]">{index + 1}.</span>
-                      {indicator}.csv
-                    </span>
-                    <Download className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition-colors" />
-                  </a>
-                ))}
+              <div className="space-y-10">
+                {GROUP_ORDER.map((group) => {
+                  const indicators = groupedIndicators[group];
+                  if (!indicators || indicators.length === 0) return null;
+                  
+                  return (
+                    <section key={group} className="space-y-4">
+                      <h3 className="text-lg font-semibold text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <span className="text-blue-500">#</span>
+                        {group}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {indicators.map((indicator, index) => (
+                          <a
+                            key={indicator}
+                            href={`/csv/${indicator}.csv`}
+                            download={`${indicator}.csv`}
+                            className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 rounded-xl transition-all group"
+                          >
+                            <span className="text-slate-300 font-medium group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                              {indicator}.csv
+                            </span>
+                            <Download className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+                          </a>
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
               </div>
             )}
           </div>

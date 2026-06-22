@@ -1,11 +1,24 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
-import { useAvailableIndicators } from "@/hooks/useIndicators";
+import { useAvailableIndicators, getIndicatorGroup, GROUP_ORDER } from "@/hooks/useIndicators";
 import { Loader2, Activity } from "lucide-react";
 
 export default function Home() {
   const { data, isLoading, isError } = useAvailableIndicators();
+
+  const groupedIndicators = useMemo(() => {
+    if (!data?.indicators) return {};
+    const groups: Record<string, string[]> = {};
+    data.indicators.forEach((indicator) => {
+      const group = getIndicatorGroup(indicator);
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(indicator);
+    });
+    // Sort within groups
+    Object.keys(groups).forEach(g => groups[g].sort());
+    return groups;
+  }, [data]);
 
   return (
     <div className="min-h-screen bg-slate-950 p-8 font-sans">
@@ -19,41 +32,51 @@ export default function Home() {
           </p>
         </header>
         
-        <main className="space-y-8">
-          <section>
-            <h2 className="text-2xl font-bold text-white mb-6">Wybierz wskaźnik</h2>
-            {isLoading ? (
-              <div className="w-full h-48 bg-slate-900 rounded-xl flex items-center justify-center border border-slate-800 shadow-xl">
-                <div className="flex flex-col items-center gap-4 text-blue-500">
-                  <Loader2 className="w-8 h-8 animate-spin" />
-                  <p className="text-slate-400 text-sm">Ładowanie dostępnych wskaźników...</p>
-                </div>
+        <main className="space-y-12">
+          {isLoading ? (
+            <div className="w-full h-48 bg-slate-900 rounded-xl flex items-center justify-center border border-slate-800 shadow-xl">
+              <div className="flex flex-col items-center gap-4 text-blue-500">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <p className="text-slate-400 text-sm">Ładowanie dostępnych wskaźników...</p>
               </div>
-            ) : isError ? (
-              <div className="w-full h-24 bg-slate-900 rounded-xl flex items-center justify-center border border-red-800 text-red-500 shadow-xl">
-                Wystąpił błąd podczas pobierania wskaźników z API.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {data?.indicators.map((indicator) => (
-                  <Link 
-                    key={indicator} 
-                    href={`/indicator/${indicator}`}
-                    className="block group"
-                  >
-                    <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 hover:border-blue-500 transition-colors shadow-lg flex items-center gap-4">
-                      <div className="p-3 bg-slate-800 rounded-lg group-hover:bg-blue-900/30 text-blue-400 transition-colors">
-                        <Activity className="w-6 h-6" />
-                      </div>
-                      <span className="text-slate-200 font-semibold group-hover:text-blue-400 transition-colors">
-                        {indicator}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
+            </div>
+          ) : isError ? (
+            <div className="w-full h-24 bg-slate-900 rounded-xl flex items-center justify-center border border-red-800 text-red-500 shadow-xl">
+              Wystąpił błąd podczas pobierania wskaźników z API.
+            </div>
+          ) : (
+            GROUP_ORDER.map((group) => {
+              const indicators = groupedIndicators[group];
+              if (!indicators || indicators.length === 0) return null;
+              
+              return (
+                <section key={group} className="space-y-6">
+                  <h2 className="text-2xl font-bold text-white border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <span className="text-emerald-500">•</span>
+                    {group}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {indicators.map((indicator) => (
+                      <Link 
+                        key={indicator} 
+                        href={`/indicator/${indicator}`}
+                        className="block group"
+                      >
+                        <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 hover:border-blue-500 transition-colors shadow-lg flex items-center gap-4">
+                          <div className="p-3 bg-slate-800 rounded-lg group-hover:bg-blue-900/30 text-blue-400 transition-colors">
+                            <Activity className="w-6 h-6" />
+                          </div>
+                          <span className="text-slate-200 font-semibold group-hover:text-blue-400 transition-colors break-words w-full">
+                            {indicator}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              );
+            })
+          )}
         </main>
       </div>
     </div>

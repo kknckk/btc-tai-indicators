@@ -1,5 +1,25 @@
 import useSWR from 'swr';
 
+export const getIndicatorGroup = (name: string): string => {
+  const mockowane = ["SplyAct30d", "SplyAct180d", "SplyAct1yr", "CapAct1yrUSD"];
+  const darmowe_api = [
+    "CapMrktCurUSD", "CapMVRVCur", "FeeTotNtv", "AdrActCnt", "AdrBalCnt", 
+    "TxCnt", "TxTfrCnt", "BlkCnt", "HashRate", "SplyCur", "IssTotNtv", "IssTotUSD", 
+    "SplyExpFut10yr", "FlowInExNtv", "FlowInExUSD", "FlowOutExNtv", "FlowOutExUSD", 
+    "PriceBTC", "PriceUSD", "TxTfrValAdjUSD", "TxTfrValAdjNtv", "TxTfrValNtv", 
+    "TxTfrValUSD", "BlkSizeMeanByte", "UTXOCnt", "SOPR", "CDD", "LTH_MVRV", "STH_MVRV", "FeeMedNtv"
+  ];
+  if (mockowane.includes(name)) return "3. Wskaźniki symulowane (Mockowane)";
+  if (darmowe_api.includes(name)) return "1. Pobierane bezpośrednio z darmowych API";
+  return "2. Wyliczane u nas (Derywaty i agregacje)";
+};
+
+export const GROUP_ORDER = [
+  "1. Pobierane bezpośrednio z darmowych API",
+  "2. Wyliczane u nas (Derywaty i agregacje)",
+  "3. Wskaźniki symulowane (Mockowane)",
+];
+
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) {

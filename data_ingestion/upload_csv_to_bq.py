@@ -3,10 +3,17 @@ import argparse
 import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
+from google.oauth2 import credentials
 
 def main(project_id: str):
     print(f"Inicjalizacja klienta BigQuery dla projektu: {project_id}")
-    client = bigquery.Client(project=project_id)
+    
+    token = os.environ.get("GCLOUD_TOKEN")
+    if token:
+        creds = credentials.Credentials(token)
+        client = bigquery.Client(project=project_id, credentials=creds)
+    else:
+        client = bigquery.Client(project=project_id)
     
     dataset_id = "btc_indicators"
     table_id = "coinmetrics_daily"

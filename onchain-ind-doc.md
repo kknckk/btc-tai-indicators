@@ -171,7 +171,19 @@ skrypt `bq_active_supply.py`.
 
 ---
 
-## 4. Analiza Literatury i Planowane Eksperymenty (Zakres Prac Technicznych)
+## 4. Mechanizm Codziennej Aktualizacji Danych
+
+Zasilanie bazy danych i odświeżanie wskaźników odbywa się w sposób zautomatyzowany. Cały proces (Data Ingestion) jest zaprojektowany jako potok danych (pipeline) i składa się z następujących kroków:
+
+1. **Pobieranie Danych (Fetchery)**: Każdego dnia uruchamiane są skrypty (np. \`coinmetrics_fetcher.py\`, \`bgeometrics_fetcher.py\`, \`blockchain_fetcher.py\`, \`mempool_fetcher.py\`), które łączą się z zewnętrznymi API. Skrypty te pobierają surowe wartości wskaźników w formacie JSON i spłaszczają je do plików CSV (zapisywanych lokalnie w \`data_ingestion/csv/\`).
+2. **Łączenie (Merge)**: Skrypt \`merge_data.py\` ładuje wszystkie wygenerowane pliki CSV z surowymi danymi dla poszczególnych wskaźników i scala je w jeden główny dataset bazując na kluczu \`time\` (dacie).
+3. **Kalkulacja Derywat**: Skrypt \`compute_derived_metrics.py\` podnosi zmergowany plik, wykonuje na nim operacje wektorowe (pandas) odwracające wzory matematyczne (np. wyliczanie *CapRealUSD*, metryk inflacji czy *FeeRevPct*) i tworzy docelowy plik \`merged_all.csv\`, zawierający wszystkie 56 kolumn (lub ich "wymockowane" wersje dla ciężkich wskaźników aktywności).
+4. **Zapis w Hurtowni (GCP BigQuery)**: Skrypt \`upload_csv_to_bq.py\` wypycha (upsert) ostateczny zbiór danych (\`merged_all.csv\`) bezpośrednio do tabeli \`btc_indicators\` w projekcie \`btc-ind\` w Google Cloud. Skrypt używa autoryzacji ADC (Application Default Credentials).
+5. **Orkiestracja**: Obecnie proces ten można wyzwalać ręcznie (odpalając kolejno skrypty) lub za pomocą prostej usługi typu Cron, w przyszłości zalecane jest opakowanie tego potoku narzędziem takim jak **Apache Airflow (Cloud Composer)**, by w razie błędu API móc wznowić zadanie. Posiadamy też wstępny szkielet do wykorzystania Dataform do operacji ELT bezpośrednio w BigQuery.
+
+---
+
+## 5. Analiza Literatury i Planowane Eksperymenty (Zakres Prac Technicznych)
 
 Na podstawie zebranych prac badawczych, wyłoniliśmy konkretne eksperymenty do zrobienia. to by miało potwierdzić 'układ odniesienia' i jakość danych. tzn czy umiemy reprodukować inne znane wyniki (recenzowane), zanim zaproponujemy swoje miary czy modele. 
 
@@ -261,3 +273,62 @@ Na podstawie zebranych prac badawczych, wyłoniliśmy konkretne eksperymenty do 
 - **Zakres prac technicznych (Skrypty):**
   - Skrypt używający Principal Component Analysis (`sklearn.decomposition.PCA`) redukujący 20-30 zaszumionych metryk do 2-3 głównych komponentów.
   - Dopasowanie modelu Regresji Logistycznej, który będzie na bieżąco klasyfikował i zwracał prawdopodobieństwo nadejścia dnia o wysokiej zmienności (RV > 95%).
+
+## 5. Podsumowanie Statusu Brakujących Wskaźników z Wcześniejszych Analiz
+
+Poniższa sekcja odpowiada na zapotrzebowanie zaadresowania listy 16 konkretnych wskaźników, które wcześniej były oznaczone jako potencjalnie "brakujące" lub wymagające weryfikacji. Wymienione metryki są częścią zaktualizowanego ekosystemu pobierania (API) i kalkulacji lokalnej (Derywaty).
+
+### Wskaźniki w pełni wdrożone (Zrobione w CSV i przez API/Derywaty)
+
+1. **DiffMean (Średnia Trudność Sieci)**
+   - **Status:** Zrobione.
+   - **Opis:** Obliczane na podstawie danych z BigQuery w skrypcie `bq_easy_metrics.py` (poprzez konwersję pola szesnastkowego bloków). Zapisywane jako `DiffMean.csv`.
+2. **IssContNtv**
+   - **Status:** Zrobione.
+   - **Opis:** Jest to kopia metryki `IssTotNtv` (dziennej emisji), wprowadzona w celach dopasowania do starszych systemów nazewnictwa. Generowana automatycznie jako derywata w skrypcie `compute_derived_metrics.py` i zapisana w `IssContNtv.csv`.
+3. **TxMeanByte (Średni rozmiar transakcji)**
+   - **Status:** Zrobione.
+   - **Opis:** Wyliczane bezproblemowo poprzez agregację średniej na tabeli `crypto_bitcoin.transactions` w BigQuery (`bq_easy_metrics.py`). Zapisywane jako `TxMeanByte.csv`.
+4. **TxTfrValMeanNtv (Średnia wartość transferu w BTC)**
+   - **Status:** Zrobione.
+   - **Opis:** Wyliczane lokalnie (derywata) dzieląc całkowity wolumen transferów w BTC przez ich ilość (`TxTfrValNtv / TxTfrCnt`). Liczone przez `compute_derived_metrics.py`. Zapisane jako `TxTfrValMeanNtv.csv`.
+5. **RevAllTimeUSD (Skumulowany zysk górników all-time)**
+   - **Status:** Zrobione.
+   - **Opis:** Wyliczane lokalnie jako suma narastająca (cumsum) z całkowitych opłat zwaloryzowanych do dolarów i nowej emisji w dolarach (`FeeTotUSD + IssTotUSD`). Zapisane w `RevAllTimeUSD.csv`.
+6. **TxTfrValMeanUSD (Średnia wartość transferu w USD)**
+   - **Status:** Zrobione.
+   - **Opis:** Matematyczny ekwiwalent punktu nr 4, lecz waloryzowany na dolary (`TxTfrValUSD / TxTfrCnt`). Liczony w `compute_derived_metrics.py` i składowany jako `TxTfrValMeanUSD.csv`.
+7. **NVTAdj (Wskaźnik NVT)**
+   - **Status:** Zrobione (jako NVT_Naive).
+   - **Opis:** Wyliczane matematycznie jako rynkowa kapitalizacja podzielona przez transakcyjny wolumen w dolarach (`CapMrktCurUSD / TxTfrValUSD`). Ze względu na brak zaawansowanego skorygowania (adjustments), zapisywane u nas jako `NVT_Naive.csv`.
+8. **NVTAdj90 (NVT wyrównane średnią 90-dniową)**
+   - **Status:** Zrobione.
+   - **Opis:** Wynik matematyczny będący po prostu 90-dniową średnią kroczącą na wyżej opisanym wskaźniku naiwnego NVT (`NVT_Naive.rolling(90)`). Skrypt dopisany do `compute_derived_metrics.py`, dane w `NVTAdj90.csv`.
+9. **VelCur1yr (Roczna Prędkość Cyrkulacji)**
+   - **Status:** Zrobione (jako VelCur1yr_Naive).
+   - **Opis:** Dzieli wolumen przez aktywną podaż z ostatniego roku (`TxTfrValNtv / SplyAct1yr`). Ponieważ `SplyAct1yr` aktualnie korzysta ze stałych symulujących (mocking - z powodu ograniczeń rozmiaru zapytań w BQ), prędkość ta posiada sufiks `_Naive` i na ten moment nie wykazuje historycznej wariancji.
+10. **TxTfrValDayDst (Coin Days Destroyed - CDD)**
+    - **Status:** Zrobione (jako CDD).
+    - **Opis:** Dostępne od razu dzięki integracji z bezpłatnym API BGeometrics (`bgeometrics_fetcher.py`). Stanowi świetne zastępstwo dla braku pełnych danych o wieku UTXO. Zapisywane jako `CDD.csv`.
+11. **FeeMedUSD (Mediana Opłat w USD)**
+    - **Status:** Zrobione.
+    - **Opis:** Obliczana lokalnie poprzez pomnożenie ściągniętej z Mempool.space mediany opłat w BTC (`FeeMedNtv`) przez aktualną cenę z CoinMetrics (`PriceUSD`). Zapisane jako `FeeMedUSD.csv`.
+14. **ExchangeFlowIn (Napływy na giełdy)**
+    - **Status:** Zrobione (jako FlowInExNtv / FlowInExUSD).
+    - **Opis:** Surowe dane wyciągnięte z API CoinMetrics (`coinmetrics_fetcher.py`). Istnieje tu jednak istotne ryzyko heurystyczne: klasyfikacja (labeling) klastrów adresów giełd dla darmowych kluczy API dostawcy może być zaszumiona lub obarczona błędem.
+15. **ExchangeFlowOut (Wypływy z giełd)**
+    - **Status:** Zrobione (jako FlowOutExNtv / FlowOutExUSD).
+    - **Opis:** Podobnie jak wpływy, dane te są pozyskiwane i zapisywane bez trudu z darmowego endpointa CoinMetrics.
+16. **LTH/STH split (Podział na dawnych i nowych inwestorów)**
+    - **Status:** Zrobione (jako LTH_MVRV i STH_MVRV).
+    - **Opis:** Odzwierciedlone jako MVRV dla "Long-Term Holders" oraz "Short-Term Holders". Zostały pobrane prosto z zewnętrznego API (BGeometrics) i lądują w postaci dwóch niezależnych plików CSV, gotowych do zasilania analiz on-chain.
+
+### Wskaźniki NIE zrobione i Dlaczego
+
+12. **TxTfrValAdjUSD (Skorygowany wolumen transferów w USD)**
+    - **Status:** Brak danych.
+    - **Powód:** Skrypt do pobierania CoinMetrics usiłuje ściągnąć kolumnę `TxTfrValAdjUSD` wprost od dostawcy (jest w zmiennej TARGET_COLUMNS), jednak w darmowej publicznej wersji bazy (community tier), ta kolumna przestała być udostępniana. 
+    - **Rozwiązanie zastępcze:** Wykorzystujemy zastępczy szacowany wolumen bez zaawansowanego odszumiania z mikroskopijnych transferów (`TxTfrValUSD` dostarczany przez Blockchain.com i Coinmetrics).
+13. **TxTfrValAdjNtv (Skorygowany wolumen transferów w BTC)**
+    - **Status:** Brak danych.
+    - **Powód:** Ten sam co w punkcie 12 – brak darmowego udostępnienia u zewnętrznego dostawcy. Zamiast tego analityka bazuje na standardowym wskaźniku `TxTfrValNtv`.

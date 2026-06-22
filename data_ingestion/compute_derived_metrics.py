@@ -66,5 +66,10 @@ def compute_derived():
         df[["time", "NVT_Naive"]].to_csv(os.path.join(CSV_DIR, "NVT_Naive.csv"), index=False)
         print("Wygenerowano NVT_Naive.csv")
 
+        # 6. NVTAdj90 (90-day moving average of NVT_Naive)
+        df["NVTAdj90"] = df["NVT_Naive"].rolling(window=90, min_periods=1).mean()
+        df[["time", "NVTAdj90"]].to_csv(os.path.join(CSV_DIR, "NVTAdj90.csv"), index=False)
+        print("Wygenerowano NVTAdj90.csv")
+
 if __name__ == "__main__":
     compute_derived()
