@@ -7,6 +7,10 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from prophet import Prophet
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+import math
 from utils import load_merged_data, save_results
 
 def run_paper5_prophet(df: pd.DataFrame):
@@ -93,6 +97,115 @@ def run_paper7_classification(df: pd.DataFrame):
         "feature_importance": [{"feature": f, "importance": float(imp)} for f, imp in feat_imp]
     }
 
+class VolatilityTransformer(nn.Module):
+    def __init__(self, input_dim, d_model=16, nhead=2, num_layers=1, dropout=0.1):
+        super().__init__()
+        self.embedding = nn.Linear(input_dim, d_model)
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout, batch_first=True)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.fc_out = nn.Linear(d_model, 1)
+
+    def forward(self, src):
+        # src: [batch_size, seq_len, input_dim]
+        emb = self.embedding(src)
+        out = self.transformer_encoder(emb)
+        # Take the last sequence output
+        out = out[:, -1, :]
+        return self.fc_out(out).squeeze(-1)
+
+class VolatilityLSTM(nn.Module):
+    def __init__(self, input_dim, hidden_dim=16, num_layers=1):
+        super().__init__()
+        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
+        self.fc_out = nn.Linear(hidden_dim, 1)
+
+    def forward(self, x):
+        out, _ = self.lstm(x)
+        out = out[:, -1, :]
+        return self.fc_out(out).squeeze(-1)
+
+def run_paper6_dl_volatility(df: pd.DataFrame):
+    features = ['AdrActCnt', 'FeeTotUSD', 'RevUSD', 'TxTfrValUSD', 'rv_7d']
+    available_features = [f for f in features if f in df.columns]
+    
+    if 'rv_7d' not in available_features:
+        return {}
+        
+    df_clean = df.dropna(subset=available_features).copy()
+    
+    # Scale features
+    data = df_clean[available_features].values
+    data = (data - np.mean(data, axis=0)) / (np.std(data, axis=0) + 1e-8)
+    
+    seq_len = 14
+    X_seq = []
+    y_seq = []
+    
+    # Target is rv_7d
+    target_idx = available_features.index('rv_7d')
+    
+    for i in range(len(data) - seq_len):
+        X_seq.append(data[i:i+seq_len])
+        y_seq.append(data[i+seq_len, target_idx])
+        
+    X_seq = np.array(X_seq)
+    y_seq = np.array(y_seq)
+    
+    if len(X_seq) < 100:
+        return {}
+        
+    train_size = int(len(X_seq) * 0.8)
+    X_train, X_test = torch.tensor(X_seq[:train_size], dtype=torch.float32), torch.tensor(X_seq[train_size:], dtype=torch.float32)
+    y_train, y_test = torch.tensor(y_seq[:train_size], dtype=torch.float32), torch.tensor(y_seq[train_size:], dtype=torch.float32)
+    
+    train_dataset = TensorDataset(X_train, y_train)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    
+    # Initialize models
+    input_dim = len(available_features)
+    lstm_model = VolatilityLSTM(input_dim=input_dim)
+    transformer_model = VolatilityTransformer(input_dim=input_dim)
+    
+    criterion = nn.MSELoss()
+    optimizer_lstm = torch.optim.Adam(lstm_model.parameters(), lr=0.01)
+    optimizer_tf = torch.optim.Adam(transformer_model.parameters(), lr=0.01)
+    
+    # Fast training for PoC (5 epochs)
+    epochs = 5
+    for epoch in range(epochs):
+        lstm_model.train()
+        transformer_model.train()
+        for batch_x, batch_y in train_loader:
+            optimizer_lstm.zero_grad()
+            out_lstm = lstm_model(batch_x)
+            loss_lstm = criterion(out_lstm, batch_y)
+            loss_lstm.backward()
+            optimizer_lstm.step()
+            
+            optimizer_tf.zero_grad()
+            out_tf = transformer_model(batch_x)
+            loss_tf = criterion(out_tf, batch_y)
+            loss_tf.backward()
+            optimizer_tf.step()
+            
+    # Eval
+    lstm_model.eval()
+    transformer_model.eval()
+    with torch.no_grad():
+        pred_lstm = lstm_model(X_test)
+        pred_tf = transformer_model(X_test)
+        mse_lstm = criterion(pred_lstm, y_test).item()
+        mse_tf = criterion(pred_tf, y_test).item()
+        
+    return {
+        "sequence_length": seq_len,
+        "epochs_trained": epochs,
+        "test_mse": {
+            "LSTM": float(mse_lstm),
+            "Transformer": float(mse_tf)
+        }
+    }
+
 def main():
     results_dir = os.path.join(os.path.dirname(__file__), "results")
     df_path = os.path.join(results_dir, "derived_metrics.csv")
@@ -116,6 +229,12 @@ def main():
         print("Paper 7 (Classification) OK")
     except Exception as e:
         print(f"Paper 7 Error: {e}")
+        
+    try:
+        results['paper6'] = run_paper6_dl_volatility(df)
+        print("Paper 6 (Transformers vs LSTM) OK")
+    except Exception as e:
+        print(f"Paper 6 Error: {e}")
         
     with open(os.path.join(results_dir, "ml_results.json"), "w") as f:
         json.dump(results, f, default=str)

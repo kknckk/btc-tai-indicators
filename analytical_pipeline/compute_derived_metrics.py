@@ -43,6 +43,18 @@ def compute_derived_metrics():
         
     save_results(df, "derived_metrics.csv")
     print(f"Obliczono pochodne miary. Liczba wierszy: {len(df)}")
+    
+    # Zapis wybranych miar do katalogu z danymi, by API mogło je serwować
+    import os
+    csv_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data_ingestion", "csv")
+    if os.path.exists(csv_dir):
+        export_metrics = ['ShareExUSD', 'NetFlowUSD', 'r_t', 'rv_30d']
+        for m in export_metrics:
+            if m in df.columns:
+                out_df = df[['time', m]].dropna()
+                out_path = os.path.join(csv_dir, f"{m}.csv")
+                out_df.to_csv(out_path, index=False, header=['time', 'value'])
+                print(f"Wyeksportowano {m}.csv do API.")
 
 if __name__ == "__main__":
     compute_derived_metrics()
