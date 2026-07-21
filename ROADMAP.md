@@ -1,6 +1,6 @@
-# Roadmap dla Agenta AI (Vibe Coding)
+# Roadmapa Projektu (Wdrożenia i Analityka)
 
-Witaj Agencie! Ten dokument opisuje plan działania na kolejne iteracje projektu. Do tej pory zrealizowaliśmy i wyeksportowaliśmy do plików CSV 34 podstawowe i zaawansowane wskaźniki przy użyciu danych darmowych. Poniżej znajduje się szczegółowa architektura i logika, którą należy wdrożyć, by uzyskać te najbardziej zaawansowane (zależne od struktury UTXO i pełnego węzła Bitcoin).
+Ten dokument opisuje plan działania na kolejne iteracje projektu. Do tej pory zrealizowaliśmy i wyeksportowaliśmy do plików CSV 34 podstawowe i zaawansowane wskaźniki przy użyciu danych darmowych. Poniżej znajduje się szczegółowa architektura i logika, którą należy wdrożyć, by uzyskać te najbardziej zaawansowane (zależne od struktury UTXO i pełnego węzła Bitcoin).
 
 ## 1. Wyzwanie: Pełny Węzeł (Full Node) w chmurze
 Wskaźniki takie jak:

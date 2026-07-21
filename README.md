@@ -1,7 +1,7 @@
 # BTC TAI Indicators (On-Chain Dashboard & API)
 
-## Project Context for Future AI Agents ("Vibe Coding")
-**Dear AI Agent:** This repository contains an on-chain analytics dashboard and REST API for Bitcoin network indicators. The goal of this project is to serve historical and live metrics (such as Realized Cap, SOPR, MVRV Z-Score, Active Supply, CDD, Median Fees, etc.) using a serverless Google Cloud Platform (GCP) architecture without the need for hosting a fully synced 600GB+ Bitcoin node.
+## Project Context
+This repository contains an on-chain analytics dashboard and REST API for Bitcoin network indicators. The goal of this project is to serve historical and live metrics (such as Realized Cap, SOPR, MVRV Z-Score, Active Supply, CDD, Median Fees, etc.) using a serverless Google Cloud Platform (GCP) architecture without the need for hosting a fully synced 600GB+ Bitcoin node.
 
 ### Scope & Architecture
 - **Data Ingestion (`/data_ingestion`)**: Python scripts designed to fetch historical and daily data. We rely on free sources like the CoinMetrics Community CSV dataset (`btc.csv`) and `mempool.space` API. We plan to store everything in **Google BigQuery**.
@@ -14,7 +14,7 @@
 3. **API Implementation**: Built a FastAPI server (`main.py`) with a complete BigQuery client integration. It exposes `/api/v1/metrics/available` and `/api/v1/metrics/values`. Dockerfile provided for Cloud Run deployment.
 4. **Dashboard Implementation**: Bootstrapped Next.js. Created a `Chart.tsx` component using `lightweight-charts`. Built an `ApiTester.tsx` component to make REST calls visually from the browser. The main page is styled using Tailwind CSS and `lucide-react` icons.
 
-### What Needs To Be Done Next (Action Plan for You)
+### What Needs To Be Done Next
 1. **Execute Data Ingestion**: The scripts in `data_ingestion` need to be actually executed on a machine or GCP Cloud Function against a real GCP project with BigQuery enabled.
 2. **GCP Project Setup**: Provision BigQuery datasets (`btc_indicators`), Cloud Run services, and Cloud Scheduler for daily syncs. Currently, these scripts use placeholder `GCP_PROJECT_ID`.
 3. **Advanced Metrics (Group 3 & 4 Disclaimers)**: 

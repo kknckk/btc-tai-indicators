@@ -27,5 +27,5 @@ Aplikacja kliencka w folderze `/dashboard/` została wdrożona na Cloud Run (`bt
 *   **Baza Danych:** Panel oferujący pobranie każdego ze wskaźników w wygodnym formacie `nazwa.csv` zaciąganym z `/public/csv/`.
 
 ## Kolejne Kroki / Rozwój
-Nowy agent AI powinien zapoznać się z kodem w `api/main.py` oraz `dashboard/src/app/` by zobaczyć sposób komunikacji. Zastosowany React korzysta z nowoczesnego SWR do cachingu zapytań HTTP po stronie interfejsu.
+Nowy programista rozwijający system powinien zapoznać się z kodem w `api/main.py` oraz `dashboard/src/app/` by zobaczyć sposób komunikacji. Zastosowany React korzysta z nowoczesnego SWR do cachingu zapytań HTTP po stronie interfejsu.
 Możliwości rozwoju to m.in. wsparcie dla nowych baz danych, system AI ostrzegający mailowo o silnych sygnałach w korelacji lub bardziej rygorystyczne testowanie w GitHub Actions.

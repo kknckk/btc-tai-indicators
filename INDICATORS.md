@@ -68,8 +68,7 @@ Pozostałe wskaźniki (Faza 2 i Faza 3 w ROADMAP.md), **nie są wylistowane jako
 - **CapAct1yrUSD** (Podzbiór Realized Cap - wymaga UTXO set analysis).
 - **FeeMedNtv / FeeMedUSD** (Mediany Opłat blokowych. Będą w GCP pobierane codziennie skryptem z API `mempool.space`).
 
-## Instrukcje dla Agenta AI na innej maszynie
-1. Aby wygenerować na nowo całą paczkę wyżej wylistowanych CSV, użyj skryptów: 
-   - `python data_ingestion/derive_metrics.py` (CoinMetrics)
-   - `python data_ingestion/blockchain_fetcher.py` (Blockchain.com)
-2. Skrypty automatycznie zapisują dane do folderu `data_ingestion/csv/`. Upewnij się, że używasz środowiska wirtualnego opisanego w `SCRIPTS.md`.
+## Instrukcje dla Nowych Deweloperów
+Jeżeli ten projekt został świeżo sklonowany, należy:
+1. Upewnić się, że pobrane zostały pliki `data_ingestion/csv/*.csv`. API opiera się w całości na odczycie tych statycznych CSV za pomocą Pydantic i Pandas.
+2. Można zignorować potrzebę ściągania bazy BigQuery do lokalnego developmentu jeśli folder `csv/` jest pełen. Skrypty automatycznie zapisują dane do folderu `data_ingestion/csv/`. Upewnij się, że używasz środowiska wirtualnego opisanego w `SCRIPTS.md`.
