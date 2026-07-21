@@ -18,11 +18,19 @@ def load_merged_data() -> pd.DataFrame:
 
     first_file = csv_files[0]
     merged_df = pd.read_csv(os.path.join(csv_dir, first_file))
+    if 'value' in merged_df.columns:
+        merged_df.rename(columns={'value': first_file.replace('.csv', '')}, inplace=True)
     merged_df['time'] = pd.to_datetime(merged_df['time'])
 
     for filename in csv_files[1:]:
         df = pd.read_csv(os.path.join(csv_dir, filename))
+        if 'value' in df.columns:
+            df.rename(columns={'value': filename.replace('.csv', '')}, inplace=True)
         df['time'] = pd.to_datetime(df['time'])
+        # Handle overlapping columns other than 'time'
+        overlap = set(merged_df.columns).intersection(set(df.columns)) - {'time'}
+        if overlap:
+            df = df.drop(columns=list(overlap))
         merged_df = pd.merge(merged_df, df, on="time", how="outer")
 
     merged_df = merged_df.sort_values("time").reset_index(drop=True)

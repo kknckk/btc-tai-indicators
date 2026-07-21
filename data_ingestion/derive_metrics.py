@@ -63,7 +63,7 @@ def fetch_and_derive():
     df["CapFutExp10yrUSD"] = df["SplyExpFut10yr"] * df["PriceUSD"]
     
     # 12. IssContPctDay & IssContPctAnn
-    df["IssContPctDay"] = df["IssTotNtv"] / df["SplyCur"]
+    df["IssContPctDay"] = (df["IssTotNtv"] / df["SplyCur"]) * 100
     df["IssContPctAnn"] = df["IssContPctDay"] * 365
     
     # 13. TxCntSec

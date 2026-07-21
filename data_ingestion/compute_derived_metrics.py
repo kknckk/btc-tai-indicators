@@ -47,15 +47,16 @@ def compute_derived():
         df[["time", "RevAllTimeUSD"]].to_csv(os.path.join(CSV_DIR, "RevAllTimeUSD.csv"), index=False)
         print("Wygenerowano RevAllTimeUSD.csv")
 
-    # 4. VelCur1yr_Naive (Prędkość Naiwna)
-    sply_1yr = safe_read("SplyAct1yr")
-    if tx_val_ntv is not None and sply_1yr is not None:
-        df = tx_val_ntv.merge(sply_1yr, on="time", how="inner")
+    # 4. VelCur1yr (Prawdziwa prędkość z 1-roczną sumą)
+    sply_cur = safe_read("SplyCur")
+    if tx_val_ntv is not None and sply_cur is not None:
+        df = tx_val_ntv.merge(sply_cur, on="time", how="inner")
         # Zabezpieczenie przed dzieleniem przez 0
-        df = df[df["SplyAct1yr"] > 0]
-        df["VelCur1yr_Naive"] = df["TxTfrValNtv"] / df["SplyAct1yr"]
-        df[["time", "VelCur1yr_Naive"]].to_csv(os.path.join(CSV_DIR, "VelCur1yr_Naive.csv"), index=False)
-        print("Wygenerowano VelCur1yr_Naive.csv")
+        df = df[df["SplyCur"] > 0]
+        df["TxTfrValNtv_1yr_sum"] = df["TxTfrValNtv"].rolling(window=365, min_periods=1).sum()
+        df["VelCur1yr"] = df["TxTfrValNtv_1yr_sum"] / df["SplyCur"]
+        df[["time", "VelCur1yr"]].to_csv(os.path.join(CSV_DIR, "VelCur1yr.csv"), index=False)
+        print("Wygenerowano VelCur1yr.csv")
         
     # 5. NVT_Naive (Market Cap / TxTfrValUSD)
     cap_mrkt = safe_read("CapMrktCurUSD")
@@ -66,8 +67,9 @@ def compute_derived():
         df[["time", "NVT_Naive"]].to_csv(os.path.join(CSV_DIR, "NVT_Naive.csv"), index=False)
         print("Wygenerowano NVT_Naive.csv")
 
-        # 6. NVTAdj90 (90-day moving average of NVT_Naive)
-        df["NVTAdj90"] = df["NVT_Naive"].rolling(window=90, min_periods=1).mean()
+        # 6. NVTAdj90 (Market Cap / 90-day moving average of TxTfrValUSD)
+        df["TxTfrValUSD_SMA90"] = df["TxTfrValUSD"].rolling(window=90, min_periods=1).mean()
+        df["NVTAdj90"] = df["CapMrktCurUSD"] / df["TxTfrValUSD_SMA90"]
         df[["time", "NVTAdj90"]].to_csv(os.path.join(CSV_DIR, "NVTAdj90.csv"), index=False)
         print("Wygenerowano NVTAdj90.csv")
 

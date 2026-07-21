@@ -6,6 +6,18 @@ import { BookOpen, Code, FlaskConical, Link as LinkIcon, AlertCircle } from 'luc
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import dynamic from 'next/dynamic';
+
+const Paper1Dashboard = dynamic(() => import('@/components/literature/Paper1Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper2Dashboard = dynamic(() => import('@/components/literature/Paper2Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper3Dashboard = dynamic(() => import('@/components/literature/Paper3Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper4Dashboard = dynamic(() => import('@/components/literature/Paper4Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper5Dashboard = dynamic(() => import('@/components/literature/Paper5Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper6Dashboard = dynamic(() => import('@/components/literature/Paper6Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper7Dashboard = dynamic(() => import('@/components/literature/Paper7Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper8Dashboard = dynamic(() => import('@/components/literature/Paper8Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper9Dashboard = dynamic(() => import('@/components/literature/Paper9Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
+const Paper10Dashboard = dynamic(() => import('@/components/literature/Paper10Dashboard'), { ssr: false, loading: () => <p>Ładowanie wyników analitycznych...</p> });
 
 export default function PaperPage() {
   const { paperId } = useParams();
@@ -89,6 +101,21 @@ export default function PaperPage() {
             {details.implementationPlan}
           </ReactMarkdown>
         </div>
+      </div>
+      
+      {/* Sekcja Wyników Analitycznych (Dashboardy) */}
+      <div className="mt-12">
+        <h2 className="text-3xl font-extrabold text-white mb-6">Wyniki Analityczne (Live)</h2>
+        {idStr === 'paper1' && <Paper1Dashboard />}
+        {idStr === 'paper2' && <Paper2Dashboard />}
+        {idStr === 'paper3' && <Paper3Dashboard />}
+        {idStr === 'paper4' && <Paper4Dashboard />}
+        {idStr === 'paper5' && <Paper5Dashboard />}
+        {idStr === 'paper6' && <Paper6Dashboard />}
+        {idStr === 'paper7' && <Paper7Dashboard />}
+        {idStr === 'paper8' && <Paper8Dashboard />}
+        {idStr === 'paper9' && <Paper9Dashboard />}
+        {idStr === 'paper10' && <Paper10Dashboard />}
       </div>
     </div>
   );

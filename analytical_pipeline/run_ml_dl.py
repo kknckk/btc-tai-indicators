@@ -72,13 +72,20 @@ def run_paper7_classification(df: pd.DataFrame):
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
     
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.svm import LinearSVC
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
     rf = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf.fit(X_train, y_train)
+    rf.fit(X_train, y_train) # RF doesn't strictly need scaling, but we can pass X_train
     y_pred_rf = rf.predict(X_test)
     
-    svm = SVC(kernel='linear')
-    svm.fit(X_train, y_train)
-    y_pred_svm = svm.predict(X_test)
+    svm = LinearSVC(dual=False, random_state=42, max_iter=2000)
+    svm.fit(X_train_scaled, y_train)
+    y_pred_svm = svm.predict(X_test_scaled)
     
     # Feature importance z Random Forest
     importances = rf.feature_importances_
@@ -94,7 +101,11 @@ def run_paper7_classification(df: pd.DataFrame):
             "accuracy": float(accuracy_score(y_test, y_pred_svm)),
             "f1": float(f1_score(y_test, y_pred_svm))
         },
-        "feature_importance": [{"feature": f, "importance": float(imp)} for f, imp in feat_imp]
+        "feature_importance": [{"feature": f, "importance": float(imp)} for f, imp in feat_imp],
+        "roc_data": [
+            {"model": "Random Forest", "accuracy": float(accuracy_score(y_test, y_pred_rf))},
+            {"model": "SVM", "accuracy": float(accuracy_score(y_test, y_pred_svm))}
+        ]
     }
 
 class VolatilityTransformer(nn.Module):
@@ -197,13 +208,32 @@ def run_paper6_dl_volatility(df: pd.DataFrame):
         mse_lstm = criterion(pred_lstm, y_test).item()
         mse_tf = criterion(pred_tf, y_test).item()
         
+    # Time series of actual vs pred for last N points
+    n_plot = min(100, len(y_test))
+    ts_actual = y_test[-n_plot:].numpy().tolist()
+    ts_lstm = pred_lstm[-n_plot:].numpy().tolist()
+    ts_tf = pred_tf[-n_plot:].numpy().tolist()
+    
+    ts_data = []
+    # Dates for these last n_plot
+    # The original dataframe has 'time' column. We lost it during scaling.
+    # Let's just create an index for simplicity
+    for i in range(n_plot):
+        ts_data.append({
+            "index": i,
+            "actual": float(ts_actual[i]),
+            "lstm": float(ts_lstm[i]),
+            "transformer": float(ts_tf[i])
+        })
+        
     return {
         "sequence_length": seq_len,
         "epochs_trained": epochs,
         "test_mse": {
             "LSTM": float(mse_lstm),
             "Transformer": float(mse_tf)
-        }
+        },
+        "time_series": ts_data
     }
 
 def main():

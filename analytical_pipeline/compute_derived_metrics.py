@@ -48,7 +48,7 @@ def compute_derived_metrics():
     import os
     csv_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data_ingestion", "csv")
     if os.path.exists(csv_dir):
-        export_metrics = ['ShareExUSD', 'NetFlowUSD', 'r_t', 'rv_30d']
+        export_metrics = ['ShareExUSD', 'NetFlowUSD', 'NetFlowNtv', 'r_t', 'rv_t', 'rv_7d', 'rv_30d', 'dir_t1', 'PM_proxy', 'NVT']
         for m in export_metrics:
             if m in df.columns:
                 out_df = df[['time', m]].dropna()

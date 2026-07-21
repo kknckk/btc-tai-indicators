@@ -68,18 +68,19 @@ def fetch_easy_bq_metrics():
         df_tx = pd.DataFrame(records)
         df_tx[["time", "TxMeanByte"]].to_csv("csv/TxMeanByte.csv", index=False)
         
+        # Zapis FeeMedNtv w BTC (podzielone przez 1e8)
+        df_tx["FeeMedNtv"] = df_tx["FeeMedNtv"].astype(float) / 100_000_000
+        df_tx[["time", "FeeMedNtv"]].to_csv("csv/FeeMedNtv.csv", index=False)
+        
         # FeeMedUSD = FeeMedNtv * PriceUSD
         if os.path.exists("csv/PriceUSD.csv"):
             df_price = pd.read_csv("csv/PriceUSD.csv")
             df_fee = df_tx[["time", "FeeMedNtv"]].merge(df_price, on="time", how="inner")
-            # Fee in BigQuery is in Satoshis usually, or BTC? Actually BQ fee is in Satoshis.
-            # Konwersja z Decimal na float
-            df_fee["FeeMedNtv"] = df_fee["FeeMedNtv"].astype(float)
-            df_fee["FeeMedUSD"] = (df_fee["FeeMedNtv"] / 100_000_000) * df_fee["PriceUSD"]
+            df_fee["FeeMedUSD"] = df_fee["FeeMedNtv"] * df_fee["PriceUSD"]
             df_fee[["time", "FeeMedUSD"]].to_csv("csv/FeeMedUSD.csv", index=False)
-            print("Zapisano TxMeanByte.csv oraz FeeMedUSD.csv")
+            print("Zapisano TxMeanByte.csv, FeeMedNtv.csv oraz FeeMedUSD.csv")
         else:
-            print("Zapisano TxMeanByte.csv (FeeMedUSD pominięte brak PriceUSD.csv)")
+            print("Zapisano TxMeanByte.csv oraz FeeMedNtv.csv (FeeMedUSD pominięte brak PriceUSD.csv)")
             
     except Exception as e:
         print(f"Błąd BQ tx: {e}")
