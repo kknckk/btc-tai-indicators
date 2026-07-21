@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell
 } from 'recharts';
-import { Trees, CheckCircle, ShieldCheck, Layers, BarChart2, Award } from 'lucide-react';
+import { Trees,  BarChart2, Award } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -117,9 +117,9 @@ export default function Paper7Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis type="number" stroke="#64748b" tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
               <YAxis type="category" dataKey="feature" stroke="#cbd5e1" tick={{ fontSize: 13, fontFamily: 'monospace' }} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(v: any) => [`${(Number(v) * 100).toFixed(2)}%`, 'Waga cechy']} />
+              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(v: unknown) => [`${(Number(v) * 100).toFixed(2)}%`, 'Waga cechy']} />
               <Bar dataKey="importance" name="Waga cechy" radius={[0, 6, 6, 0]}>
-                {featData.map((entry: any, idx: number) => (
+                {featData.map((entry: unknown, idx: number) => (
                   <Cell key={`cell-${idx}`} fill={idx === 0 ? '#10b981' : idx === 1 ? '#34d399' : '#059669'} opacity={1 - idx * 0.08} />
                 ))}
               </Bar>

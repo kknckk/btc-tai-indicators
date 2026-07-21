@@ -20,7 +20,7 @@ export default function ApiTester({ initialMetric = 'MVRV_Z' }: ApiTesterProps) 
       const res = await fetch(`${baseUrl}/api/v1/metrics/values?metrics=${metric}&start_date=${startDate}&end_date=${endDate}`);
       const data = await res.json();
       setResponse(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setResponse({ error: err.message });
     } finally {
       setLoading(false);

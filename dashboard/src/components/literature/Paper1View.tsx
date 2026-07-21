@@ -11,19 +11,19 @@ import {
   Area,
 } from 'recharts';
 
-export default function Paper1View({ data }: { data: any }) {
+export default function Paper1View({ data }: { data: unknown }) {
   if (!data) return null;
 
   // Format the correlation matrix into an array for rendering
   const metrics = Object.keys(data.correlation_heatmap);
   
   // Find the 90th percentile of h_t to highlight high volatility periods
-  const h_t_values = data.h_t_series.map((d: any) => d.h_t).filter((v: number) => !isNaN(v));
+  const h_t_values = data.h_t_series.map((d: unknown) => d.h_t).filter((v: number) => !isNaN(v));
   h_t_values.sort((a: number, b: number) => a - b);
   const percentile90 = h_t_values[Math.floor(h_t_values.length * 0.9)] || 0;
 
   // Enhance series data with a "high_volatility" background indicator
-  const chartData = data.h_t_series.map((d: any) => ({
+  const chartData = data.h_t_series.map((d: unknown) => ({
     ...d,
     time: d.time.split('T')[0], // format date
     high_vol_zone: d.h_t > percentile90 ? Math.max(...data.h_t_series.map((x:any)=>x.PriceUSD||0)) : null,
@@ -65,7 +65,7 @@ export default function Paper1View({ data }: { data: any }) {
               </tr>
             </thead>
             <tbody>
-              {data.regressions.map((reg: any, i: number) => (
+              {data.regressions.map((reg: unknown, i: number) => (
                 <tr key={reg.metric} className="hover:bg-slate-50 border-b last:border-0">
                   <td className="py-3 px-4 font-medium text-slate-800">{reg.metric}</td>
                   <td className="py-3 px-4 text-right font-mono text-slate-600">{reg.coef.toFixed(6)}</td>

@@ -74,7 +74,7 @@ export default function Paper9Dashboard() {
               <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('-')[0]} />
               <YAxis yAxisId="left" stroke="#3b82f6" domain={['auto', 'auto']} tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`} />
               <YAxis yAxisId="right" orientation="right" stroke="#38bdf8" tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: any, name: any) => [name === 'ShareExUSD' ? `${(val * 100).toFixed(2)}%` : `$${Number(val).toFixed(2)}`, name]} />
+              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: unknown, name: unknown) => [name === 'ShareExUSD' ? `${(val * 100).toFixed(2)}%` : `$${Number(val).toFixed(2)}`, name]} />
               <ReferenceLine yAxisId="right" y={stats.mean_share ?? 0.15} stroke="#64748b" strokeDasharray="3 3" label={{ value: 'Średnia', fill: '#64748b', position: 'insideTopRight' }} />
               <Line yAxisId="left" type="monotone" dataKey="PriceUSD" stroke="#3b82f6" dot={false} strokeWidth={2} name="Cena USD" />
               <Line yAxisId="right" type="monotone" dataKey="ShareExUSD" stroke="#38bdf8" dot={false} strokeWidth={1.5} name="ShareExUSD" opacity={0.85} />

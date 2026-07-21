@@ -1,7 +1,7 @@
 fastapi>=0.100.0
 uvicorn[standard]>=0.23.0
-google-cloud-bigquery>=3.11.0
-pandas>=2.0.0
+google-cloud-bigquery==3.17.2
+pandas==2.2.2
 db-dtypes>=1.1.1
 pydantic>=2.0.0
 cachetools==5.3.3

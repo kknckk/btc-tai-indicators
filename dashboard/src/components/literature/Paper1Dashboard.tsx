@@ -37,7 +37,7 @@ export default function Paper1Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {regressions.map((reg: any) => {
+              {regressions.map((reg: unknown) => {
                 const isSigPositive = reg.significant && reg.coef > 0;
                 const isSigNegative = reg.significant && reg.coef < 0;
                 return (
@@ -82,7 +82,7 @@ export default function Paper1Dashboard() {
                 contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }}
                 itemStyle={{ color: '#38bdf8' }}
               />
-              {h_t_series.filter((d: any) => d.is_high_vol).map((d: any, idx: number) => (
+              {h_t_series.filter((d: unknown) => d.is_high_vol).map((d: unknown, idx: number) => (
                 <ReferenceArea key={idx} yAxisId="left" x1={d.time} x2={d.time} fill="#ef4444" fillOpacity={0.1} />
               ))}
               <Line yAxisId="left" type="monotone" dataKey="PriceUSD" stroke="#3b82f6" dot={false} strokeWidth={2} name="Cena USD" />
@@ -111,7 +111,7 @@ export default function Paper1Dashboard() {
             {Object.entries(correlation_heatmap).map(([row, cols]: [string, any]) => (
               <div key={row} className="flex h-10 items-center">
                 <div className="w-32 text-right pr-4 text-xs font-bold text-slate-400 truncate" title={row}>{row}</div>
-                {Object.values(cols).map((val: any, idx: number) => {
+                {Object.values(cols).map((val: unknown, idx: number) => {
                   const r = val > 0 ? Math.floor(255 * val) : 0;
                   const b = val < 0 ? Math.floor(255 * Math.abs(val)) : 0;
                   const alpha = Math.abs(val);

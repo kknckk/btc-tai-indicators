@@ -6,7 +6,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend, BarChart, Bar, Cell
 } from 'recharts';
-import { Cpu, Zap, Layers, Activity, Award } from 'lucide-react';
+import { Cpu, Activity, Award } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -76,9 +76,9 @@ export default function Paper6Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                 <XAxis type="number" stroke="#64748b" tickFormatter={(v) => v.toExponential(2)} />
                 <YAxis type="category" dataKey="model" stroke="#cbd5e1" tick={{ fontSize: 12, fill: '#e2e8f0' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(v: any) => [Number(v).toExponential(4), 'MSE']} />
+                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(v: unknown) => [Number(v).toExponential(4), 'MSE']} />
                 <Bar dataKey="mse" radius={[0, 6, 6, 0]}>
-                  {mseData.map((entry: any, idx: number) => (
+                  {mseData.map((entry: unknown, idx: number) => (
                     <Cell key={`cell-${idx}`} fill={entry.color} />
                   ))}
                 </Bar>
@@ -101,7 +101,7 @@ export default function Paper6Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('T')[0]} />
               <YAxis stroke="#94a3b8" tickFormatter={(val) => val.toFixed(3)} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: any) => [Number(val).toFixed(5), '']} />
+              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: unknown) => [Number(val).toFixed(5), '']} />
               <Legend verticalAlign="top" height={36} wrapperStyle={{ paddingBottom: '10px' }} />
               <Line type="monotone" dataKey="Actual_rv" stroke="#e2e8f0" strokeWidth={2.5} dot={false} name="Zmienność Rzeczywista (Actual RV)" />
               <Line type="monotone" dataKey="Pred_Transformer" stroke="#38bdf8" strokeWidth={2} dot={false} name="Prognoza Transformer" />

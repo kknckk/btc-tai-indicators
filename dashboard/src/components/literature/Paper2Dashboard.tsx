@@ -88,7 +88,7 @@ export default function Paper2Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {regressions.map((reg: any, idx: number) => {
+              {regressions.map((reg: unknown, idx: number) => {
                 const isSig = reg.p_value < 0.05;
                 return (
                   <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/20">

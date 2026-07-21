@@ -29,7 +29,7 @@ export default function PaperPage() {
       <div className="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
         <AlertCircle className="w-12 h-12 text-slate-500 mx-auto mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">Brak artykułu</h2>
-        <p className="text-slate-400">Artykuł o ID "{idStr}" nie istnieje w bazie lub wdrożenie jest w toku.</p>
+        <p className="text-slate-400">Artykuł o ID &quot;{idStr}&quot; nie istnieje w bazie lub wdrożenie jest w toku.</p>
       </div>
     );
   }
@@ -87,12 +87,12 @@ export default function PaperPage() {
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
             components={{
-              h3: ({node, ...props}) => <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-2 flex items-center gap-2" {...props} />,
-              p: ({node, ...props}) => <p className="text-slate-300 mb-4 leading-relaxed" {...props} />,
-              ol: ({node, ...props}) => <ol className="list-decimal list-inside space-y-4 text-slate-300 ml-2" {...props} />,
-              li: ({node, ...props}) => <li className="pl-2 marker:text-emerald-500 marker:font-bold" {...props} />,
-              strong: ({node, ...props}) => <strong className="text-emerald-400 font-semibold" {...props} />,
-              code: ({node, inline, ...props}: any) => 
+              h3: ({...props}: any) => <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-2 flex items-center gap-2" {...props} />,
+              p: ({...props}: any) => <p className="text-slate-300 mb-4 leading-relaxed" {...props} />,
+              ol: ({...props}: any) => <ol className="list-decimal list-inside space-y-4 text-slate-300 ml-2" {...props} />,
+              li: ({...props}: any) => <li className="pl-2 marker:text-emerald-500 marker:font-bold" {...props} />,
+              strong: ({...props}: any) => <strong className="text-emerald-400 font-semibold" {...props} />,
+              code: ({inline, ...props}: any) => 
                 inline 
                   ? <code className="bg-slate-800 text-blue-300 px-1.5 py-0.5 rounded font-mono text-sm" {...props} />
                   : <code className="block bg-slate-950 p-4 rounded-xl text-sm overflow-x-auto border border-slate-800 text-slate-300 my-4" {...props} />

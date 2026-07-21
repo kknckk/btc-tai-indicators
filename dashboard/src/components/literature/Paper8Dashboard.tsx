@@ -69,7 +69,7 @@ export default function Paper8Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {regression.map((reg: any, idx: number) => {
+                  {regression.map((reg: unknown, idx: number) => {
                     const isSig = reg.p_value < 0.05;
                     return (
                       <tr key={idx} className="border-b border-slate-800/50 text-sm">

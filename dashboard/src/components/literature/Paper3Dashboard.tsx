@@ -6,7 +6,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine, BarChart, Bar, Cell
 } from 'recharts';
-import { Activity, TrendingUp, CheckCircle, AlertCircle, Layers } from 'lucide-react';
+import { Activity, TrendingUp, CheckCircle, Layers } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -118,7 +118,7 @@ export default function Paper3Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {short_term_ardl.map((item: any, idx: number) => {
+                  {short_term_ardl.map((item: unknown, idx: number) => {
                     const isSig = item.p_value < 0.05;
                     return (
                       <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/20 text-sm">
@@ -154,7 +154,7 @@ export default function Paper3Dashboard() {
                 <YAxis type="category" dataKey="name" stroke="#cbd5e1" tick={{ fontSize: 11 }} />
                 <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} />
                 <Bar dataKey="multiplier" name="Mnożnik długoterminowy" radius={[0, 4, 4, 0]}>
-                  {ltmData.map((entry: any, idx: number) => (
+                  {ltmData.map((entry: unknown, idx: number) => (
                     <Cell key={`cell-${idx}`} fill={entry.multiplier > 0 ? '#38bdf8' : '#f43f5e'} />
                   ))}
                 </Bar>

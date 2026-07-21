@@ -6,7 +6,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend
 } from 'recharts';
-import { BrainCircuit, CheckCircle, AlertCircle, Layers, Activity } from 'lucide-react';
+import { BrainCircuit, Layers, Activity } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
@@ -67,7 +67,7 @@ export default function Paper5Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('T')[0]} />
               <YAxis stroke="#94a3b8" domain={['auto', 'auto']} tickFormatter={(val) => `$${(val/1000).toFixed(1)}k`} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: any) => [`$${Number(val).toFixed(2)}`, '']} />
+              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: unknown) => [`$${Number(val).toFixed(2)}`, '']} />
               <Legend verticalAlign="top" height={36} wrapperStyle={{ paddingBottom: '10px' }} />
               <Line type="monotone" dataKey="actual" stroke="#38bdf8" strokeWidth={2.5} dot={false} name="Faktyczna Cena (Actual USD)" />
               <Line type="monotone" dataKey="predicted" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Prognoza Prophet (Predicted yhat)" />

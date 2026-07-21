@@ -80,9 +80,9 @@ export default function Paper10Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                   <XAxis dataKey="pc" stroke="#64748b" />
                   <YAxis stroke="#94a3b8" tickFormatter={(v) => `${v.toFixed(0)}%`} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(v: any) => [`${Number(v).toFixed(2)}%`, 'Wariancja wyjaśniona']} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(v: unknown) => [`${Number(v).toFixed(2)}%`, 'Wariancja wyjaśniona']} />
                   <Bar dataKey="variance" radius={[6, 6, 0, 0]}>
-                    {evData.map((entry: any, idx: number) => (
+                    {evData.map((entry: unknown, idx: number) => (
                       <Cell key={`cell-${idx}`} fill={idx === 0 ? '#38bdf8' : '#818cf8'} />
                     ))}
                   </Bar>
@@ -107,7 +107,7 @@ export default function Paper10Dashboard() {
               <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('T')[0].split('-')[0]} />
               <YAxis yAxisId="left" stroke="#3b82f6" domain={['auto', 'auto']} tickFormatter={(val) => val.toFixed(2)} />
               <YAxis yAxisId="right" orientation="right" stroke="#ef4444" domain={[0, 1]} tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: any, name: any) => [name === 'Prawdopodobieństwo EWI' ? `${(Number(val)*100).toFixed(1)}%` : Number(val).toFixed(4), name]} />
+              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} formatter={(val: unknown, name: unknown) => [name === 'Prawdopodobieństwo EWI' ? `${(Number(val)*100).toFixed(1)}%` : Number(val).toFixed(4), name]} />
               <ReferenceLine yAxisId="right" y={0.5} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Próg alarmowy 50%', fill: '#ef4444', position: 'insideTopRight' }} />
               <Line yAxisId="left" type="monotone" dataKey="rv_30d" stroke="#38bdf8" dot={false} strokeWidth={2} name="Zmienność 30d (rv_30d)" />
               <Line yAxisId="right" type="monotone" dataKey="ewi_prob" stroke="#ef4444" dot={false} strokeWidth={2} name="Prawdopodobieństwo EWI" opacity={0.9} />
@@ -130,8 +130,8 @@ export default function Paper10Dashboard() {
               <XAxis type="number" dataKey="PC1" name="PC1" stroke="#64748b" tickFormatter={(v) => v.toFixed(1)} />
               <YAxis type="number" dataKey="PC2" name="PC2" stroke="#64748b" tickFormatter={(v) => v.toFixed(1)} />
               <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
-              <Scatter name="Normalna Zmienność" data={scatter_data.filter((d: any) => !d.is_high_vol)} fill="#38bdf8" fillOpacity={0.5} />
-              <Scatter name="Wysoka Zmienność (Top 10%)" data={scatter_data.filter((d: any) => d.is_high_vol)} fill="#ef4444" fillOpacity={0.85} />
+              <Scatter name="Normalna Zmienność" data={scatter_data.filter((d: unknown) => !d.is_high_vol)} fill="#38bdf8" fillOpacity={0.5} />
+              <Scatter name="Wysoka Zmienność (Top 10%)" data={scatter_data.filter((d: unknown) => d.is_high_vol)} fill="#ef4444" fillOpacity={0.85} />
             </ScatterChart>
           </ResponsiveContainer>
         </div>
