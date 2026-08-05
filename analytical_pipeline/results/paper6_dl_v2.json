@@ -1,0 +1,102 @@
+{
+  "paper6_dl_v2": {
+    "sequence_lengths": {
+      "14": {
+        "LSTM": {
+          "RMSE": 0.1326738396450132,
+          "MAE": 0.11008715826571654,
+          "MAPE": 26.4453641867189
+        },
+        "Transformer": {
+          "RMSE": 0.2160436461141769,
+          "MAE": 0.18267160408270897,
+          "MAPE": 50.18049068335904
+        },
+        "epochs_used": {
+          "LSTM": 12,
+          "Transformer": 13
+        }
+      },
+      "30": {
+        "LSTM": {
+          "RMSE": 0.16031967382045129,
+          "MAE": 0.13391843638984458,
+          "MAPE": 36.41678414605274
+        },
+        "Transformer": {
+          "RMSE": 0.10220741062347637,
+          "MAE": 0.08418861180446403,
+          "MAPE": 21.83546848954388
+        },
+        "epochs_used": {
+          "LSTM": 22,
+          "Transformer": 27
+        }
+      },
+      "60": {
+        "LSTM": {
+          "RMSE": 0.1432538434175036,
+          "MAE": 0.11373968896460997,
+          "MAPE": 25.944650372042332
+        },
+        "Transformer": {
+          "RMSE": 0.1678052731595926,
+          "MAE": 0.13561442225386092,
+          "MAPE": 36.26157310992303
+        },
+        "epochs_used": {
+          "LSTM": 33,
+          "Transformer": 33
+        }
+      }
+    },
+    "main_sequence_length": 30,
+    "baselines": {
+      "naive": {
+        "RMSE": 0.02347093533126224,
+        "MAE": 0.012131540968117383,
+        "MAPE": 2.8849204935388943
+      },
+      "GARCH_1_1": {
+        "RMSE": 0.1865836614164865,
+        "MAE": 0.1611946750061014,
+        "MAPE": 41.531366723938575
+      },
+      "HAR_RV": {
+        "RMSE": 0.02399432788284057,
+        "MAE": 0.014755878698215465,
+        "MAPE": 3.5744657557505555
+      }
+    },
+    "diebold_mariano": {
+      "Transformer_vs_LSTM": {
+        "dm_stat": -19.700587590711102,
+        "p_value": 0.0
+      },
+      "Transformer_vs_HAR_RV": {
+        "dm_stat": 25.57089978565041,
+        "p_value": 0.0
+      },
+      "LSTM_vs_HAR_RV": {
+        "dm_stat": 29.72341766522938,
+        "p_value": 0.0
+      },
+      "Transformer_vs_GARCH": {
+        "dm_stat": -18.26741983395488,
+        "p_value": 0.0
+      }
+    },
+    "training_config": {
+      "max_epochs": 80,
+      "patience": 10,
+      "d_model": 64,
+      "seeds": [
+        42,
+        101,
+        2024
+      ]
+    },
+    "best_model": "naive",
+    "notes": "Automated run with error handling and early stopping."
+  }
+}

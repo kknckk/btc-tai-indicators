@@ -9,18 +9,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from arch import arch_model
 from scipy import stats
+import traceback
 import sys
 sys.path.append(os.path.dirname(__file__))
 from utils import load_merged_data
 
-
-# Set seeds for reproducibility
 def set_seed(seed=42):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
 
-# 1. Model Definitions
 class LSTMForecaster(nn.Module):
     def __init__(self, input_dim, hidden_dim=64, num_layers=2, dropout=0.2):
         super().__init__()
@@ -65,7 +63,6 @@ class TransformerForecaster(nn.Module):
         out = self.transformer(x)
         return self.fc(out[:, -1, :]).squeeze(-1)
 
-# Diebold-Mariano Test Function
 def diebold_mariano_test(y_true, y_pred1, y_pred2, h=1, criterion='MSE'):
     e1 = y_true - y_pred1
     e2 = y_true - y_pred2
@@ -92,15 +89,13 @@ def calc_metrics(y_true, y_pred):
     rmse = float(np.sqrt(mse))
     mae = float(np.mean(np.abs(y_true - y_pred)))
     mape = float(np.mean(np.abs((y_true - y_pred) / (y_true + 1e-8))) * 100)
-    return {"MSE": mse, "RMSE": rmse, "MAE": mae, "MAPE": mape}
+    return {"RMSE": rmse, "MAE": mae, "MAPE": mape}
 
 def run_paper6_dl_v2():
-    # 1. Load Data
     results_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "results"))
     os.makedirs(results_dir, exist_ok=True)
     csv_path = os.path.join(results_dir, "derived_metrics.csv")
-
-
+    out_file = os.path.join(results_dir, "paper6_dl_v2.json")
     
     if os.path.exists(csv_path):
         df = pd.read_csv(csv_path)
@@ -124,27 +119,22 @@ def run_paper6_dl_v2():
     r_raw = df_clean['r_t'].values
     n = len(df_clean)
     
-    # 2. Time-Series Split
-    # Test set: last 20%
-    # Validation set: 15% of remaining 80%
     test_size = int(n * 0.20)
     tv_size = n - test_size
     val_size = int(tv_size * 0.15)
     train_size = tv_size - val_size
     
-    # Fit StandardScaler ONLY on train set
     scaler = StandardScaler()
     scaler.fit(X_raw[:train_size])
     X_scaled = scaler.transform(X_raw)
     
-    # 3. Baseline Models (Evaluated on main sequence test window)
     y_test_full = y_raw[tv_size:]
     
     # Baseline A: Naive
     y_pred_naive = y_raw[tv_size-1:-1]
     metrics_naive = calc_metrics(y_test_full, y_pred_naive)
     
-    # Baseline B: HAR-RV (RV_d, RV_w, RV_m)
+    # Baseline B: HAR-RV
     def build_har_features(rv_s):
         X_har, y_har = [], []
         for i in range(22, len(rv_s)):
@@ -164,7 +154,6 @@ def run_paper6_dl_v2():
     y_pred_har = har_model.predict(X_har[har_val_end:])
     metrics_har = calc_metrics(y_har_test, y_pred_har)
 
-    
     # Baseline C: GARCH(1,1)
     am = arch_model(r_raw[:train_size] * 100, p=1, q=1, vol='Garch')
     res_garch = am.fit(disp='off')
@@ -180,10 +169,11 @@ def run_paper6_dl_v2():
     y_pred_garch = np.array(garch_preds)
     metrics_garch = calc_metrics(y_test_full, y_pred_garch)
     
-    # 4. Training Helper Function for PyTorch Deep Learning Models
+    MAX_EPOCHS = 80
+    PATIENCE = 10
+    
     def train_single_model(model_class, model_kwargs, X_tr, y_tr, X_v, y_v, X_te, seed=42):
         set_seed(seed)
-        
         train_ds = TensorDataset(torch.tensor(X_tr, dtype=torch.float32), torch.tensor(y_tr, dtype=torch.float32))
         val_ds = TensorDataset(torch.tensor(X_v, dtype=torch.float32), torch.tensor(y_v, dtype=torch.float32))
         
@@ -193,13 +183,14 @@ def run_paper6_dl_v2():
         model = model_class(**model_kwargs)
         criterion = nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
         
         best_val_loss = float('inf')
         patience_cnt = 0
         best_state = None
+        epochs_used = 0
         
-        for epoch in range(3):
+        for epoch in range(MAX_EPOCHS):
             model.train()
             for bx, by in train_loader:
                 optimizer.zero_grad()
@@ -223,136 +214,158 @@ def run_paper6_dl_v2():
                 best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
             else:
                 patience_cnt += 1
-                if patience_cnt >= 1:
+                if patience_cnt >= PATIENCE:
+                    epochs_used = epoch + 1
                     break
-
-
-
-
-
-
-
+            epochs_used = epoch + 1
                     
-        model.load_state_dict(best_state)
+        if best_state is not None:
+            model.load_state_dict(best_state)
         model.eval()
         with torch.no_grad():
             test_preds = model(torch.tensor(X_te, dtype=torch.float32)).numpy()
             
-        return test_preds, model
+        return test_preds, model, epochs_used
 
-    # 5. Evaluate Sequence Lengths (14, 30, 60 days) & Model Seeds
     seeds = [42, 101, 2024]
     seq_length_results = {}
     
-    best_transformer_weights = None
     y_test_30d = None
     lstm_preds_30d = None
     trans_preds_30d = None
     
     for L in [14, 30, 60]:
-        Xs, ys = [], []
-        for i in range(L, len(X_scaled)):
-            Xs.append(X_scaled[i-L:i])
-            ys.append(y_raw[i])
-        Xs, ys = np.array(Xs), np.array(ys)
-        
-        tr_end = train_size - L
-        vl_end = tv_size - L
-        
-        X_tr_L, y_tr_L = Xs[:tr_end], ys[:tr_end]
-        X_v_L, y_v_L = Xs[tr_end:vl_end], ys[tr_end:vl_end]
-        X_te_L, y_te_L = Xs[vl_end:], ys[vl_end:]
-        
-        lstm_preds = []
-        for s in seeds:
-            p, _ = train_single_model(
-                LSTMForecaster, {'input_dim': X_tr_L.shape[2], 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.2},
-                X_tr_L, y_tr_L, X_v_L, y_v_L, X_te_L, seed=s
-            )
-            lstm_preds.append(p)
-        lstm_avg = np.mean(lstm_preds, axis=0)
-        
-        trans_preds = []
-        last_trans_model = None
-        for s in seeds:
-            p, tr_m = train_single_model(
-                TransformerForecaster, {'input_dim': X_tr_L.shape[2], 'd_model': 64, 'nhead': 4, 'num_layers': 2, 'dim_feedforward': 128, 'dropout': 0.1},
-                X_tr_L, y_tr_L, X_v_L, y_v_L, X_te_L, seed=s
-            )
-            trans_preds.append(p)
-            last_trans_model = tr_m
+        try:
+            Xs, ys = [], []
+            for i in range(L, len(X_scaled)):
+                Xs.append(X_scaled[i-L:i])
+                ys.append(y_raw[i])
+            Xs, ys = np.array(Xs), np.array(ys)
             
-        trans_avg = np.mean(trans_preds, axis=0)
-        
-        m_lstm = calc_metrics(y_te_L, lstm_avg)
-        m_trans = calc_metrics(y_te_L, trans_avg)
-        _, dm_p = diebold_mariano_test(y_te_L, trans_avg, lstm_avg)
-        
-        seq_length_results[str(L)] = {
-            "LSTM": m_lstm,
-            "Transformer": m_trans,
-            "DM_vs_LSTM_pval": float(dm_p)
-        }
-        
-        if L == 30:
-            y_test_30d = y_te_L
-            lstm_preds_30d = lstm_avg
-            trans_preds_30d = trans_avg
-            weights_path = os.path.join(results_dir, "best_transformer_weights.pt")
-            torch.save(last_trans_model.state_dict(), weights_path)
+            tr_end = train_size - L
+            vl_end = tv_size - L
+            
+            X_tr_L, y_tr_L = Xs[:tr_end], ys[:tr_end]
+            X_v_L, y_v_L = Xs[tr_end:vl_end], ys[tr_end:vl_end]
+            X_te_L, y_te_L = Xs[vl_end:], ys[vl_end:]
+            
+            lstm_preds = []
+            lstm_eps = []
+            for s in seeds:
+                p, _, ep = train_single_model(
+                    LSTMForecaster, {'input_dim': X_tr_L.shape[2], 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.2},
+                    X_tr_L, y_tr_L, X_v_L, y_v_L, X_te_L, seed=s
+                )
+                lstm_preds.append(p)
+                lstm_eps.append(ep)
+            lstm_avg = np.mean(lstm_preds, axis=0)
+            
+            trans_preds = []
+            trans_eps = []
+            last_trans_model = None
+            for s in seeds:
+                p, tr_m, ep = train_single_model(
+                    TransformerForecaster, {'input_dim': X_tr_L.shape[2], 'd_model': 64, 'nhead': 4, 'num_layers': 2, 'dim_feedforward': 128, 'dropout': 0.1},
+                    X_tr_L, y_tr_L, X_v_L, y_v_L, X_te_L, seed=s
+                )
+                trans_preds.append(p)
+                trans_eps.append(ep)
+                last_trans_model = tr_m
+                
+            trans_avg = np.mean(trans_preds, axis=0)
+            
+            m_lstm = calc_metrics(y_te_L, lstm_avg)
+            m_trans = calc_metrics(y_te_L, trans_avg)
+            
+            seq_length_results[str(L)] = {
+                "LSTM": m_lstm,
+                "Transformer": m_trans,
+                "epochs_used": {"LSTM": int(np.mean(lstm_eps)), "Transformer": int(np.mean(trans_eps))}
+            }
+            
+            if L == 30:
+                y_test_30d = y_te_L
+                lstm_preds_30d = lstm_avg
+                trans_preds_30d = trans_avg
+                weights_path = os.path.join(results_dir, "best_transformer_weights.pt")
+                if last_trans_model:
+                    torch.save(last_trans_model.state_dict(), weights_path)
+        except Exception as e:
+            print(f"Error training sequence length {L}: {e}")
+            traceback.print_exc()
+            seq_length_results[str(L)] = {"error": str(e)}
 
-    # 6. Diebold-Mariano Tests for Main Models (L=30)
-    m_lstm_30 = calc_metrics(y_test_30d, lstm_preds_30d)
-    m_trans_30 = calc_metrics(y_test_30d, trans_preds_30d)
-    
+    # Fallbacks in case 30 failed
+    if y_test_30d is None:
+        y_test_30d = y_test_full
+        lstm_preds_30d = np.zeros_like(y_test_full)
+        trans_preds_30d = np.zeros_like(y_test_full)
+
     dm_stat_tl, dm_p_tl = diebold_mariano_test(y_test_30d, trans_preds_30d, lstm_preds_30d)
-    dm_stat_th, dm_p_th = diebold_mariano_test(y_har_test, trans_preds_30d, y_pred_har)
-    dm_stat_lh, dm_p_lh = diebold_mariano_test(y_har_test, lstm_preds_30d, y_pred_har)
     
-    _, dm_p_naive_lstm = diebold_mariano_test(y_test_30d, y_pred_naive, lstm_preds_30d)
-    _, dm_p_har_lstm = diebold_mariano_test(y_har_test, y_pred_har, lstm_preds_30d)
-    _, dm_p_garch_lstm = diebold_mariano_test(y_test_30d, y_pred_garch, lstm_preds_30d)
-    
-    models_30d = {
-        "Naive": {**metrics_naive, "DM_pval_vs_LSTM": float(dm_p_naive_lstm)},
-        "HAR_RV": {**metrics_har, "DM_pval_vs_LSTM": float(dm_p_har_lstm)},
-        "GARCH_1_1": {**metrics_garch, "DM_pval_vs_LSTM": float(dm_p_garch_lstm)},
-        "LSTM": {**m_lstm_30, "DM_pval_vs_LSTM": 1.000},
-        "Transformer": {**m_trans_30, "DM_pval_vs_LSTM": float(dm_p_tl)}
-    }
+    # Need to match lengths for HAR/GARCH tests
+    min_len = min(len(y_test_30d), len(y_har_test), len(y_pred_garch))
+    y_true_dm = y_test_30d[-min_len:]
+    pred_trans = trans_preds_30d[-min_len:]
+    pred_lstm = lstm_preds_30d[-min_len:]
+    pred_har = y_pred_har[-min_len:]
+    pred_garch = y_pred_garch[-min_len:]
+
+    dm_stat_th, dm_p_th = diebold_mariano_test(y_true_dm, pred_trans, pred_har)
+    dm_stat_lh, dm_p_lh = diebold_mariano_test(y_true_dm, pred_lstm, pred_har)
+    dm_stat_tg, dm_p_tg = diebold_mariano_test(y_true_dm, pred_trans, pred_garch)
     
     dm_test_summary = {
         "Transformer_vs_LSTM": {"dm_stat": float(dm_stat_tl), "p_value": float(dm_p_tl)},
         "Transformer_vs_HAR_RV": {"dm_stat": float(dm_stat_th), "p_value": float(dm_p_th)},
-        "LSTM_vs_HAR_RV": {"dm_stat": float(dm_stat_lh), "p_value": float(dm_p_lh)}
+        "LSTM_vs_HAR_RV": {"dm_stat": float(dm_stat_lh), "p_value": float(dm_p_lh)},
+        "Transformer_vs_GARCH": {"dm_stat": float(dm_stat_tg), "p_value": float(dm_p_tg)}
     }
     
-    # 7. Output JSON Structure
+    baselines = {
+        "naive": metrics_naive,
+        "GARCH_1_1": metrics_garch,
+        "HAR_RV": metrics_har
+    }
+    
+    # find best model based on RMSE of seq_len 30 vs baselines
+    best_rmse = float('inf')
+    best_model = "Unknown"
+    
+    if "30" in seq_length_results and "Transformer" in seq_length_results["30"]:
+        t_rmse = seq_length_results["30"]["Transformer"]["RMSE"]
+        if t_rmse < best_rmse:
+            best_rmse = t_rmse
+            best_model = "Transformer"
+    
+    if "30" in seq_length_results and "LSTM" in seq_length_results["30"]:
+        l_rmse = seq_length_results["30"]["LSTM"]["RMSE"]
+        if l_rmse < best_rmse:
+            best_rmse = l_rmse
+            best_model = "LSTM"
+
+    for b_name, b_metrics in baselines.items():
+        if b_metrics["RMSE"] < best_rmse:
+            best_rmse = b_metrics["RMSE"]
+            best_model = b_name
+
     output_json = {
         "paper6_dl_v2": {
             "sequence_lengths": seq_length_results,
-            "models_30d": models_30d,
-            "dm_test": dm_test_summary,
-            "features_used": active_feats,
-            "target": target_col,
-            "dataset_info": {
-                "total_rows": n,
-                "train_rows": train_size,
-                "val_rows": val_size,
-                "test_rows": test_size
+            "main_sequence_length": 30,
+            "baselines": baselines,
+            "diebold_mariano": dm_test_summary,
+            "training_config": {
+                "max_epochs": MAX_EPOCHS,
+                "patience": PATIENCE,
+                "d_model": 64,
+                "seeds": seeds
             },
-            "training_params": {
-                "seeds": seeds,
-                "max_epochs": 150,
-                "patience": 15,
-                "batch_size": 64,
-                "learning_rate": 0.001
-            },
-            "weights_saved": os.path.join(results_dir, "best_transformer_weights.pt")
+            "best_model": best_model,
+            "notes": "Automated run with error handling and early stopping."
         }
     }
     
-    out_file = os.path.join(results_dir, "paper6_dl_v2.json")
     print(f"Writing JSON output to: {out_file}")
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(output_json, f, indent=2)
@@ -360,18 +373,47 @@ def run_paper6_dl_v2():
         os.fsync(f.fileno())
     print(f"JSON successfully written. File exists: {os.path.exists(out_file)}")
 
-        
     # 8. Console Table Output
     print("\n" + "=" * 90)
     print("  PAPER 6 V2 DEEP LEARNING VOLATILITY FORECASTING RESULTS (Rafi et al., 2024)")
     print("=" * 90)
-    header = f"{'Model':<18} | {'RMSE':<8} | {'MAE':<8} | {'MAPE':<8} | {'DM p-value vs LSTM':<20}"
+    header = f"{'Model':<18} | {'SeqLen':<6} | {'RMSE':<8} | {'MAE':<8} | {'MAPE':<8} | {'DM p-value vs HAR-RV':<20}"
     print(header)
     print("-" * 90)
     
-    for m_name, m in models_30d.items():
-        row_str = f"{m_name:<18} | {m['RMSE']:8.4f} | {m['MAE']:8.4f} | {m['MAPE']:7.2f}% | {m['DM_pval_vs_LSTM']:<20.4f}"
+    # Baselines
+    for b_name, b_metrics in baselines.items():
+        if b_name == "HAR_RV":
+            dm_p = 1.0
+        elif b_name == "naive":
+            _, dm_p = diebold_mariano_test(y_true_dm, y_pred_naive[-min_len:], pred_har)
+        elif b_name == "GARCH_1_1":
+            _, dm_p = diebold_mariano_test(y_true_dm, pred_garch, pred_har)
+        else:
+            dm_p = 0.0
+            
+        row_str = f"{b_name:<18} | {'-':<6} | {b_metrics['RMSE']:8.4f} | {b_metrics['MAE']:8.4f} | {b_metrics['MAPE']:7.2f}% | {dm_p:<20.4f}"
         print(row_str)
+
+    # DL Models
+    for L, res in seq_length_results.items():
+        if "error" in res:
+            continue
+        
+        for m_name in ["LSTM", "Transformer"]:
+            if m_name in res:
+                m_metrics = res[m_name]
+                if L == "30":
+                    if m_name == "LSTM":
+                        dm_p = dm_p_lh
+                    else:
+                        dm_p = dm_p_th
+                else:
+                    dm_p = float('nan') 
+                    
+                row_str = f"{m_name:<18} | {L:<6} | {m_metrics['RMSE']:8.4f} | {m_metrics['MAE']:8.4f} | {m_metrics['MAPE']:7.2f}% | {dm_p:<20.4f}"
+                print(row_str)
+
     print("=" * 90)
     print(f"Results saved to: {out_file}\n")
 
