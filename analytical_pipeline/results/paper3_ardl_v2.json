@@ -1,0 +1,125 @@
+{
+  "paper3_ardl_v2": {
+    "sample_period": "2012-01-01 to 2026-05-24",
+    "sample_frequency": "Weekly (W-SUN)",
+    "adf_kpss": {
+      "Y": {
+        "adf_level_p": 0.1758781534564382,
+        "adf_diff_p": 2.1839107462214243e-25,
+        "kpss_level_p": 0.01,
+        "kpss_diff_p": 0.1,
+        "integration_order": "I(1)"
+      },
+      "NUPL": {
+        "adf_level_p": 0.019936967212145024,
+        "adf_diff_p": 0.0,
+        "kpss_level_p": 0.1,
+        "kpss_diff_p": 0.1,
+        "integration_order": "I(0)"
+      },
+      "PM_proxy": {
+        "adf_level_p": 3.7868635795576304e-06,
+        "adf_diff_p": 6.486001537114512e-20,
+        "kpss_level_p": 0.05890223676203725,
+        "kpss_diff_p": 0.1,
+        "integration_order": "I(0)"
+      },
+      "log_AdrActCnt": {
+        "adf_level_p": 0.0001290690004056141,
+        "adf_diff_p": 3.2848876947257464e-30,
+        "kpss_level_p": 0.01,
+        "kpss_diff_p": 0.01,
+        "integration_order": "I(1)"
+      }
+    },
+    "selected_lags": {
+      "p": 3,
+      "q_NUPL": 1,
+      "q_PM_proxy": 0,
+      "q_log_AdrActCnt": 3,
+      "criterion": "AIC",
+      "aic": -1809.697911427912
+    },
+    "bounds_test": {
+      "F_stat": 12.52224731581901,
+      "I0_bound_5pct": 3.23,
+      "I1_bound_5pct": 4.35,
+      "I0_bound_1pct": 4.29,
+      "I1_bound_1pct": 5.61,
+      "decision": "COINTEGRATION CONFIRMED (F > I(1) bound at 5%)",
+      "cointegration": true
+    },
+    "long_run_multipliers": {
+      "NUPL": {
+        "coef": 13.691809846983292,
+        "p_value": 2.444821318360782e-09,
+        "sign": "+"
+      },
+      "PM_proxy": {
+        "coef": 7.451413927802924,
+        "p_value": 0.40063153832367704,
+        "sign": "+"
+      },
+      "log_AdrActCnt": {
+        "coef": 1.281883000430795,
+        "p_value": 0.23258985750271602,
+        "sign": "+"
+      }
+    },
+    "ecm_results": {
+      "ect_coefficient": -0.005652229176137719,
+      "ect_p_value": 3.096180324440783e-12,
+      "speed_of_adjustment_pct": 0.5652229176137719,
+      "r_squared": 0.5572054687533181,
+      "adj_r_squared": 0.5530225244635384
+    },
+    "toda_yamamoto": {
+      "NUPL": {
+        "stat": 1.2700460089966534,
+        "p_value": 0.2794364167266651,
+        "conclusion": "DOES NOT CAUSE Y"
+      },
+      "PM_proxy": {
+        "stat": 0.2837553130352588,
+        "p_value": 0.88864963923121,
+        "conclusion": "DOES NOT CAUSE Y"
+      },
+      "log_AdrActCnt": {
+        "stat": 0.7814332068010428,
+        "p_value": 0.5371076507046286,
+        "conclusion": "DOES NOT CAUSE Y"
+      }
+    },
+    "diagnostics": {
+      "breusch_godfrey": {
+        "stat": 7.749521012101667,
+        "p_value": 0.10119665968166165,
+        "pass": true
+      },
+      "breusch_pagan": {
+        "stat": 167.46369882399745,
+        "p_value": 9.291031205528369e-31,
+        "pass": false
+      },
+      "jarque_bera": {
+        "stat": 2237.2725225586137,
+        "p_value": 0.0,
+        "pass": false
+      },
+      "cusum_stability": {
+        "stat": 0.637839972210191,
+        "p_value": 0.8105807105805594,
+        "stable": true
+      }
+    },
+    "short_run_coefficients": {
+      "ECT_lag1": -0.005652229176137719,
+      "dY_lag1": -0.2465499614320043,
+      "dY_lag2": 0.05386382718335719,
+      "dX1_lag0": 1.5837758475587342,
+      "dX3_lag0": 0.22969483489631382,
+      "dX3_lag1": 0.1272901794339431,
+      "dX3_lag2": 0.07397327020659317
+    }
+  }
+}

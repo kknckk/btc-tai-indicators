@@ -1,0 +1,373 @@
+{
+  "paper1_garch_v2": {
+    "garch_comparison": {
+      "Normal": {
+        "AIC": 31586.885434850265,
+        "BIC": 31613.53960320127,
+        "omega": 0.6354970258939697,
+        "alpha": 0.16621950838579258,
+        "beta": 0.8194743709265837,
+        "persistence": 0.9856938793123763,
+        "diagnostics": {
+          "ljung_box_p10": 1.1899024666350028e-09,
+          "ljung_box_p20": 2.0118215800590405e-11,
+          "arch_lm_p10": 0.8243389620459598,
+          "arch_lm_p20": 0.9542352156466407
+        }
+      },
+      "Student_t": {
+        "AIC": 29870.245349897297,
+        "BIC": 29903.563060336055,
+        "omega": 0.39362226048745297,
+        "alpha": 0.1585992452983644,
+        "beta": 0.8414007547017092,
+        "nu_degrees_freedom": 3.0777831319004316,
+        "persistence": 1.0000000000000735,
+        "diagnostics": {
+          "ljung_box_p10": 1.3212978272287405e-09,
+          "ljung_box_p20": 3.498324976870773e-11,
+          "arch_lm_p10": 0.7227964174254541,
+          "arch_lm_p20": 0.8905065291157038
+        }
+      }
+    },
+    "hac_regression_conditional_variance": {
+      "AdrActCnt_lag1": {
+        "coef": 2.617888339727762,
+        "HAC_se": 7.230856472775283,
+        "t_stat": 0.3620440192091086,
+        "p_value": 0.717319135963576,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7825299665057193,
+        "sig_bh": false
+      },
+      "AdrActCnt_lag7": {
+        "coef": -22.609073903837142,
+        "HAC_se": 9.848447748488294,
+        "t_stat": -2.295699229079787,
+        "p_value": 0.021693084566256,
+        "p_bonferroni": 0.26031701479507197,
+        "sig_bonferroni": false,
+        "p_bh": 0.260317014795072,
+        "sig_bh": false
+      },
+      "TxCntSec_lag1": {
+        "coef": -9.831811726241094,
+        "HAC_se": 11.88380262834667,
+        "t_stat": -0.8273287628312741,
+        "p_value": 0.4080507453608364,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      },
+      "TxCntSec_lag7": {
+        "coef": 6.326239279571798,
+        "HAC_se": 8.902888130873004,
+        "t_stat": 0.7105828116197452,
+        "p_value": 0.4773427974922395,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      },
+      "FeeTotUSD_lag1": {
+        "coef": 4.656291965637947,
+        "HAC_se": 5.650795068495512,
+        "t_stat": 0.8240065175249144,
+        "p_value": 0.40993585470438554,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      },
+      "FeeTotUSD_lag7": {
+        "coef": 3.8758953209465528,
+        "HAC_se": 6.294476912299935,
+        "t_stat": 0.615761305498274,
+        "p_value": 0.5380520691308226,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7174027588410968,
+        "sig_bh": false
+      },
+      "FeeMeanUSD_lag1": {
+        "coef": 0.43186459998401405,
+        "HAC_se": 9.192747525562746,
+        "t_stat": 0.04697883834872066,
+        "p_value": 0.9625300934546838,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.9625300934546838,
+        "sig_bh": false
+      },
+      "FeeMeanUSD_lag7": {
+        "coef": -7.566529301614556,
+        "HAC_se": 10.46865503028984,
+        "t_stat": -0.7227795050769826,
+        "p_value": 0.4698153607465777,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      },
+      "HashRate_lag1": {
+        "coef": 15.215323607845724,
+        "HAC_se": 21.073479056029203,
+        "t_stat": 0.7220128943774266,
+        "p_value": 0.4702865498990306,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      },
+      "HashRate_lag7": {
+        "coef": -20.95003824341975,
+        "HAC_se": 22.078689005733207,
+        "t_stat": -0.9488805353424573,
+        "p_value": 0.34268137534234466,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      },
+      "RevUSD_lag1": {
+        "coef": -8.987743329400631,
+        "HAC_se": 22.77193414820051,
+        "t_stat": -0.39468510978944943,
+        "p_value": 0.6930752931638647,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7825299665057193,
+        "sig_bh": false
+      },
+      "RevUSD_lag7": {
+        "coef": 19.450782285617606,
+        "HAC_se": 23.313191089222656,
+        "t_stat": 0.8343251771572968,
+        "p_value": 0.4040977679601895,
+        "p_bonferroni": 1.0,
+        "sig_bonferroni": false,
+        "p_bh": 0.7160141962383593,
+        "sig_bh": false
+      }
+    },
+    "garch_x_results": {
+      "exogenous_variable": "log1p(AdrActCnt)_lag1",
+      "AIC": 29863.073982612426,
+      "BIC": 29896.390829120297,
+      "omega": 0.39451823278016007,
+      "alpha": 0.15872553988979682,
+      "beta": 0.8412744601101634,
+      "nu_degrees_freedom": 3.076802948111436
+    },
+    "subperiod_robustness": {
+      "2013-2017": {
+        "observations": 1826,
+        "garch_params": {
+          "alpha": 0.19230194445204782,
+          "beta": 0.8076980555479528,
+          "nu": 3.2706223757456434
+        },
+        "hac_ols_coefficients": {
+          "AdrActCnt_lag1": {
+            "coef": 148.67005249265176,
+            "p_value": 0.010202241880048582
+          },
+          "AdrActCnt_lag7": {
+            "coef": 96.84164877512748,
+            "p_value": 0.01211267408745583
+          },
+          "TxCntSec_lag1": {
+            "coef": -81.0557068188959,
+            "p_value": 0.008400917354142145
+          },
+          "TxCntSec_lag7": {
+            "coef": -163.16203269559747,
+            "p_value": 0.010777091602265268
+          },
+          "FeeTotUSD_lag1": {
+            "coef": -12.287150156404316,
+            "p_value": 0.1901475444580003
+          },
+          "FeeTotUSD_lag7": {
+            "coef": 19.249311808857534,
+            "p_value": 0.08053889601009184
+          },
+          "FeeMeanUSD_lag1": {
+            "coef": 55.003242724253546,
+            "p_value": 0.07169084724045287
+          },
+          "FeeMeanUSD_lag7": {
+            "coef": -66.47698644125147,
+            "p_value": 0.030885061039106407
+          },
+          "HashRate_lag1": {
+            "coef": 59.51971565711187,
+            "p_value": 0.23923135817494312
+          },
+          "HashRate_lag7": {
+            "coef": -98.24453449253214,
+            "p_value": 0.10742199022319379
+          },
+          "RevUSD_lag1": {
+            "coef": -90.26052771628834,
+            "p_value": 0.172452081328631
+          },
+          "RevUSD_lag7": {
+            "coef": 95.08440419679133,
+            "p_value": 0.12101050897282911
+          }
+        }
+      },
+      "2018-2020": {
+        "observations": 1096,
+        "garch_params": {
+          "alpha": 0.07504160889393728,
+          "beta": 0.9249583911060465,
+          "nu": 3.0163425498973275
+        },
+        "hac_ols_coefficients": {
+          "AdrActCnt_lag1": {
+            "coef": 2.9023168625150713,
+            "p_value": 0.7860157818291953
+          },
+          "AdrActCnt_lag7": {
+            "coef": -6.4046437515339845,
+            "p_value": 0.49263320539117594
+          },
+          "TxCntSec_lag1": {
+            "coef": -41.20314030286207,
+            "p_value": 0.13942709849822446
+          },
+          "TxCntSec_lag7": {
+            "coef": 27.51517370944614,
+            "p_value": 0.21310301249292962
+          },
+          "FeeTotUSD_lag1": {
+            "coef": 14.997700531003396,
+            "p_value": 0.2609076559494038
+          },
+          "FeeTotUSD_lag7": {
+            "coef": -7.466170406747864,
+            "p_value": 0.4909314137542008
+          },
+          "FeeMeanUSD_lag1": {
+            "coef": -17.107207123989426,
+            "p_value": 0.22479868157020233
+          },
+          "FeeMeanUSD_lag7": {
+            "coef": 11.776755104088702,
+            "p_value": 0.28157362145645326
+          },
+          "HashRate_lag1": {
+            "coef": 19.867356736240126,
+            "p_value": 0.48847688346779694
+          },
+          "HashRate_lag7": {
+            "coef": -25.791502880628848,
+            "p_value": 0.34378705366346396
+          },
+          "RevUSD_lag1": {
+            "coef": -22.577094918936588,
+            "p_value": 0.41998047148119877
+          },
+          "RevUSD_lag7": {
+            "coef": 23.33160963350776,
+            "p_value": 0.38599922071835224
+          }
+        }
+      },
+      "2021-2026": {
+        "observations": 1969,
+        "garch_params": {
+          "alpha": 0.05943528063694247,
+          "beta": 0.9393335280402865,
+          "nu": 3.3137941838787355
+        },
+        "hac_ols_coefficients": {
+          "AdrActCnt_lag1": {
+            "coef": 0.0703552782892439,
+            "p_value": 0.9661667900653809
+          },
+          "AdrActCnt_lag7": {
+            "coef": -1.3821684504166465,
+            "p_value": 0.3806730449231719
+          },
+          "TxCntSec_lag1": {
+            "coef": 5.070976783485843,
+            "p_value": 0.08116108847439583
+          },
+          "TxCntSec_lag7": {
+            "coef": -2.3726562805787488,
+            "p_value": 0.35629149709495467
+          },
+          "FeeTotUSD_lag1": {
+            "coef": -5.176174456611086,
+            "p_value": 0.038350395138420576
+          },
+          "FeeTotUSD_lag7": {
+            "coef": -1.4775497056620692,
+            "p_value": 0.461937764901014
+          },
+          "FeeMeanUSD_lag1": {
+            "coef": 8.642643644302368,
+            "p_value": 0.019477567930068107
+          },
+          "FeeMeanUSD_lag7": {
+            "coef": 2.871479565213625,
+            "p_value": 0.33669567620064345
+          },
+          "HashRate_lag1": {
+            "coef": -3.752472983461337,
+            "p_value": 0.3429792343700946
+          },
+          "HashRate_lag7": {
+            "coef": 0.18911840735488075,
+            "p_value": 0.9610413167136497
+          },
+          "RevUSD_lag1": {
+            "coef": -1.3383921230468263,
+            "p_value": 0.7389294228234823
+          },
+          "RevUSD_lag7": {
+            "coef": 0.8812859563701461,
+            "p_value": 0.8126132190634219
+          }
+        }
+      }
+    },
+    "sign_stability": {
+      "AdrActCnt_lag1": {
+        "signs_by_period": {
+          "2013-2017": 1.0,
+          "2018-2020": 1.0,
+          "2021-2026": 1.0
+        },
+        "is_sign_stable": true
+      },
+      "FeeTotUSD_lag1": {
+        "signs_by_period": {
+          "2013-2017": -1.0,
+          "2018-2020": 1.0,
+          "2021-2026": -1.0
+        },
+        "is_sign_stable": false
+      },
+      "HashRate_lag1": {
+        "signs_by_period": {
+          "2013-2017": 1.0,
+          "2018-2020": 1.0,
+          "2021-2026": -1.0
+        },
+        "is_sign_stable": false
+      }
+    },
+    "sample_period": {
+      "start": "2010-07-19",
+      "end": "2026-05-23",
+      "n_obs": 5788
+    }
+  }
+}
