@@ -16,6 +16,7 @@ echo "2. Uruchamianie modeli ekonometrycznych (GARCH, PCA, ARDL)..."
 python3 run_econometrics.py
 python3 run_paper3_ardl_v2.py
 python3 run_paper1_garch_v2.py
+python3 run_paper2_netflows_v2.py
 
 
 
@@ -32,5 +33,8 @@ python3 run_paper7_ml_v2.py
 
 
 
+
+echo "5. Sprawdzanie i wysyłanie alertów webhook..."
+python3 ../api/services/alerts.py
 
 echo "=== Zakończono pomyślnie! Wyniki w folderze 'results/' ==="

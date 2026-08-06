@@ -4,7 +4,7 @@ import React from 'react';
 import useSWR from 'swr';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  ReferenceLine, AreaChart, Area
+  ReferenceLine, AreaChart, Area, Scatter
 } from 'recharts';
 import { Award, TrendingUp, ShieldAlert, Zap, BarChart3, Layers } from 'lucide-react';
 
@@ -13,12 +13,12 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 export default function Paper4Dashboard() {
   const { data, error, isLoading } = useSWR('/api/v1/literature/paper/paper4', fetcher);
 
-  if (isLoading) return <div className="animate-pulse p-8 bg-slate-900 rounded-xl text-slate-400">Ładowanie wyników strategii inwestycyjnych (VectorBT)...</div>;
+  if (isLoading) return <div className="animate-pulse p-8 bg-slate-900 rounded-xl text-slate-400">Ładowanie wyników strategii inwestycyjnych V2 (Zero Look-Ahead)...</div>;
   if (error || !data) return <div className="text-red-400 p-8 bg-slate-900 rounded-xl border border-red-900/50">Błąd podczas ładowania danych dla Paper 4.</div>;
 
-  const { metrics = {}, thresholds = {}, time_series = [] } = data;
-  const strat = metrics.strategy || {};
-  const bh = metrics.buy_and_hold || {};
+  const strat = data.expanding?.metrics || {};
+  const bh = data.buy_and_hold?.metrics || {};
+  const time_series = data.expanding?.equity_curve || [];
 
   return (
     <div className="space-y-8">
@@ -27,9 +27,9 @@ export default function Paper4Dashboard() {
         <div className="flex items-start gap-3">
           <Layers className="w-6 h-6 text-amber-400 mt-1 flex-shrink-0" />
           <div>
-            <h3 className="font-bold text-lg text-white mb-2">Backtesting Strategii na bazie MVRV Z-Score i NUPL</h3>
+            <h3 className="font-bold text-lg text-white mb-2">Backtesting Strategii "Expanding Window" (Bez Look-Ahead Bias)</h3>
             <p className="text-slate-300 text-sm leading-relaxed">
-              Kwantylowa strategia inwestycyjna oparta na wskaźnikach on-chain <span className="text-amber-400 font-semibold">MVRV Z-Score</span> (skorygowanego o zrealizowaną kapitalizację) oraz <span className="text-emerald-400 font-semibold">NUPL</span> (Net Unrealized Profit/Loss). Strategia generuje sygnały kupna, gdy rynek wkracza w strefę skrajnego zaniżenia wyceny (<span className="font-mono text-xs text-emerald-400">MVRV &lt; {thresholds.mvrv_low?.toFixed(2)}</span>), oraz sygnały wyjścia przy przegrzaniu (<span className="font-mono text-xs text-red-400">MVRV &gt; {thresholds.mvrv_high?.toFixed(2)}</span>).
+              Symulacja inwestycyjna wykorzystująca rozszerzające się okno historyczne (<span className="text-amber-400 font-semibold">Expanding Window</span>). Strategia dynamicznie oblicza kwantyle on-chain (np. <span className="text-emerald-400 font-semibold">MVRV Z-Score</span>) bazując WYŁĄCZNIE na danych dostępnych do danego dnia. Generuje sygnały alokacji chroniąc przed Max Drawdownem. Koszty transakcyjne wliczone (20 bps).
             </p>
           </div>
         </div>
@@ -82,57 +82,48 @@ export default function Paper4Dashboard() {
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Liczba Transakcji</span>
             <Zap className="w-5 h-5 text-purple-400" />
           </div>
-          <div className="text-3xl font-bold font-mono text-purple-400 mb-1">{strat.trades ?? 0}</div>
+          <div className="text-3xl font-bold font-mono text-purple-400 mb-1">{strat.transactions ?? 0}</div>
           <div className="text-xs text-slate-400">
-            <span>Średni hold time: <span className="text-slate-300 font-semibold">Długoterminowy</span></span>
+            <span>Ekspozycja rynkowa: <span className="text-slate-300 font-semibold">{strat.pct_time_in_market?.toFixed(1)}% czasu</span></span>
           </div>
         </div>
       </div>
 
-      {/* 2. Wykres MVRV Z-Score z progami wejścia/wyjścia */}
+      {/* 2. Wykres Krzywej Kapitału (Equity Curve) */}
       <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
-        <h3 className="font-bold text-xl text-amber-400 mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5" />
-          MVRV Z-Score a Strefy Decyzyjne Strategii
+        <h3 className="font-bold text-xl text-emerald-400 mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5" />
+          Krzywa Kapitału: Expanding Strategy vs Buy & Hold (Log Scale)
         </h3>
-        <p className="text-slate-400 text-sm mb-6">Dolna linia przerywana (<span className="text-emerald-400 font-mono font-bold">{thresholds.mvrv_low?.toFixed(2)}</span>) sygnalizuje strefę kupna, górna (<span className="text-red-400 font-mono font-bold">{thresholds.mvrv_high?.toFixed(2)}</span>) strefę realizacji zysków.</p>
+        <p className="text-slate-400 text-sm mb-6">Rozwój portfela przy inwestycji początkowej równej 1 (skala logarytmiczna zlicza wartość kapitału). Szare kropki pod wykresem oznaczają dni kiedy strategia była "w rynku" (Long).</p>
         <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={time_series} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('-')[0]} />
-              <YAxis yAxisId="left" stroke="#3b82f6" domain={['auto', 'auto']} tickFormatter={(val) => `$${(val/1000).toFixed(0)}k`} />
-              <YAxis yAxisId="right" orientation="right" stroke="#f59e0b" domain={[-1, 8]} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} />
-              <ReferenceLine yAxisId="right" y={thresholds.mvrv_low ?? 0} stroke="#10b981" strokeDasharray="4 4" label={{ value: 'Kupno', fill: '#10b981', position: 'insideTopRight' }} />
-              <ReferenceLine yAxisId="right" y={thresholds.mvrv_high ?? 3.5} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Sprzedaż', fill: '#ef4444', position: 'insideBottomRight' }} />
-              <Line yAxisId="left" type="monotone" dataKey="PriceUSD" stroke="#3b82f6" dot={false} strokeWidth={2} name="Cena USD" />
-              <Line yAxisId="right" type="monotone" dataKey="MVRV_Z" stroke="#f59e0b" dot={false} strokeWidth={1.5} name="MVRV Z-Score" />
+              <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('-')[0]} minTickGap={30} />
+              
+              <YAxis yAxisId="left" stroke="#10b981" scale="log" domain={['auto', 'auto']} tickFormatter={(val) => `${val.toFixed(1)}x`} />
+              
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} 
+                formatter={(val: unknown, name: any) => {
+                  if (name === 'strategy_value') return [`${Number(val).toFixed(2)}x`, 'Kapitał Strategii'];
+                  if (name === 'bh_value') return [`${Number(val).toFixed(2)}x`, 'Buy & Hold'];
+                  if (name === 'MVRV_Z') return [Number(val).toFixed(2), 'MVRV Z-Score'];
+                  return [val, name];
+                }} 
+              />
+              
+              <Line yAxisId="left" type="monotone" dataKey="bh_value" stroke="#64748b" dot={false} strokeWidth={2} name="bh_value" opacity={0.6} />
+              <Line yAxisId="left" type="monotone" dataKey="strategy_value" stroke="#10b981" dot={false} strokeWidth={2} name="strategy_value" />
+              
+              {/* Sygnały Long */}
+              <Scatter yAxisId="left" dataKey={(d: any) => d.position === 1 ? 0.8 : null} fill="#38bdf8" />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 3. Wykres NUPL (Net Unrealized Profit/Loss) */}
-      <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
-        <h3 className="font-bold text-xl text-emerald-400 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5" />
-          NUPL (Net Unrealized Profit/Loss)
-        </h3>
-        <p className="text-slate-400 text-sm mb-6">Dynamika niezrealizowanych zysków i strat w sieci Bitcoin w skali od -0.5 do 1.0.</p>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={time_series} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="time" stroke="#64748b" tickFormatter={(val) => val.split('-')[0]} />
-              <YAxis stroke="#10b981" domain={[-0.5, 1.0]} tickFormatter={(val) => `${(val * 100).toFixed(0)}%`} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }} />
-              <ReferenceLine y={0} stroke="#64748b" />
-              <Area type="monotone" dataKey="NUPL" stroke="#10b981" fill="#10b981" fillOpacity={0.2} name="NUPL" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
     </div>
   );
 }

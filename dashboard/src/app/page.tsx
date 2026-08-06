@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAvailableIndicators, getIndicatorGroup, GROUP_ORDER } from "@/hooks/useIndicators";
 import { Loader2, Activity } from "lucide-react";
 import { ResearchSignals } from "@/components/ResearchSignals";
+import { ChatAgent } from "@/components/ChatAgent";
 
 export default function Home() {
   const { data, isLoading, isError } = useAvailableIndicators();
@@ -82,6 +83,7 @@ export default function Home() {
           )}
         </main>
       </div>
+      <ChatAgent />
     </div>
   );
 }
