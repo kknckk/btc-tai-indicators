@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useAvailableIndicators, getIndicatorGroup, GROUP_ORDER } from "@/hooks/useIndicators";
 import { Loader2, Activity } from "lucide-react";
+import { ResearchSignals } from "@/components/ResearchSignals";
 
 export default function Home() {
   const { data, isLoading, isError } = useAvailableIndicators();
@@ -33,6 +34,8 @@ export default function Home() {
         </header>
         
         <main className="space-y-12">
+          <ResearchSignals />
+          
           {isLoading ? (
             <div className="w-full h-48 bg-slate-900 rounded-xl flex items-center justify-center border border-slate-800 shadow-xl">
               <div className="flex flex-col items-center gap-4 text-blue-500">
