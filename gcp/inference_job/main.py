@@ -27,9 +27,17 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+_HERE = Path(__file__).resolve()
+# Lokalnie: <repo>/gcp/inference_job/main.py -> parents[2] = repo root.
+# W obrazie: /app/main.py -> /app (tam Dockerfile kopiuje models/ i api/csv).
+APP_ROOT = next(
+    (candidate for candidate in (_HERE.parents[2], _HERE.parent, _HERE.parents[1])
+     if candidate and (candidate / "models").is_dir()),
+    _HERE.parent,
+)
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
+REPO_ROOT = APP_ROOT
 
 from models.tsfm_wrapper import (  # noqa: E402
     DependencyMissing,
