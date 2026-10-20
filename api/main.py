@@ -20,10 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from routers import literature, research, chat
+from routers import literature, research, chat, predict
 app.include_router(literature.router)
 app.include_router(research.router)
 app.include_router(chat.router)
+app.include_router(predict.router)
 
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "btc-ind")
 DATASET_ID = "btc_indicators"
