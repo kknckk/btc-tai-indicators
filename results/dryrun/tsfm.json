@@ -1,0 +1,110 @@
+{
+  "status": "ok",
+  "generated_at": "2026-10-20T14:26:03+00:00",
+  "mode": "dry-run",
+  "stub": true,
+  "model": "stub",
+  "requested_model": "chronos-bolt",
+  "model_id": null,
+  "git_commit": "22de988",
+  "python": "3.13.5",
+  "data": {
+    "source": "data_ingestion/csv/PriceUSD.csv",
+    "n_obs": 5789,
+    "start": "2010-07-18",
+    "end": "2026-05-23"
+  },
+  "config": {
+    "context_len": 256,
+    "horizons": [
+      1,
+      7,
+      30
+    ],
+    "n_origins": 40,
+    "step": 1,
+    "batch_size": 16,
+    "device": "cpu",
+    "quantiles": [
+      0.1,
+      0.5,
+      0.9
+    ]
+  },
+  "horizons": {
+    "1": {
+      "horizon": 1,
+      "n_origins": 40,
+      "first_origin": "5748",
+      "last_origin": "5787",
+      "metrics": {
+        "rmse": 1149.4869200584778,
+        "mae": 953.9688914853825,
+        "mape_pct": 1.2239135412811974,
+        "smape_pct": 1.2247491221180935,
+        "dir_acc": 0.0,
+        "dir_acc_rw_momentum": 0.55,
+        "dir_edge_vs_rw": -0.55,
+        "rmse_naive_rw": 1149.4869200584778,
+        "mae_naive_rw": 953.9688914853825,
+        "rmse_skill_vs_rw": 0.0,
+        "r2_oos_vs_rw": 0.0
+      },
+      "interval_coverage_p10_p90": 1.0,
+      "median_interval_width_pct": 6.900221296842783
+    },
+    "7": {
+      "horizon": 7,
+      "n_origins": 40,
+      "first_origin": "5742",
+      "last_origin": "5781",
+      "metrics": {
+        "rmse": 2876.240105234795,
+        "mae": 2517.8124884105046,
+        "mape_pct": 3.232154238291955,
+        "smape_pct": 3.2546274640494457,
+        "dir_acc": 0.0,
+        "dir_acc_rw_momentum": 0.55,
+        "dir_edge_vs_rw": -0.55,
+        "rmse_naive_rw": 2876.240105234795,
+        "mae_naive_rw": 2517.8124884105046,
+        "rmse_skill_vs_rw": 0.0,
+        "r2_oos_vs_rw": 0.0
+      },
+      "interval_coverage_p10_p90": 1.0,
+      "median_interval_width_pct": 19.192249333059124
+    },
+    "30": {
+      "horizon": 30,
+      "n_origins": 40,
+      "first_origin": "5719",
+      "last_origin": "5758",
+      "metrics": {
+        "rmse": 7728.6861143518,
+        "mae": 6705.296328309833,
+        "mape_pct": 8.534109967542612,
+        "smape_pct": 9.042262194427272,
+        "dir_acc": 0.0,
+        "dir_acc_rw_momentum": 0.525,
+        "dir_edge_vs_rw": -0.525,
+        "rmse_naive_rw": 7728.6861143518,
+        "mae_naive_rw": 6705.296328309833,
+        "rmse_skill_vs_rw": 0.0,
+        "r2_oos_vs_rw": 0.0
+      },
+      "interval_coverage_p10_p90": 1.0,
+      "median_interval_width_pct": 42.789847059368604
+    }
+  },
+  "warnings": [
+    "--dry-run nadpisał model 'chronos-bolt' atrapą 'stub'"
+  ],
+  "aggregate": {
+    "mean_rmse": 3918.137713215024,
+    "mean_mae": 3392.359236068574,
+    "mean_dir_acc": 0.0,
+    "mean_dir_acc_rw_momentum": 0.5416666666666666,
+    "mean_rmse_skill_vs_rw": 0.0
+  },
+  "runtime_seconds": 1.1761300563812256
+}
