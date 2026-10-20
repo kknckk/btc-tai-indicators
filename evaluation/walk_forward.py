@@ -64,6 +64,38 @@ def _fold_starts(n: int, h: int, min_train: int, embargo: int, step: int) -> lis
     return list(range(first, last, step))
 
 
+def make_folds(
+    n: int,
+    horizon: int,
+    n_folds: int = 5,
+    min_train_frac: float = 0.6,
+    embargo: Optional[int] = None,
+    step: Optional[int] = None,
+) -> list[dict]:
+    """Expanding-window folds as ``{"train": (start, end), "test": (start, end)}`` row ranges.
+
+    Same purge/embargo rule as :func:`run_walk_forward`: the last ``horizon`` rows of a
+    training fold are dropped (their labels overlap the test block) and ``embargo`` extra
+    rows separate consecutive folds. Fold *k* trains on everything before its test block,
+    so the window expands. Exposed separately because model runners that manage their own
+    training loop (e.g. ``experiments/run_neural.py``) need the fold geometry only.
+    """
+    embargo = horizon if embargo is None else embargo
+    min_train = int(n * min_train_frac)
+    last = n - horizon
+    if step is None:
+        region = max(1, last - (min_train + horizon + embargo))
+        step = max(horizon, region // max(1, n_folds))
+    folds: list[dict] = []
+    for a in _fold_starts(n, horizon, min_train, embargo, step)[:n_folds]:
+        tr_end = a - horizon - embargo
+        te_end = min(a + step, last)
+        if tr_end < 1 or te_end <= a:
+            continue
+        folds.append({"train": (0, tr_end), "test": (a, te_end)})
+    return folds
+
+
 def run_walk_forward(
     panel: pd.DataFrame,
     h: int,

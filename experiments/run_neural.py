@@ -57,12 +57,13 @@ except ImportError:
 # use the expanding-window + purge/embargo splitter defined below.
 # ---------------------------------------------------------------------------
 try:
-    from evaluation.walk_forward import run_walk_forward  # type: ignore
+    from evaluation.walk_forward import make_folds as run_walk_forward  # type: ignore
 
-    _WF_SOURCE = "evaluation.walk_forward.run_walk_forward"
+    _WF_SOURCE = "evaluation.walk_forward.make_folds"
 except ImportError:
     run_walk_forward = None
     _WF_SOURCE = "local expanding_window_splits (fallback)"
+
 
 
 def expanding_window_splits(
@@ -103,6 +104,23 @@ def expanding_window_splits(
 # ---------------------------------------------------------------------------
 # Feature engineering
 # ---------------------------------------------------------------------------
+def _load_panel_frame(feature_columns=None, min_coverage=0.5) -> pd.DataFrame:
+    """Load the merged panel through whichever ``load_panel`` is available.
+
+    The merged branch (``experiments/data.py``) returns a DataFrame indexed by a
+    DatetimeIndex named ``time`` and takes no feature arguments; the local
+    fallback takes ``feature_columns``/``min_coverage``. Normalise both to a frame
+    that has a ``time`` column so the rest of this module is source-agnostic.
+    """
+    try:
+        panel = load_panel(feature_columns=feature_columns, min_coverage=min_coverage)
+    except TypeError:
+        panel = load_panel()
+        if not isinstance(panel.index, pd.RangeIndex):
+            panel = panel.reset_index().rename(columns={panel.index.name or "index": "time"})
+    return panel
+
+
 def build_feature_frame(cfg: dict) -> pd.DataFrame:
     """Load the on-chain + price panel and attach engineered columns.
 
@@ -116,12 +134,19 @@ def build_feature_frame(cfg: dict) -> pd.DataFrame:
     feature_columns = data_cfg.get("feature_columns")
     min_coverage = data_cfg.get("min_coverage", 0.5)
 
-    df = load_panel(feature_columns=feature_columns, min_coverage=min_coverage)
+    df = _load_panel_frame(feature_columns=feature_columns, min_coverage=min_coverage)
     df = df.sort_values("time").reset_index(drop=True)
     df["log_price"] = np.log(df["PriceUSD"].astype(float))
     df["r_t"] = df["log_price"].diff()
 
-    feature_cols = [c for c in (feature_columns or []) if c in df.columns]
+    # The merged data layer exposes raw levels under ``slog1p_<metric>``; accept either name.
+    feature_columns = [
+        c if c in df.columns else f"slog1p_{c}"
+        for c in (feature_columns or [])
+        if c in df.columns or f"slog1p_{c}" in df.columns
+    ]
+    feature_cols = list(feature_columns)
+
     if data_cfg.get("include_lagged_return", True):
         feature_cols = feature_cols + ["r_t"]
 
