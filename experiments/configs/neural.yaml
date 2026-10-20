@@ -1,0 +1,57 @@
+# Config for experiments/run_neural.py (ModernTCN + PatchTST, BTC log-returns)
+seeds: [42]
+
+horizons: [1, 7, 30]
+
+data:
+  feature_columns: [AdrActCnt, TxCntSec, FeeTotUSD, FeeMeanUSD, HashRate, NUPL, MVRV_Z, RevUSD]
+  min_coverage: 0.5
+  include_lagged_return: true  # adds r_t = diff(log PriceUSD) as a feature
+
+walk_forward:
+  n_folds: 5
+  min_train_frac: 0.6
+  # embargo (in rows) appended after each test fold before the next
+  # expanding-train cut point; purge (= horizon rows) is always removed
+  # from the tail of the training fold to avoid overlapping-label leakage.
+  embargo_multiplier: 1
+
+models:
+  moderntcn:
+    window: 60
+    d_model: 128
+    ffn_dim: 288
+    kernel_size: 25
+    num_blocks: 3
+    dropout: 0.1
+    lr: 0.001
+    batch_size: 64
+    max_epochs: 80
+    patience: 10
+    val_fraction: 0.15
+
+  patchtst:
+    window: 128
+    patch_len: 16
+    stride: 16
+    d_model: 64
+    nhead: 4
+    num_layers: 2
+    dim_feedforward: 128
+    dropout: 0.1
+    channel_independent: true
+    lr: 0.001
+    batch_size: 64
+    max_epochs: 80
+    patience: 10
+    val_fraction: 0.15
+
+# Overrides applied on top of the sections above when --smoke is passed.
+# Keeps the real architectures (same param counts) but trains for a
+# couple of epochs on a small, recent subsample so the whole script
+# finishes in a couple of minutes on CPU.
+smoke:
+  max_epochs: 3
+  patience: 2
+  n_folds: 2
+  subsample_rows: 700
