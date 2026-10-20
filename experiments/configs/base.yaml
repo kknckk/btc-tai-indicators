@@ -1,0 +1,25 @@
+seed: 42
+horizons: [1, 7, 30]
+walk_forward:
+  min_train: 1000      # rows with known labels in the first training fold
+  step: 30             # test block length (days) == refit frequency
+  embargo: 0           # extra days beyond the purge; total gap = h + embargo
+costs_bps: [10, 20]
+annualization: 365     # crypto trades every day
+eval_start_subperiod: "2018-01-01"
+min_feature_obs: 500   # on-chain column needs this many non-null rows to be a feature
+xgboost:
+  n_estimators: 400
+  learning_rate: 0.03
+  max_depth: 3
+  subsample: 0.8
+  colsample_bytree: 0.8
+  early_stopping_rounds: 30
+  val_fraction: 0.2
+  n_jobs: 4
+garch:
+  dist: t
+  o: 1                 # 1 = GJR-GARCH(1,1,1); 0 = plain GARCH(1,1)
+vol_target:
+  annual_vol: 0.40
+  max_leverage: 1.0
