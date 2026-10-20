@@ -1,1 +1,1 @@
-"""Experiments package: data layer, configs and baseline runners."""
+"""Experiments package: data layer, configs, baseline and neural model runners."""
