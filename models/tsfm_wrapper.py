@@ -722,10 +722,11 @@ class MoiraiForecaster(BaseForecaster):
         return self._predictor
 
     def _predict_batch(self, contexts: List[np.ndarray], horizon: int) -> np.ndarray:
+        # Najpierw walidacja zależności (_load rzuca DependencyMissing), dopiero
+        # potem import gluonts – inaczej brak pakietu wycieka jako surowy ImportError.
+        predictor = self._load()
         import pandas as pd
         from gluonts.dataset.common import ListDataset
-
-        predictor = self._load()
         entries = []
         for ctx in contexts:
             entries.append(
