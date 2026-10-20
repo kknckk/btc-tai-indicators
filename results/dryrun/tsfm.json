@@ -1,12 +1,12 @@
 {
   "status": "ok",
-  "generated_at": "2026-10-20T14:26:03+00:00",
+  "generated_at": "2026-10-20T14:32:25+00:00",
   "mode": "dry-run",
   "stub": true,
   "model": "stub",
   "requested_model": "chronos-bolt",
   "model_id": null,
-  "git_commit": "22de988",
+  "git_commit": "ace0357",
   "python": "3.13.5",
   "data": {
     "source": "data_ingestion/csv/PriceUSD.csv",
@@ -106,5 +106,5 @@
     "mean_dir_acc_rw_momentum": 0.5416666666666666,
     "mean_rmse_skill_vs_rw": 0.0
   },
-  "runtime_seconds": 1.1761300563812256
+  "runtime_seconds": 1.1140952110290527
 }

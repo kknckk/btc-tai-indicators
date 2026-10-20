@@ -4,7 +4,7 @@
 - **Model:** `stub` (`None`)
 - **Dane:** `data_ingestion/csv/PriceUSD.csv` – 5789 obserwacji, 2010-07-18 → 2026-05-23
 - **Konfiguracja:** context_len=256, origins/h=40, step=1, device=cpu
-- **Czas:** 1.2 s, commit `22de988`
+- **Czas:** 1.1 s, commit `ace0357`
 
 ## Metryki (punktowo na origin+h)
 
