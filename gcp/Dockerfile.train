@@ -1,0 +1,41 @@
+# Obraz treningowo-ewaluacyjny dla Vertex AI CustomJob (zero-shot TSFM).
+#
+# Build context = katalog główny repo:
+#   gcloud builds submit --config gcp/cloudbuild.yaml \
+#       --substitutions=_IMAGE_URI=europe-west4-docker.pkg.dev/PROJECT/btc-tai/tsfm-train:latest .
+# lub lokalnie:
+#   docker build -f gcp/Dockerfile.train -t tsfm-train .
+#
+# Uwaga: to NIE jest fine-tuning. Uruchamiamy zero-shot ewaluację
+# experiments/run_tsfm.py; artefakt (wyniki JSON/MD) ląduje w GCS.
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    HF_HOME=/tmp/hf \
+    TRANSFORMERS_CACHE=/tmp/hf \
+    PYTHONPATH=/app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Zależności najpierw (cache warstw). torch wyłącznie z indeksu CPU.
+COPY gcp/requirements-train.txt /app/requirements-train.txt
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.4.1 \
+    && pip install --no-cache-dir -r /app/requirements-train.txt
+
+# Kod i minimalne dane (cena BTC ~160 KB). Pełny panel on-chain nie jest
+# potrzebny do ewaluacji TSFM na cenie; można go pobrać z GCS przez PRICE_CSV_GCS.
+COPY models/ /app/models/
+COPY experiments/ /app/experiments/
+COPY api/csv/PriceUSD.csv /app/api/csv/PriceUSD.csv
+COPY gcp/entrypoint.sh /app/gcp/entrypoint.sh
+RUN chmod +x /app/gcp/entrypoint.sh
+
+# Domyślnie: realny Chronos-Bolt na CPU, 60 originów na horyzont.
+ENTRYPOINT ["/app/gcp/entrypoint.sh"]
+CMD ["--model", "chronos-bolt", "--horizons", "1,7,30", "--origins", "60", "--context-len", "256"]

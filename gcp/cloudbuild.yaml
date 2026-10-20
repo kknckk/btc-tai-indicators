@@ -1,0 +1,21 @@
+# Build obrazu treningowego z Dockerfile poza katalogiem głównym.
+# Użycie:
+#   gcloud builds submit --config gcp/cloudbuild.yaml \
+#     --substitutions=_IMAGE_URI=europe-west4-docker.pkg.dev/$GCP_PROJECT_ID/btc-tai/tsfm-train:latest .
+substitutions:
+  _IMAGE_URI: "europe-west4-docker.pkg.dev/your-gcp-project/btc-tai/tsfm-train:latest"
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - "--file=gcp/Dockerfile.train"
+      - "--tag=${_IMAGE_URI}"
+      - "."
+
+images:
+  - "${_IMAGE_URI}"
+
+options:
+  machineType: "E2_HIGHCPU_8"
+  logging: CLOUD_LOGGING_ONLY
