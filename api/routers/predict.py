@@ -45,7 +45,11 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+_HERE = Path(__file__).resolve()
+# W repo: <repo>/api/routers/predict.py -> parents[2] = repo root.
+# W obrazie: /app/routers/predict.py -> parents[2] = "/", więc cofamy się do /app,
+# gdzie Dockerfile kopiuje models/.
+REPO_ROOT = _HERE.parents[2] if (_HERE.parents[2] / "models").is_dir() else _HERE.parents[1]
 if str(REPO_ROOT) not in sys.path:  # obraz API kopiuje models/ do /app/models
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -322,9 +326,9 @@ def list_models() -> ModelsResponse:
     """Status modeli TSFM + informacja, czy istnieje artefakt (artifact vs stub)."""
     models: List[ModelInfo] = []
     for item in available_models():
-        artifact_present = _artifact_has(item["model"]) or (
-            bool(ARTIFACT_GCS_PREFIX) and item["model"] != "stub"
-        )
+        # Tylko lokalny plik traktujemy jako "artefakt obecny"; prefiks GCS jest
+        # raportowany osobno, bez zgadywania, czy blob istnieje (oszczędza requesty).
+        artifact_present = _artifact_has(item["model"])
         serving_mode: Literal["artifact", "stub"] = (
             "artifact" if artifact_present and item["model"] != "stub" else "stub"
         )
