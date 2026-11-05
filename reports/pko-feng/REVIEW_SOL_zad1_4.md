@@ -139,7 +139,30 @@ Należy ją wykazać ablacyjnie na wspólnym teście: `(a) historia ceny`, `(b) 
 
 Raport jako plan kolejnego etapu wskazuje **systematyczne strojenie hiperparametrów, selekcję i rozszerzenie predyktorów, modelowanie zwrotów zamiast poziomów, stabilizację prognoz wielokrokowych oraz aktualizację danych, szczególnie BTC** (§5.4, §7.8–7.9). Dla współpracy oznacza to najlepszy moment, aby **wspólnie ustalić protokół i definicje cech BTC-TAI przed rozbudową modeli**. Pozwoli to ocenić rzeczywistą wartość on-chain i TAI, a później bez zmiany znaczenia eksperymentu przenieść wybrane rozwiązanie do `pko-fr`.
 
-## 8. Werdykt recenzencki
+## 8. Mapowanie: lista modeli/assetów z zlecenia PKO vs to, co faktycznie zrealizowano w zad. 1.4
+
+Poniżej zestawienie listy „modeli do przetestowania i przegrania do Banku” (mail Działu Wewnętrznego z 05.11.2026) z faktycznym zakresem raportu zad. 1.4 (30.10.2026). **Kredyty konsumpcyjne i hipoteczne nie zostały w raporcie zrealizowane wcale** — raport obejmuje 8 grup wskaźników (EUR/PLN, USD/PLN, stopa NBP, krzywa obligacji, WIG20, ropa, złoto, BTC), a w §3/tab. 1 i §7 nie ma ani słowa o kredytach.
+
+**Stopa NBP**
+- I: Reguła Taylora / funkcja reakcji — **NIE w raporcie** (brak; jest ARIMA/VAR/BVAR/logit/probit/ordered). Implementacja istnieje po naszej stronie: `experiments/sgh/tier1_nbp.py::TaylorRuleForecaster` (TRD-32), ale bez wyników liczbowych w repo.
+- I: Modele liniowe forward-looking — **CZĘŚCIOWO**: raport ma ARIMA/VAR/BVAR na poziomie stopy; nasz `ForwardLinearForecaster` (Ridge na lagach) — kod, brak wyników.
+- I: Ordered logit / ordered probit — **TAK** (§7.3.1, tab. 11: BA 96,9% z predyktorami, Macro-F1 65,6%).
+- II: VAR, BVAR, SVAR — **VAR/BVAR TAK** (§7.3.1, tab. 10, oba gorsze od naiwnej); **SVAR NIE** w raporcie (mamy `SVARForecaster` w tier2_nbp.py, brak wyników).
+- II: Modele z oczekiwaniami i komunikacją — **NIE** (kod: `ExpectationsCommForecaster`, brak wyników).
+- II: RPP Random forest, Gradient boosting — **NIE w raporcie dla stopy** (kod: `RandomForestForecaster`, `GradientBoostingForecaster` w tier2_nbp.py, brak wyników).
+- II: Modele tekstowe / NLP — **NIE** (kod: `RppNlpForecaster` TF-IDF na komunikatach RPP, brak wyników).
+
+**Obligacje 2/5/7/10Y**
+- I: Nelson-Siegel, Svensson, Diebold-Li — **TAK jako estymacja krzywej DNS** (§7.4.2, λ=0,602), ale prognozowanie czynników robi screening AR/VAR/Ridge/PLS/drzewa/PCA, nie klasyczne NS/Svensson/Diebold-Li jako modele prognostyczne. Nasze implementacje (`NelsonSiegelForecaster`, `SvenssonForecaster`, `DieboldLiForecaster`, TRD-34) — kod, brak wyników.
+- II: PCA dla czynników, VAR/BVAR/VARX czynników, makrofinansowe, AFNS, PCA-LSTM, LSTM — **CZĘŚCIOWO w raporcie**: PCA i VAR czynników DNS są w §7.4.3; AFNS/PCA-LSTM/LSTM **NIE** w raporcie (kod: `AFNSForecaster`, `PCALSTMForecaster`, `MacroFinanceForecaster`, `VARXFactorsForecaster` w tier2_bonds.py, brak wyników).
+
+**Kredyty konsumpcyjne** — **CAŁY BLOK NIEZREALIZOWANY w raporcie** (brak sekcji). Po naszej stronie pełna implementacja kodu: tier I ARDL/ECM/dynamic regression/logit scorecard (TRD-36), tier II VAR/BVAR/factor/FCI/LASSO/ElasticNet/RF/GBM/PKO-internal (TRD-37) — wszystko bez wyników liczbowych (`results/sgh_credit_consumer_*.json` nie istnieją).
+
+**Kredyty hipoteczne** — **CAŁY BLOK NIEZREALIZOWANY w raporcie**. Kod: tier I ARDL/VECM/dynamic/logit (TRD-38), tier II VAR/panel/contract/RF/GBM/LSTM/PKO-internal (TRD-39) — brak wyników.
+
+**Wniosek dla PKO:** z listy 4 assetów (stopa, obligacje, kredyty konsumpcyjne, kredyty hipoteczne) raport SGH zrealizował w pełni tylko stopę (częściowo — bez SVAR/NLP/RF) i obligacje (częściowo — bez AFNS/LSTM na czynnikach). **Kredyty konsumpcyjne i hipoteczne nie pojawiają się w raporcie wcale**, mimo że są na liście. Modele z tych bloków istnieją jako kod w naszym repo (BTC-TAI, TRD-32..41), ale bez uruchomionych wyników — do „przegrania do Banku” potrzebne są najpierw pełne wyniki walk-forward.
+
+## 9. Werdykt recenzencki
 
 **Zadanie 1.4 można uznać za dobrze udokumentowany etap budowy i technicznego sprawdzenia potoku.** Raport jest szczególnie wartościowy jako opis protokołu, ograniczeń danych i bankowego interfejsu modeli. **Nie uzasadnia natomiast twierdzenia, że wyłoniono produkcyjny model BTC ani że mała poprawa BTC na 30 dni utrzyma się na aktualnych danych.**
 
