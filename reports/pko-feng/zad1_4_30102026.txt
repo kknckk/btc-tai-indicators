@@ -1,0 +1,2328 @@
+ Projekt: „Zaprojektowanie i opracowanie przez PKO BP systemu
+predykcyjnego umożliwiającego przewidywanie wartości wybranych
+aktywów cyfrowych” Numer projektu: FENG.01.01-IP.01-A059/23
+
+
+
+
+       Raport z realizacji zadania 1.4
+    Potok modeli uczenia maszynowego i sztucznej inteligencji
+
+
+
+
+                        Wersja:   1,0
+                        Data:     30.10.2026
+Spis treści
+
+1 Podsumowanie zarządcze                                                                               3
+
+2 Cel i zakres zadania                                                                                 4
+
+3 Zakres wskaźników i modeli                                                                           4
+
+4 Dane                                                                                                 5
+  4.1   Źródła danych     . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    5
+  4.2   Charakterystyka danych według wskaźników            . . . . . . . . . . . . . . . . . . . .    6
+  4.3   Zasady przygotowania danych . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          8
+  4.4   Kontrola jakości danych i doświadczenia z pracy na danych . . . . . . . . . . . .              8
+
+5 Wstępne uczenie, kalibracja i testy lokalne                                                          9
+  5.1   Sposób prowadzenia testów . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          9
+  5.2   Zakres kalibracji . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     10
+  5.3   Benchmark i metryki . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       11
+  5.4   Charakter etapu i interpretacja wyników . . . . . . . . . . . . . . . . . . . . . . .         11
+
+6 Przekazanie i uruchomienie modeli w infrastrukturze banku                                           12
+  6.1   Różnica między środowiskiem lokalnym a infrastrukturą banku . . . . . . . . . .               12
+  6.2   Wzorzec . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     13
+  6.3   Procedura przekazania pojedynczego modelu . . . . . . . . . . . . . . . . . . . .             13
+  6.4   Weryfikacja poprawności integracji . . . . . . . . . . . . . . . . . . . . . . . . . .        14
+  6.5   Przekazane modele . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       14
+  6.6   Status przekazania i uruchomienia . . . . . . . . . . . . . . . . . . . . . . . . . .         18
+
+7 Wyniki                                                                                              20
+  7.1   EUR/PLN . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       20
+        7.1.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         20
+        7.1.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     21
+        7.1.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+  7.2   USD/PLN . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       23
+        7.2.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         23
+        7.2.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     24
+        7.2.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     24
+  7.3   Stopa procentowa . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      25
+        7.3.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         25
+
+
+                                                  1
+        7.3.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     26
+        7.3.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     27
+  7.4   Obligacje i krzywa rentowności . . . . . . . . . . . . . . . . . . . . . . . . . . . .        27
+        7.4.1   Zakres i przygotowanie danych . . . . . . . . . . . . . . . . . . . . . . . .         28
+        7.4.2   Estymacja krzywej dochodowości . . . . . . . . . . . . . . . . . . . . . . .          28
+        7.4.3   Prognozowanie czynników DNS . . . . . . . . . . . . . . . . . . . . . . . .           28
+        7.4.4   Walidacja prognoz . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       29
+        7.4.5   Główne wyniki . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       29
+        7.4.6   Wyniki według terminu zapadalności . . . . . . . . . . . . . . . . . . . . .          29
+        7.4.7   Walidacja statystyczna . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      29
+        7.4.8   Diagnostyka błędów i ograniczenia . . . . . . . . . . . . . . . . . . . . . .         30
+  7.5   WIG20 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     31
+        7.5.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         31
+        7.5.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     32
+        7.5.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     33
+  7.6   Ropa . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    33
+        7.6.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         33
+        7.6.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     35
+        7.6.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     36
+  7.7   Złoto . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   36
+        7.7.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         36
+        7.7.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     37
+        7.7.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     38
+  7.8   BTC . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     38
+        7.8.1   Zakres przetestowanych modeli . . . . . . . . . . . . . . . . . . . . . . . .         38
+        7.8.2   Wykresy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     39
+        7.8.3   Wnioski . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     40
+  7.9   Podsumowanie wyników . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          40
+
+8 Podsumowanie realizacji zadania                                                                     42
+
+
+
+
+                                                  2
+1    Podsumowanie zarządcze
+
+Celem zadania 1.4 było przygotowanie i przeprowadzenie wstępnego procesu uczenia oraz kali-
+bracji grupy modeli prognostycznych dla uzgodnionej grupy wskaźników, a następnie dostoso-
+wanie technicznie sprawnych implementacji do infrastruktury przygotowanej przez bank.
+Prace objęły osiem grup wskaźników: kursy EUR/PLN i USD/PLN, stopę referencyjną NBP,
+krzywą rentowności obligacji skarbowych, indeks WIG20, ceny ropy Brent i złota oraz kurs
+BTC/USD. Dla poszczególnych wskaźników testowano modele ekonometryczne, modele uczenia
+maszynowego, sieci neuronowe, transformery, modele zmienności, modele klasyfikacyjne oraz
+modele czynnikowe krzywej rentowności.
+Wstępne uczenie, kalibrację i porównanie konfiguracji przeprowadzono w lokalnym środowi-
+sku roboczym. Środowisko to służyło przygotowaniu modeli, kontroli poprawności implemen-
+tacji oraz charakterystyce ich jakości prognostycznej. Nie stanowi ono przedmiotu przekazania.
+Przedmiotem przekazania są implementacje modeli dostosowane do interfejsów i sposobu do-
+starczania danych w infrastrukturze banku, wyniki testów potwierdzających ich działanie oraz
+dokumentacja pozwalająca zidentyfikować konfigurację i odtworzyć przebieg.
+Łącznie oceniono 190 kombinacji modelu, wariantu danych, horyzontu oraz, w przypadku obliga-
+cji, tenoru. Pełny zestaw prognoz uzyskano dla 188 kombinacji. Wyjątkiem był model dekompo-
+zycyjny dla ropy, którego implementacja wymaga dalszego dopracowania. Wyniki prognostyczne
+mają charakter wstępny: modele oceniano przy ograniczonym zakresie kalibracji, bez systema-
+tycznej optymalizacji hiperparametrów i rozbudowanej selekcji predyktorów.
+Najbardziej stabilną poprawę względem benchmarku uzyskano w prognozie zmienności przy wy-
+korzystaniu modeli z rodziny GARCH. Przewagę odnotowano również dla części modeli kursów
+walut na horyzoncie 30 dni oraz dla większości modeli krzywej rentowności, szczególnie na jej
+krótkim końcu. W prognozowaniu poziomów cen instrumentów finansowych prognoza naiwna
+pozostała wymagającym punktem odniesienia, a wyniki wskazały kierunki dalszej kalibracji, w
+szczególności selekcję predyktorów, modelowanie stóp zwrotu i stabilizację prognoz wielokroko-
+wych.
+Odrębny i rozszerzony strumień prac dotyczył obligacji skarbowych. W przypadku pozostałych
+wskaźników punktem wyjścia był bezpośrednio obserwowany szereg zmiennej prognozowanej.
+W przypadku obligacji konieczne było najpierw zbudowanie samego obiektu prognozy, czyli
+dziennej krzywej dochodowości i opisujących ją czynników. Zakres ten obejmował przygotowa-
+nie i filtrację danych o instrumentach i przepływach pieniężnych, estymację dziennych krzywych
+Dynamic Nelson–Siegel, osobne prognozowanie czynników poziomu, nachylenia i krzywizny, re-
+konstrukcję przyszłej krzywej oraz ocenę wyników na rentownościach i cenach obligacji. Prze-
+prowadzono również szeroki screening modeli i danych, walidację statystyczną oraz diagnostykę
+źródeł największych błędów. Modelowanie obligacji stanowiło tym samym rozszerzenie standar-
+dowego procesu zastosowanego dla pozostałych wskaźników i dostarczyło kompletnego rozwiąza-
+nia analitycznego, od przygotowania danych o instrumentach do prognozy krzywej oraz wyceny
+obligacji.
+Technicznie sprawne modele dostosowano do infrastruktury banku i poddano testom integra-
+cyjnym. Test obejmował odczyt danych, wykonanie treningu i predykcji, zapis wyników i logów
+oraz porównanie z przebiegiem referencyjnym. Ze względu na trwającą przebudowę backendu
+chmurowego pełna publikacja produkcyjna artefaktów nie była dostępna dla wszystkich modeli.
+Status zaliczenia oznacza zatem poprawne przejście testu integracyjnego w zakresie dostępnych
+komponentów infrastruktury, a nie akceptację modelu do zastosowania produkcyjnego.
+
+
+
+
+                                              3
+2     Cel i zakres zadania
+
+Celem zadania 1.4 było zbudowanie i przeprowadzenie wstępnego procesu uczenia i kalibracji
+grupy modeli uczenia maszynowego i sztucznej inteligencji dla pierwszej grupy wskaźników,
+zgodnie z priorytetami uzgodnionymi pomiędzy bankiem a zespołem SGH.
+Zakres prac objął:
+    • przygotowanie danych do lokalnych eksperymentów prognostycznych;
+    • implementację reprezentatywnej grupy modeli ekonometrycznych, uczenia maszynowego i
+      głębokiego uczenia;
+    • przeprowadzenie wstępnego uczenia i kalibracji modeli;
+    • ocenę modeli w chronologicznym protokole trening–walidacja–test i w backteście kroczą-
+      cym;
+    • porównanie wyników z odpowiednimi benchmarkami;
+    • dostosowanie technicznie sprawnych modeli do wspólnego interfejsu infrastruktury banku;
+    • wykonanie testów potwierdzających poprawne uruchomienie i generowanie wyników;
+    • przygotowanie raportu z przeprowadzonych prac, uzyskanych wyników i zidentyfikowanych
+      ograniczeń.
+Lokalny potok eksperymentalny był narzędziem wykorzystywanym przez zespół SGH do ucze-
+nia, kalibracji, porównania konfiguracji i przygotowania wyników referencyjnych. Infrastruktura
+ta nie stanowi przedmiotu przekazania. Modele przekazywano w postaci kodu i konfiguracji do-
+stosowanych do rejestru cech i modeli przygotowanego przez bank. Zakres zadania nie obejmował
+budowy infrastruktury bankowej, formalnego wyboru jednego finalnego modelu produkcyjnego,
+pełnej optymalizacji hiperparametrów ani wdrożenia produkcyjnego wszystkich modeli. Urucho-
+mienie modelu w infrastrukturze banku potwierdza jego poprawność techniczną i zdolność do
+generowania wyników, lecz nie stanowi samoistnie rekomendacji do wykorzystania biznesowego.
+Zakres modelowania obligacji został rozszerzony względem standardowego schematu prac przyję-
+tego dla pozostałych wskaźników. W przypadku kursów walutowych, indeksów, surowców, stopy
+procentowej i BTC modele budowano dla wcześniej zdefiniowanego szeregu docelowego. W przy-
+padku obligacji konieczne było dodatkowo przygotowanie danych o instrumentach i przepływach
+pieniężnych, oszacowanie dziennej krzywej dochodowości oraz utworzenie szeregów czynników
+stanowiących zmienne docelowe dla modeli prognostycznych. Strumień obligacyjny obejmował
+zatem pełny proces od danych o instrumentach, przez estymację i prognozowanie czynników Dy-
+namic Nelson–Siegel, do rekonstrukcji przyszłej krzywej i wyceny obligacji. Z uwagi na szerszy
+zakres analityczny i metodologiczny wyniki tego strumienia przedstawiono w raporcie w bardziej
+szczegółowej formie.
+
+
+3     Zakres wskaźników i modeli
+
+Prace objęły osiem grup wskaźników reprezentujących kursy walutowe, stopy procentowe,
+krzywą rentowności, rynek akcji, rynki surowcowe oraz rynek kryptoaktywów. Dobór rodzin
+modeli zależał od charakteru szeregu i typu zadania prognostycznego.
+Dla modeli poziomu badano co do zasady dwa warianty: wykorzystujący wyłącznie historię
+zmiennej prognozowanej oraz wariant rozszerzony o dodatkowe predyktory.
+
+
+
+                                              4
+                               Tabela 1: Wskaźniki i rodziny modeli
+
+ Wskaźnik              Rodziny modeli
+ EUR/PLN               Prognoza naiwna, ARIMA, VAR, BVAR, XGBoost, LSTM, TFT
+ USD/PLN               Prognoza naiwna, ARIMA, VAR, BVAR, XGBoost, LSTM, TFT
+ Stopa procentowa      Prognoza naiwna, ARIMA, VAR, BVAR, logit, probit, ordered logit,
+                       ordered probit
+ Obligacje             AR(1), VAR, Diebold–Li, Ridge, las losowy, Extra Trees oraz modele
+                       łączące prognozy czynników DNS
+ WIG20                 Prognoza naiwna, ARIMA, XGBoost, GARCH, EGARCH,
+                       GJR-GARCH
+ Ropa Brent            Prognoza naiwna, ARIMA, SVR, XGBoost, LSTM, VMD + XGBoost,
+                       GARCH, EGARCH, GJR-GARCH, GARCH-MIDAS
+ Złoto                 Prognoza naiwna, ARIMA, XGBoost, LSTM, GARCH, EGARCH,
+                       GJR-GARCH
+ BTC/USD               Prognoza naiwna, SVR, XGBoost, LSTM, TFT, PatchTST oraz
+                       walidacyjnie Helformer
+
+
+Modele zmienności oceniano oddzielnie od modeli poziomu, natomiast dla stopy procentowej
+obok prognozy poziomu analizowano także kierunek przyszłej decyzji.
+Szczegółowy opis danych, horyzontów, protokołu testowego i wyników przedstawiono w kolejnych
+rozdziałach.
+
+
+4     Dane
+
+Eksperymenty lokalne objęły osiem wskaźników (targetów) i trzy typy zadań prognostycznych:
+prognozę poziomu (wszystkie wskaźniki), prognozę zmienności (WIG20, ropa, złoto) oraz pro-
+gnozę kierunku decyzji o stopie procentowej. W tym rozdziale opisano źródła danych, zakres
+i częstotliwość szeregów, zestawy predyktorów oraz zasady przygotowania danych wspólne dla
+wszystkich eksperymentów.
+Pliki źródłowe wykorzystywano wyłącznie do odczytu. Wszystkie operacje na danych – wyrów-
+nanie kalendarzy, uwzględnienie opóźnień publikacji, wyliczenie zmiennych pochodnych (np. lo-
+garytmicznych stóp zwrotu, różnic stóp procentowych) – wykonuje mechanizm uruchomieniowy
+na podstawie jawnych specyfikacji danych zapisanych w plikach konfiguracyjnych YAML. Dzięki
+temu każdy wynik jest jednoznacznie powiązany z wersją danych i może zostać odtworzony.
+
+
+4.1    Źródła danych
+
+Wykorzystano sześć zbiorów danych, przygotowanych w kolejnych etapach prac:
+
+    • Kursy średnie NBP (tabela A) dla EUR/PLN i USD/PLN, pobrane z interfejsu API
+      NBP, obejmujące fixingi od 2.01.2002 do 16.09.2026 (6242 notowania).
+    • Wspólna tablica dzienna dla kursów walut i WIG20, zawierająca 25 zmiennych
+      w siatce dni kalendarzowych od 2.01.2002 do 17.09.2026: kursy NBP, notowania WIG20
+      (otwarcie, maksimum, minimum, zamknięcie, wolumen), rentowności i stopy procentowe
+      w Polsce i USA, indeksy S&P 500 i VIX, cenę ropy WTI oraz wybrane dane makroekono-
+      miczne o częstotliwości miesięcznej i kwartalnej. Wartości przeniesiono 1:1 ze źródeł, bez
+
+                                                5
+      uzupełniania braków; zgodność każdej kolumny ze źródłem zweryfikowano po zapisie.
+  • Eksport danych rynkowych z 5.10.2026 (25 kolumn, dni kalendarzowe od 1.01.2000
+    do 1.09.2026): ceny ropy Brent i złota, indeks dolara DXY, kurs EUR/USD EBC, indeksy
+    S&P 500, NASDAQ-100 i VIX, stopy Fed Funds, stopy NBP i EBC. Zbiór ten był podstawą
+    eksperymentów dla ropy i złota.
+  • Eksport danych z 13.09.2026, obejmujący m.in. notowania BTC/USD wraz ze zmien-
+    nymi rynkowymi; dane kończą się 31.03.2025. Był to jedyny dostępny zbiór z notowaniami
+    BTC, dlatego wykorzystano go w eksperymentach dla tego wskaźnika.
+  • Dane uzupełnione ze źródeł publicznych (NBP, CEIC, investing.com): dzienny sze-
+    reg stopy referencyjnej NBP (26.02.1998–16.09.2026), miesięczny panel stopy procentowej
+    (stopa referencyjna, WIBOR 3M, inflacja CPI r/r, miesięczna zmiana kursu EUR/PLN;
+    02.2002–06.2026) oraz krzywa rentowności obligacji skarbowych.
+  • Panel badawczy krzywej rentowności (29.11.2004–28.08.2026), zawierający czynniki
+    dynamicznego modelu Nelsona–Siegela (DNS: poziom, nachylenie, krzywizna) wraz z ich
+    opóźnieniami i przyrostami, stopę referencyjną NBP, stawkę POLONIA, stopę MRO EBC
+    i kurs EUR/PLN.
+
+
+4.2   Charakterystyka danych według wskaźników
+
+Tabela 2 zestawia dane wykorzystane we wszystkich eksperymentach: częstotliwość i zakres sze-
+regu prognozowanego, główne predyktory używane w wariancie „target i predyktory” oraz istotne
+ograniczenia. Wariant „tylko target” korzysta wyłącznie z historii prognozowanego szeregu.
+
+                Tabela 2: Charakterystyka danych we wszystkich eksperymentach
+
+ Target       Częstotli-    Zakres        Główne predyktory            Braki / ograniczenia
+              wość          danych
+ EUR/PLN      dzienna,      02.01.2002–   Modele ML: zmiana            Serie rynkowe z USA i cena
+ (poziom)     fixingi NBP   16.09.2026    EUR/USD (NBP), VIX,          WTI kończą się w maju
+                                          stopa zwrotu S&P 500,        2026 r.; w 2 z 31 momentów
+                                          rentowność PL 10Y, różnica   testowych modele
+                                          rentowności PL–US 10Y,       korzystały z ostatniej
+                                          różnica WIBOR 3M – Fed       dostępnej wartości. Brak w
+                                          Funds, stopa referencyjna    danych stóp procentowych i
+                                          NBP, CPI PL r/r. VAR i       inflacji strefy euro.
+                                          BVAR: kurs USD/PLN i
+                                          cena ropy WTI.
+ USD/PLN      dzienna,      02.01.2002–   Modele ML: zmiana            Jak dla EUR/PLN. Kurs
+ (poziom)     fixingi NBP   16.09.2026    EUR/PLN, zmiana              EUR/USD EBC
+                                          EUR/USD (NBP),               (publikowany po fixingu
+                                          rentowność UST 10Y,          NBP) zastąpiono kursem
+                                          spread UST 10Y–2Y,           implikowanym z tabeli
+                                          różnica WIBOR 3M – Fed       NBP, aby uniknąć
+                                          Funds, różnica rentowności   wykorzystania informacji
+                                          PL–US 10Y, VIX, stopa        niedostępnej w momencie
+                                          zwrotu S&P 500, różnica      prognozy.
+                                          inflacji USA–Polska. VAR i
+                                          BVAR: kurs EUR/PLN i
+                                          cena ropy WTI.
+
+
+
+
+                                               6
+ Target         Częstotli-    Zakres        Główne predyktory             Braki / ograniczenia
+                wość          danych
+
+ WIG20          dzienna,      04.01.2010–   Stopa zwrotu S&P 500,         Krótsza historia (od 2010
+ (poziom i      sesje GPW     17.09.2026    VIX, zmiany kursów            r.). Serie z USA kończą się
+ zmienność)                                 EUR/PLN i USD/PLN,            w maju 2026 r., co dotyczy
+                                            różnica rentowności PL–US     57 z 599 momentów
+                                            10Y, WIBOR 3M, CPI PL         testowych.
+                                            r/r. Modele zmienności:
+                                            tylko target.
+ Ropa Brent     dzienna,      30.07.2007–   Zmiana EUR/USD (EBC),         Luka w notowaniach w IV
+ (poziom i      sesje ICE     01.09.2026    zmiana DXY, stopa zwrotu      2009 r. (ok. 12 sesji). W
+ zmienność)                                 S&P 500, VIX, stopa Fed       eksporcie brak ceny WTI,
+                                            Funds (dzienna).              dlatego targetem jest
+                                            GARCH-MIDAS: średnia          Brent. Brak danych o
+                                            miesięczna stopy Fed          zapasach ropy i indeksu
+                                            Funds.                        zmienności OVX.
+ Złoto          dzienna,      30.08.2000–   Zmiana EUR/USD (EBC),         Szereg notowań kontraktu
+ (poziom i      sesje         01.09.2026    zmiana DXY, stopa zwrotu      terminowego połączony z
+ zmienność)     COMEX                       S&P 500, VIX, stopa Fed       dwóch źródeł (punkt
+                                            Funds (dzienna). Modele       połączenia 29.05.2020, w
+                                            zmienności: tylko target.     zbiorze treningowym). Brak
+                                                                          rentowności UST 10Y w
+                                                                          eksporcie.
+ BTC/USD        dzienna, 7    17.09.2014–   Stopa zwrotu S&P 500,         Dane kończą się 31.03.2025;
+ (poziom)       dni w         31.03.2025    VIX, zmiana DXY,              okres testowy jest
+                tygodniu                    rentowność UST 10Y, stopa     wcześniejszy niż dla
+                                            zwrotu złota (wszystkie z     pozostałych wskaźników.
+                                            opóźnieniem 1 dnia
+                                            roboczego).
+ Stopa ref.     dni robocze   26.02.1998–   Tylko target (prognoza        Szereg schodkowy,
+ NBP (szereg                  16.09.2026    naiwna i ARIMA).              zmieniający się rzadko; w
+ dzienny)                                                                 latach 2020–2021 wartości
+                                                                          bliskie zera.
+ Stopa ref.     miesięczna    02.2002–      Poziom: WIBOR 3M, CPI         Predyktory bez opóźnień
+ NBP (szereg                  06.2026       r/r. Kierunek: CPI r/r,       publikacji (jak w
+ miesięczny,                                różnica WIBOR 3M – stopa      implementacji referencyjnej
+ kierunek                                   referencyjna, miesięczna      w R). Zbiór testowy
+ decyzji)                                   zmiana EUR/PLN.               obejmuje 17 momentów
+                                                                          prognozy, w tym jedną
+                                                                          zmianę stopy.
+ Obligacje      dzienna, dni 29.11.2004–    Czynniki DNS (poziom,         Targetem jest stopa
+ (stopy zero-   notowań      28.08.2026     nachylenie, krzywizna) z      zerokuponowa odtworzona
+ kuponowe                                   opóźnieniami i przyrostami;   z modelu DNS, a nie
+ 1Y, 2Y, 5Y,                                w wariantach rozszerzonych    notowania benchmarków.
+ 7Y, 10Y)                                   także stopa NBP,              Rentowność 1Y w źródle
+                                            POLONIA, stopa MRO            bywa nieciągła.
+                                            EBC, kurs EUR/PLN i
+                                            zmienne ryzyka.
+
+
+Historię każdego wskaźnika podzielono chronologicznie na zbiór treningowy (70%), walidacyjny
+(15%) i testowy (15%), zgodnie z protokołem opisanym w rozdziale 5. Ponieważ zakresy do-
+stępnych danych różnią się między wskaźnikami, różnią się także okresy poszczególnych zbiorów
+
+
+                                                  7
+(tabela 3). W obrębie jednego wskaźnika wszystkie modele, łącznie z benchmarkiem, oceniano
+na identycznych okresach i w tych samych momentach prognozy.
+
+Tabela 3: Chronologiczny podział danych (70/15/15) i liczba momentów prognozy w zbiorze testowym
+Target                      Trening             n         Walidacja          n          Test            n Momenty
+
+EUR/PLN, USD/PLN      02.01.2002–12.04.2019   4369   15.04.2019–27.12.2022 936 28.12.2022–16.09.2026 937       31
+WIG20                 04.01.2010–13.09.2021   2924   14.09.2021–11.03.2024 626 12.03.2024–17.09.2026 628      599
+Ropa Brent            30.07.2007–30.12.2020   3326   31.12.2020–30.10.2023 712 31.10.2023–01.09.2026 714      685
+Złoto                 30.08.2000–16.11.2018   4568   19.11.2018–07.10.2022 978 10.10.2022–01.09.2026 980      951
+BTC/USD               17.09.2014–31.01.2022   2694   01.02.2022–31.08.2023 577 01.09.2023–31.03.2025 578      549
+Stopa NBP (dzienna)   26.02.1998–21.02.2018   5214   22.02.2018–03.06.2022 1117 06.06.2022–16.09.2026 1118     55
+Stopa NBP (mies.)     01.02.2002–01.02.2019    205   01.03.2019–01.09.2022   43 01.10.2022–01.06.2026   45     17
+Obligacje (DNS)       29.11.2004–19.02.2020   3805   20.02.2020–22.05.2023 815 23.05.2023–28.08.2026 817       19
+
+n – liczba obserwacji w siatce czasu targetu (dni notowań; dni kalendarzowe dla BTC, dni robocze dla szeregu
+ dziennego stopy, miesiące dla szeregu miesięcznego stopy). Momenty – liczba momentów prognozy w zbiorze
+ testowym. Podział dla szeregu miesięcznego stopy dotyczy także prognozy kierunku decyzji, a dla obligacji –
+                                              wszystkich tenorów.
+
+
+
+4.3      Zasady przygotowania danych
+
+Dla każdego wskaźnika zdefiniowano moment prognozy, czyli chwilę, w której model wyznacza
+prognozę. Dla kursów walut jest to fixing NBP (ok. 11:00), dla WIG20 – zamknięcie sesji GPW,
+dla ropy Brent i złota – rozliczenie notowań odpowiednio na giełdach ICE i COMEX, a dla
+BTC – dzienne zamknięcie notowań. Względem momentu prognozy każdej zmiennej przypisano
+opóźnienie publikacji:
+
+  • notowania z rynków zamykanych po momencie prognozy (np. zamknięcia rynku amery-
+    kańskiego dla kursów walut i WIG20) są dostępne z opóźnieniem jednego dnia roboczego;
+  • dane miesięczne i kwartalne, datowane końcem okresu, są dostępne z opóźnieniem odpo-
+    wiadającym terminom ich publikacji (np. 15 dni dla inflacji CPI w Polsce, 32 dni dla
+    średniej miesięcznej stopy Fed Funds);
+  • w momencie prognozy model otrzymuje ostatnią znaną wartość każdej zmiennej, bez in-
+    terpolacji i bez wartości z przyszłości.
+
+Zmienne o różnych kalendarzach (dni robocze w Polsce, sesje w USA, notowania 7 dni w tygo-
+dniu, dane miesięczne) wyrównywano do siatki czasu targetu według tej samej zasady ostatniej
+znanej wartości. Stopy procentowe NBP, zapisane w źródłach tylko w dniach zmiany, przeno-
+szono w przód do kolejnej zmiany. Zmienne potencjalnie zawierające informację o samym targecie
+(np. nachylenie krzywej obliczane z prognozowanego tenoru) oznaczono w specyfikacjach jako
+niedozwolone w roli predyktorów.
+
+
+4.4      Kontrola jakości danych i doświadczenia z pracy na danych
+
+Dane do projektu pochodziły z kilku równoległych ścieżek i były udostępniane w kolejnych wer-
+sjach, w miarę jak doprecyzowywano zakres zmiennych dla poszczególnych wskaźników. Taki
+tryb pracy jest naturalny w projektach badawczo-wdrożeniowych, w których wymagania wobec
+danych krystalizują się równolegle z budową modeli. Wymagał on jednak wprowadzenia stałej
+warstwy kontroli: przed użyciem w modelach każdy zbiór był przeglądany pod kątem zgodności
+zawartości z opisem kolumn, ciągłości siatki dat, luk, wartości skrajnych oraz ryzyka wykorzysta-
+nia informacji niedostępnej w momencie prognozy. Kluczowe serie porównywano z niezależnymi
+źródłami.
+
+
+                                                           8
+Przeglądy potwierdziły wysoką jakość podstawowych szeregów – na przykład kursy EUR/PLN i
+USD/PLN w eksporcie są w pełni zgodne z danymi API NBP (6231 z 6231 dni), a skrajne zmiany
+notowań odpowiadają znanym zdarzeniom rynkowym. Jednocześnie pozwoliły one wcześnie zi-
+dentyfikować kwestie, które przy automatycznym wykorzystaniu danych mogłyby zniekształcić
+wyniki modeli:
+
+    • opis i zawartość kolumn – w pierwszej wersji eksportu kilka kolumn miało nazwy nie-
+      odpowiadające zawartości (np. indeks efektywnego kursu złotego opisany jako rentowność
+      obligacji 10-letnich); kwestie te zostały skorygowane w kolejnej wersji eksportu, a do czasu
+      korekty stosowano słownik zgodności nazw;
+    • łączenie serii z różnych źródeł – szereg cen złota jest połączeniem dwóch serii notowań;
+      punkt połączenia oznaczono i uwzględniono w interpretacji wyników;
+    • datowanie danych okresowych – część danych miesięcznych jest datowana początkiem
+      okresu, którego dotyczy, mimo że ich wartość jest znana dopiero po jego zakończeniu. Co do
+      zasady ryzyko wykorzystania informacji niedostępnej w momencie prognozy ograniczano
+      przez odpowiednie opóźnienia publikacji. Wyjątkiem były modele oparte na miesięcznym
+      panelu stopy procentowej, w których predyktory, w tym inflację CPI, wykorzystano bez
+      uwzględnienia opóźnienia publikacji, zgodnie z implementacją referencyjną. Wyniki tych
+      modeli mają charakter wstępny i wymagają ostrożności interpretacyjnej;
+    • różne horyzonty dostępności – poszczególne zbiory kończą się w różnych datach (od
+      31.03.2025 dla BTC do 17.09.2026 dla WIG20), co przekłada się na różne okresy testowe; w
+      przypadku predyktorów kończących się wcześniej niż target modele korzystały z ostatniej
+      dostępnej wartości, a liczbę takich momentów prognozy raportowano;
+    • zmiany zakresu między wersjami – kolejne wersje eksportu różniły się zestawem ko-
+      lumn i źródłem niektórych serii (np. kursu EUR/USD), dlatego nie łączono kolumn po-
+      chodzących z różnych wersji.
+
+Wszystkie zidentyfikowane kwestie udokumentowano, a sposób ich obsługi zapisano jawnie w
+specyfikacjach danych, bez modyfikowania plików źródłowych. Doświadczenia te zostaną wyko-
+rzystane w kolejnym etapie projektu, w którym zasilanie modeli danymi ma zostać ujednoli-
+cone w oparciu o rejestr cech w infrastrukturze banku (rozdział 6), zapewniający wersjonowanie
+zmiennych i wyrównanie danych według stanu wiedzy w momencie prognozy.
+
+
+5     Wstępne uczenie, kalibracja i testy lokalne
+
+5.1    Sposób prowadzenia testów
+
+Wszystkie modele w projekcie, niezależnie od wskaźnika i rodziny modeli, testowano lokal-
+nie, poza infrastrukturą zamawiającego, według jednego wspólnego protokołu. Historię każdego
+wskaźnika podzielono chronologicznie na trzy rozłączne części: zbiór treningowy (najstarsze 70%
+obserwacji), walidacyjny (kolejne 15%) i testowy (najnowsze 15%). Podziału dokonano osobno
+dla każdego wskaźnika, na jego własnej siatce dat, więc okresy różnią się między wskaźnikami w
+zależności od dostępności i częstotliwości danych (tabela 3). W obrębie wskaźnika wszystkie mo-
+dele, łącznie z benchmarkiem, oceniano na identycznych okresach i w identycznych momentach
+prognozy. Zbiór treningowy służy do estymacji, walidacyjny do wyboru konfiguracji, a testowy
+wyłącznie do oceny końcowej.
+W zbiorze walidacyjnym i testowym zastosowano backtest kroczący (walk-forward) z oknem
+rozszerzającym. W każdym momencie prognozy t model jest budowany od nowa na wszystkich
+
+
+                                                9
+obserwacjach dostępnych do t włącznie i wyznacza prognozy na zadany horyzont, po czym mo-
+ment prognozy przesuwa się o stały krok. Dla każdego wskaźnika badano dwa horyzonty, krótki i
+średni, a krok backtestu dobrano do częstotliwości i długości szeregu (tabela 4). Ostatni moment
+prognozy w każdym zbiorze wyznaczono tak, aby mieścił się w nim dłuższy z horyzontów, dzięki
+czemu wszystkie horyzonty objęte konfiguracją oceniane są w tych samych momentach.
+
+                 Tabela 4: Horyzonty prognozy i krok backtestu według wskaźników
+
+      Wskaźnik                                Horyzonty                    Krok backtestu
+      EUR/PLN, USD/PLN                        1 i 30 dni notowań           30 obserwacji
+      Obligacje (stopy zerokuponowe DNS)      60 i 250 dni notowań         30 obserwacji
+      Stopa procentowa (szereg dzienny)       1 i 30 dni roboczych         20 obserwacji
+      Stopa procentowa (szereg miesięczny)    1 i 12 miesięcy              2 miesiące
+      WIG20, ropa, złoto                      1 i 30 dni notowań           1 obserwacja
+      BTC                                     1 i 30 dni kalendarzowych    1 obserwacja
+
+
+Prognozy wielokrokowe wyznaczano dynamicznie: prognoza na dany krok korzysta wyłącznie z
+informacji znanej w momencie t oraz z wcześniejszych prognoz modelu, a nie z wartości zre-
+alizowanych w horyzoncie. Zmienne objaśniające, które nie są prognozowane przez sam model,
+utrzymywano w horyzoncie na wartościach znanych w momencie t. Modele z elementem losowym
+(sieci neuronowe, XGBoost i pokrewne) budowano od nowa w każdym momencie prognozy i dla
+każdego ziarna generatora.
+Zapobieganie przeciekowi informacji z przyszłości opiera się na kilku regułach stosowanych jed-
+nolicie dla wszystkich wskaźników. Każdej zmiennej przypisano opóźnienie publikacji: wartość
+obserwowana w dniu d jest uznawana za znaną dopiero od dnia d powiększonego o to opóźnie-
+nie. Notowania z rynków zamykanych po momencie prognozy są dostępne z opóźnieniem jednego
+dnia roboczego, a dane miesięczne i kwartalne, datowane końcem okresu, z opóźnieniem odpo-
+wiadającym terminom ich publikacji. Wyjątkiem są modele oparte na miesięcznym panelu stopy
+procentowej (VAR, BVAR oraz modele kierunku decyzji), w których predyktory – w tym inflację
+CPI – wykorzystano bez uwzględnienia opóźnienia publikacji, zgodnie z implementacją referen-
+cyjną (podrozdział 7.3). W momencie prognozy t model otrzymuje ostatnią znaną wartość każdej
+zmiennej, bez interpolacji. Transformacje i skalowanie zmiennych wyznaczano wyłącznie na da-
+nych dostępnych w danym momencie prognozy, a wartości zrealizowane w horyzoncie służyły
+jedynie do obliczenia błędów.
+
+
+5.2   Zakres kalibracji
+
+Na obecnym etapie kalibracja miała charakter wstępny i służyła ustaleniu konfiguracji pozwa-
+lających sprawdzić poprawność działania modeli. Dla każdego modelu rozpatrywano niewielką,
+z góry ustaloną siatkę konfiguracji, w wariancie opartym wyłącznie na historii targetu, a tam,
+gdzie model na to pozwala, także w wariancie z predyktorami. Do oceny na zbiorze testowym
+przechodziła konfiguracja o najlepszym średnim wyniku miary głównej na zbiorze walidacyjnym.
+W zależności od rodziny siatka obejmowała rzędy i liczbę opóźnień modeli ekonometrycznych,
+parametry rozkładu a priori modeli bayesowskich, specyfikację modeli zmienności, a w modelach
+uczenia maszynowego długość okna wejściowego oraz parametry architektury i uczenia. Modele z
+elementem losowym uruchamiano dla trzech ziaren generatora liczb losowych, raportując średni
+wynik zamiast najlepszego pojedynczego uruchomienia. Systematyczny dobór hiperparametrów
+i zestawów predyktorów przewidziano na kolejne etapy projektu.
+
+
+
+                                               10
+5.3   Benchmark i metryki
+
+Dla modeli poziomu benchmarkiem była prognoza naiwna, zakładająca, że wartość wskaźnika
+w horyzoncie h będzie równa ostatniej znanej obserwacji:
+
+                                         ŷTnaiwna
+                                             +h    = yT .
+
+Główną miarą jakości prognoz poziomu był średni bezwzględny błąd procentowy, liczony na po-
+ziomie wskaźnika, osobno dla każdego horyzontu, ze wszystkich N momentów prognozy danego
+zbioru:
+                                            N
+                                      100% X    yti +h − ŷti +h|ti
+                           MAPEh =                                  .
+                                        N i=1         yti +h
+Modele prognozujące zmianę lub stopę zwrotu oceniano po przeliczeniu prognozy na poziom
+wskaźnika. Pomocniczo obliczano średni błąd bezwzględny (MAE), pierwiastek błędu średnio-
+kwadratowego (RMSE) i trafność kierunku zmiany. Względną jakość modelu mierzono poprawą
+względem prognozy naiwnej:
+                                    MAPEnaiwna − MAPEmodel
+                        Poprawa =                          · 100%,
+                                        MAPEnaiwna
+przy czym wartość dodatnia oznacza model dokładniejszy od benchmarku. Dla poziomu stopy
+procentowej, która przez długie okresy pozostaje niezmieniona, a w części próby przyjmuje war-
+tości bliskie zera, MAPE jest miarą niestabilną, dlatego w tym przypadku główną miarą jest
+MAE.
+Modele zmienności (rodzina GARCH) prognozują zmienność warunkową stóp zwrotu, dlatego
+oceniano je osobno, względem zmienności zrealizowanej mierzonej kwadratem logarytmicznej
+stopy zwrotu. Miarą główną był MAE, pomocniczą RMSE, a benchmarkiem zmienność histo-
+ryczna, czyli średnia kwadratów pięciu ostatnich stóp zwrotu.
+Modele klasyfikacyjne, prognozujące kierunek decyzji o stopie procentowej (obniżka, brak
+zmiany, podwyżka), oceniano za pomocą Balanced Accuracy, Macro-F1 i macierzy pomyłek, z
+benchmarkiem w postaci prognozy braku zmiany. Balanced Accuracy jest średnią czułością w
+poszczególnych klasach, więc nie premiuje modelu, który stale wskazuje najczęstszą klasę.
+Dla modeli z elementem losowym raportowano średnią i rozrzut wyników z trzech ziaren gene-
+ratora.
+Wyniki lokalne służyły do potwierdzenia poprawności technicznej, wstępnej kalibracji oraz cha-
+rakterystyki prognostycznej modeli. Nie służyły do formalnego wyboru jednego modelu produk-
+cyjnego.
+
+
+5.4   Charakter etapu i interpretacja wyników
+
+Przedmiotem zadania 1.4 było zbudowanie potoku modeli, ich implementacja, wstępne uczenie
+oraz potwierdzenie poprawności działania w jednolitym, odtwarzalnym protokole oceny. Kryte-
+rium powodzenia na tym etapie jest więc kompletność i poprawność przebiegu: model odczytuje
+dane zgodnie ze specyfikacją, nie korzysta z informacji z przyszłości, generuje pełny zestaw pro-
+gnoz dla wszystkich horyzontów i daje wyniki porównywalne z benchmarkiem w tych samych
+momentach prognozy.
+Dokładność prognoz uzyskana przy wstępnej kalibracji nie jest miarą docelowych możliwości
+modeli. W części przypadków MAPE modelu jest wyższe od MAPE prognozy naiwnej, co ozna-
+cza ujemną poprawę względem benchmarku. Jest to wynik oczekiwany na tym etapie: prognoza
+
+
+                                               11
+naiwna jest wymagającym punktem odniesienia dla szeregów finansowych o charakterze zbliżo-
+nym do błądzenia losowego, a modele oceniano w konfiguracjach wybranych z niewielkiej siatki,
+bez systematycznego strojenia hiperparametrów i bez selekcji predyktorów. Systematyczny do-
+bór parametrów, selekcja i rozszerzanie zestawów danych oraz uczenie modeli ukierunkowane na
+poprawę względem benchmarku stanowią przedmiot kolejnych etapów projektu. Wyniki przed-
+stawione w rozdziale 7 należy zatem traktować jako punkt odniesienia (baseline) dla dalszych
+prac.
+
+
+6     Przekazanie i uruchomienie modeli w infrastrukturze banku
+
+Wstępne uczenie, kalibrację i testy modeli przeprowadzono w lokalnym środowisku roboczym
+zespołu SGH. Następnie technicznie sprawne implementacje dostosowano do sposobu dostarcza-
+nia danych i uruchamiania modeli w infrastrukturze przygotowanej przez bank – rejestrze cech
+i modeli PKO Feature Registry (narzędzie pko-fr), w którym dane pochodzą z BigQuery (war-
+stwy Silver i Gold projektu lab-biz-tai-gcp-pr), a procesy treningu, predykcji i walidacji są
+wykonywane przez bibliotekę banku, nie przez kod zespołu SGH. Dla każdego przekazywanego
+modelu przygotowano kod (klasę Model w src/model.py), konfigurację (model_config.yaml),
+wskazanie wersji cech i targetu oraz wynik referencyjny z przebiegu lokalnego. Poprawność in-
+tegracji potwierdzano przez uruchomienie modelu w środowisku banku, wygenerowanie prognoz
+oraz porównanie rezultatu z przebiegiem lokalnym w przyjętej tolerancji.
+
+
+6.1    Różnica między środowiskiem lokalnym a infrastrukturą banku
+
+Środowisko lokalne służyło eksploracji: dane w plikach (parquet/CSV), własny silnik oceny
+(podział 70/15/15, backtest kroczący z oknem rozszerzającym, MAPE liczone dla każdego ho-
+ryzontu względem modelu naiwnego), swoboda w doborze bibliotek i konfiguracji. Infrastruktura
+banku narzuca natomiast ustandaryzowany cykl życia modelu, w którym zespół SGH dostar-
+cza wyłącznie klasę modelu, a całą resztę – pobranie i wyrównanie danych, walidację braków,
+podział walk-forward, liczenie metryk, serializację artefaktu – realizuje zamrożona biblioteka
+banku. Taka separacja gwarantuje, że wszystkie modele są oceniane identyczną procedurą i są
+porównywalne między sobą 1:1, niezależnie od autora i technologii.
+Najważniejsze konsekwencje tej separacji dla przekazania:
+
+    • Dane nie są plikiem, lecz cechą w rejestrze. Każda zmienna objaśniająca (x) musi
+      istnieć w rejestrze cech (feature store) jako zdefiniowana w SQL, wersjonowana cecha.
+      Zmienne, których nie było w rejestrze, zakładano ścieżką raw → template → add →
+      compute. Cechy makroekonomiczne i rzadsze niż dzienne pozostają w rejestrze w swo-
+      jej naturalnej częstotliwości; ich dopasowanie do dziennego kalendarza targetu wykonuje
+      złączenie as-of (point-in-time, bez podglądania przyszłości) na etapie eksportu macierzy
+      treningowej.
+    • Target to przyszły poziom serii. Target definiuje się jako wskazaną serię bazową plus
+      horyzont H; przesunięcie wartości o H dni wykonuje rejestr automatycznie. Dla każdego
+      modelu i każdego horyzontu (H = 1 oraz H = 30) rejestrowano osobny target.
+    • Ocena to walk-forward, nie pojedynczy podział. Podstawą akceptacji jest walidacja
+      krocząca metodą walk-forward (rosnące okno treningowe, test poza próbą), tożsama me-
+      todycznie z backtestem użytym lokalnie. Metryka celu jest zapisana na targecie i stamtąd
+      wyprowadzana jednolicie przez wszystkie procesy.
+    • Wymagany jest format ONNX. Artefakt produkcyjny musi eksportować się do formatu
+
+
+                                              12
+      ONNX; predykcja na produkcji liczona jest lekko przez onnxruntime, bez bibliotek modelu.
+      Format natywny (pickle) dopuszczano wyłącznie na fazę testów.
+
+
+6.2   Wzorzec
+
+Kluczowym wymaganiem integracyjnym, wspólnym dla wszystkich przekazywanych modeli, jest
+wzorzec narzucony przez standard banku: interfejs modelu operuje na poziomach (cena wchodzi
+i cena wychodzi), natomiast stacjonarną transformację (log-zwrot) model liczy wewnątrz siebie,
+względem kotwicy – kolumny z bieżącym poziomem prognozowanej serii, obecnej w zestawie
+cech. Dzięki temu modele zwrotowe i poziomowe dają wyjście w jednej przestrzeni i pozostają
+porównywalne. Rekonstrukcję poziomu dla modeli log-zwrotowych wpina się w sam graf ONNX,
+a nie w kod wokół niego – inaczej artefakt po eksporcie zwracałby zwrot zamiast poziomu i
+rozjechałby się z przebiegiem treningowym. Dostosowanie modeli zespołu SGH do tego wzorca
+było główną częścią pracy integracyjnej: modele budowane lokalnie na cechach i poziomie wprost
+wymagały przepisania tak, by kotwica znalazła się w zestawie cech, a rekonstrukcja poziomu była
+częścią grafu.
+
+
+6.3   Procedura przekazania pojedynczego modelu
+
+Dla każdego z przekazywanych modeli przechodzono tę samą, powtarzalną ścieżkę, zgodną z
+cyklem życia narzędzia pko-fr:
+
+  1. Projekt modelu (init) – utworzenie szkieletu katalogu modelu (src/model.py,
+     model_config.yaml, artifacts/, data/) w ramach wspólnego środowiska projektu,
+     wraz z wyborem najbliższego szablonu startowego (lstm, arima, custom itd.).
+  2. Cechy w rejestrze cech – dla każdej zmiennej objaśniającej sprawdzano, czy istnieje w
+     rejestrze; brakujące zakładano (raw → template → add → compute), wraz z wariantami
+     opóźnionymi (--lag 1) dla cech opóźnionych.
+  3. Target (target_add) – rejestracja targetu: seria bazowa (poziom prognozowanej ceny),
+     horyzont (1 albo 30) oraz metryka oceny.
+  4. Powiązanie cech z targetem (select → link) – zdefiniowanie zestawu cech dla targetu
+     w tabeli pomostowej. To wiąże dane z targetem, ale nie jest jeszcze wdrożeniem.
+  5. Macierz treningowa (training_export) – zbudowanie zbioru treningowego (parquet
+     oraz manifest z wersjami cech, zakresem dat i skrótem danych dla odtwarzalności); narzę-
+     dzie samo wpisuje listę cech do konfiguracji modelu i wyrównuje cechy rzadsze złączeniem
+     as-of.
+  6. Konfiguracja i kod – uzupełnienie model_config.yaml (typ modelu, hiperparametry,
+     ziarno, parametry walidacji) oraz implementacja klasy Model (train, predict, to_onnx,
+     explain) z poprawnie wskazaną kotwicą.
+  7. Walidacja walk-forward (model_validate) – ocena modelu metodą kroczącą; raport
+     zbiorczy (metryki dla każdego okna oraz agregaty) stanowił podstawę akceptacji i punkt
+     odniesienia dla porównania z przebiegiem lokalnym.
+  8. Trening finalny (model_train) – wytrenowanie artefaktu produkcyjnego (model.onnx
+     wraz z metadanymi) na pełnym zbiorze.
+
+Krok publikacji (model_publish, wdrożenie artefaktu do GCS i rejestracja wersji) jest w infra-
+strukturze banku dostępny wyłącznie dla uruchomień chmurowych (--backend gcp). W okresie
+
+
+                                              13
+realizacji prac backend chmurowy pozostawał w przebudowie (trwało przejście na Vertex Pipe-
+lines), przez co pełna publikacja produkcyjna nie była możliwa do wykonania od początku do
+końca. Przekazanie i weryfikację przeprowadzano zatem do etapu treningu i walidacji włącznie,
+a zgodność z przebiegiem lokalnym potwierdzano na wygenerowanych prognozach.
+
+
+6.4    Weryfikacja poprawności integracji
+
+Test działania uznawano za zaliczony, jeżeli model w infrastrukturze banku: (1) został poprawnie
+uruchomiony, (2) odczytał wymagane dane z rejestru cech, (3) wygenerował kompletny zestaw
+prognoz dla wszystkich horyzontów, (4) zapisał wyniki i logi oraz (5) uzyskał rezultat zgodny
+z przebiegiem lokalnym w przyjętej tolerancji. Zgodność oceniano przez porównanie prognoz i
+metryk agregatowych walk-forward uzyskanych w banku z wynikiem referencyjnym z przebiegu
+lokalnego na tym samym zakresie dat i przy tym samym protokole walidacji (liczba okien,
+minimalna frakcja treningowa, kolumna porządku czasu). Porównywano zarówno agregaty, jak
+i wynik pozycja po pozycji.
+
+
+6.5    Przekazane modele
+
+Przekazane modele zestawiono w tabeli 5. Modele poziomu realizują wzorzec „zwroty wewnątrz,
+poziomy na wejściu i wyjściu”; modele zmienności, modele kierunku decyzji NBP oraz modele
+krzywej rentowności stanowią osobne kategorie oceny, opisane w uwagach pod tabelą. Wiersze
+modeli o identycznej specyfikacji dla obu horyzontów połączono.
+                         Tabela 5: Modele przekazane do infrastruktury banku
+
+ Identyfikator targetu   Model         Zmienna y (seria      Zmienne x (cechy)
+                                       bazowa)
+
+ ropa_svm_h1, ropa_      SVM/SVR       OIL_BRENT_PRICE       OIL_BRENT_PRICE_LAG1, DXY_INDEX, EUR_
+ svm_h30                                                     USD_CURRENCY, GOLD_SPOT_PRICE, SPX_
+                                                             INDEX
+ ropa_lstm_h1, ropa_     LSTM          OIL_BRENT_PRICE       OIL_BRENT_PRICE_LAG1, DXY_INDEX, EUR_
+ lstm_h30                                                    USD_CURRENCY, GOLD_SPOT_PRICE, SPX_
+                                                             INDEX
+ gold_xgboost_h1,        XGBoost       GOLD_SPOT_PRICE       GOLD_SPOT_PRICE_LAG1, DXY_INDEX, EUR_
+ gold_xgboost_h30                                            USD_CURRENCY, OIL_BRENT_PRICE, SPX_
+                                                             INDEX, VIX_PRICE
+ gold_garch_h1, gold_    GARCH         GOLD_SPOT_PRICE       GOLD_SPOT_PRICE_LAG1, DXY_INDEX, EUR_
+ garch_h30                                                   USD_CURRENCY, OIL_BRENT_PRICE, SPX_
+                                                             INDEX, VIX_PRICE
+ btc_xgboost_h1, btc_    XGBoost       BTC_USD_SPOT          BTC_USD_SPOT, BTC_USD_SPOT_LAG_1–20,
+ xgboost_h30                                                 US10Y, RISK_SCORE
+ btc_svm_h1, btc_svm_    SVM/SVR       BTC_USD_SPOT          BTC_USD_SPOT, BTC_USD_SPOT_LAG_1–5,
+ h30                                                         US10Y, RISK_SCORE
+ btc_lstm_h1, btc_       LSTM          BTC_USD_SPOT          BTC_USD_SPOT, BTC_USD_SPOT_LAG_1–20,
+ lstm_h30                                                    US10Y, RISK_SCORE
+ btc_tft_h1, btc_tft_    TFT           BTC_USD_SPOT          BTC_USD_SPOT, BTC_USD_SPOT_LAG_1–20,
+ h30                                                         US10Y, RISK_SCORE
+ fx_eurpln_naive_h1      Prognoza      EUR/PLN – kurs        Bieżący poziom EUR/PLN
+                         naiwna        bieżący               (anchor_feature)
+ fx_eurpln_xgb_h30       XGBoost       EUR/PLN – kurs        Bieżący EUR/PLN oraz 21 opóźnień
+                                       bieżący               (lag_01–lag_21)
+ fx_usdpln_lstm_h1       LSTM          USD/PLN – kurs        Bieżący USD/PLN oraz 20 opóźnień
+                                       bieżący               (lag_01–lag_20)
+ fx_usdpln_tft_h30       TFT           USD/PLN – kurs        Bieżący USD/PLN oraz 20 opóźnień
+                                       bieżący               (lag_01–lag_20)
+
+
+                                                  14
+Identyfikator targetu   Model           Zmienna y (seria      Zmienne x (cechy)
+                                        bazowa)
+
+eurpln_1d_naive         Naiwny          EUR_PLN_CURRENCY      EUR_PLN_CURRENCY
+eurpln_1d_arima         ARIMA           EUR_PLN_CURRENCY      EUR_PLN_CURRENCY
+eurpln_1d_var           VAR             EUR_PLN_CURRENCY      EUR_PLN_CURRENCY, OIL_BRENT_PRICE,
+                                                              USD_PLN_CURRENCY
+eurpln_1d_bvar          BVAR            EUR_PLN_CURRENCY      EUR_PLN_CURRENCY, OIL_BRENT_PRICE,
+                                                              USD_PLN_CURRENCY
+eurpln_30d_naive        Naiwny          EUR_PLN_CURRENCY      EUR_PLN_CURRENCY
+eurpln_30d_arima        ARIMA           EUR_PLN_CURRENCY      EUR_PLN_CURRENCY
+eurpln_30d_var          VAR             EUR_PLN_CURRENCY      EUR_PLN_CURRENCY, OIL_BRENT_PRICE,
+                                                              USD_PLN_CURRENCY
+eurpln_30d_bvar         BVAR            EUR_PLN_CURRENCY      EUR_PLN_CURRENCY, OIL_BRENT_PRICE,
+                                                              USD_PLN_CURRENCY
+usdpln_1d_naive         Naiwny          USD_PLN_CURRENCY      USD_PLN_CURRENCY
+usdpln_1d_arima         ARIMA           USD_PLN_CURRENCY      USD_PLN_CURRENCY
+usdpln_1d_var           VAR             USD_PLN_CURRENCY      USD_PLN_CURRENCY, EUR_PLN_CURRENCY,
+                                                              OIL_BRENT_PRICE
+usdpln_1d_bvar          BVAR            USD_PLN_CURRENCY      USD_PLN_CURRENCY, EUR_PLN_CURRENCY,
+                                                              OIL_BRENT_PRICE
+usdpln_30d_naive        Naiwny          USD_PLN_CURRENCY      USD_PLN_CURRENCY
+usdpln_30d_arima        ARIMA           USD_PLN_CURRENCY      USD_PLN_CURRENCY
+usdpln_30d_var          VAR             USD_PLN_CURRENCY      USD_PLN_CURRENCY, EUR_PLN_CURRENCY,
+                                                              OIL_BRENT_PRICE
+usdpln_30d_bvar         BVAR            USD_PLN_CURRENCY      USD_PLN_CURRENCY, EUR_PLN_CURRENCY,
+                                                              OIL_BRENT_PRICE
+stopa_d_1d_naive        Naiwny          NBP_RATE_REF          NBP_RATE_REF
+stopa_d_1d_arima        ARIMA           NBP_RATE_REF          NBP_RATE_REF
+stopa_d_30d_naive       Naiwny          NBP_RATE_REF          NBP_RATE_REF
+stopa_d_30d_arima       ARIMA           NBP_RATE_REF          NBP_RATE_REF
+stopa_m_1m_naive        Naiwny          NBP_RATE_REF          NBP_RATE_REF
+stopa_m_1m_arima        ARIMA           NBP_RATE_REF          NBP_RATE_REF
+stopa_m_1m_var          VAR             NBP_RATE_REF          NBP_RATE_REF, WIBOR_3M, CPI_POLAND_
+                                                              YOY
+stopa_m_1m_bvar         BVAR            NBP_RATE_REF          NBP_RATE_REF, WIBOR_3M, CPI_POLAND_
+                                                              YOY
+stopa_m_12m_naive       Naiwny          NBP_RATE_REF          NBP_RATE_REF
+stopa_m_12m_arima       ARIMA           NBP_RATE_REF          NBP_RATE_REF
+stopa_m_12m_var         VAR             NBP_RATE_REF          NBP_RATE_REF, WIBOR_3M, CPI_POLAND_
+                                                              YOY
+stopa_m_12m_bvar        BVAR            NBP_RATE_REF          NBP_RATE_REF, WIBOR_3M, CPI_POLAND_
+                                                              YOY
+stopa_kier_1m_logit     Logit           NBP_RATE_HIKE_M       NBP_RATE_HIKE_M, CPI_POLAND_YOY,
+                                                              WIBOR_3M, EUR_PLN_CHANGE_M
+stopa_kier_1m_          Probit          NBP_RATE_HIKE_M       NBP_RATE_HIKE_M, CPI_POLAND_YOY,
+probit                                                        WIBOR_3M, EUR_PLN_CHANGE_M
+stopa_kier_1m_          Ordered logit   NBP_RATE_DECISION_M   NBP_RATE_DECISION_M, CPI_POLAND_YOY,
+ologit                                                        WIBOR_3M, EUR_PLN_CHANGE_M
+stopa_kier_1m_          Ordered probit NBP_RATE_DECISION_M    NBP_RATE_DECISION_M, CPI_POLAND_YOY,
+oprobit                                                       WIBOR_3M, EUR_PLN_CHANGE_M
+stopa_kier_12m_         Logit           NBP_RATE_HIKE_M       NBP_RATE_HIKE_M, CPI_POLAND_YOY,
+logit                                                         WIBOR_3M, EUR_PLN_CHANGE_M
+stopa_kier_12m_         Probit          NBP_RATE_HIKE_M       NBP_RATE_HIKE_M, CPI_POLAND_YOY,
+probit                                                        WIBOR_3M, EUR_PLN_CHANGE_M
+stopa_kier_12m_         Ordered logit   NBP_RATE_DECISION_M   NBP_RATE_DECISION_M, CPI_POLAND_YOY,
+ologit                                                        WIBOR_3M, EUR_PLN_CHANGE_M
+
+
+
+
+                                                   15
+ Identyfikator targetu   Model         Zmienna y (seria       Zmienne x (cechy)
+                                       bazowa)
+
+ stopa_kier_12m_         Ordered probit NBP_RATE_DECISION_M   NBP_RATE_DECISION_M, CPI_POLAND_YOY,
+ oprobit                                                      WIBOR_3M, EUR_PLN_CHANGE_M
+ Bonds_3y_h91            VAR+RIDGE     CURVE_DNS_BETA0_       YIELD_USA_10Y, YIELD_USA_10Y_LAG1,
+                                       LEVEL, CURVE_DNS_      YIELD_DE_10Y, YIELD_DE_10Y_LAG1, EUR_
+                                       BETA1_SLOPE, CURVE_    PLN_CURRENCY, EUR_PLN_CURRENCY_LAG1,
+                                       DNS_BETA2_CURVATURE    VIX_INDEX, VIX_INDEX_LAG1, OIL_BRENT_
+                                                              PRICE
+ Bonds_3y_h365           AR(1)+RIDGE CURVE_DNS_BETA0_         NBP_RATE_REF, IRS_CURVE_POLAND_2Y,
+                                     LEVEL, CURVE_DNS_        IRS_CURVE_POLAND_5Y, IRS_CURVE_
+                                     BETA1_SLOPE, CURVE_      POLAND_10Y, YIELD_USA_10Y, YIELD_DE_
+                                     DNS_BETA2_CURVATURE      10Y, EUR_PLN_CURRENCY, VIX_INDEX
+ Bonds_5y_h91            VAR+RIDGE CURVE_DNS_BETA0_           NBP_RATE_REF, WIBOR_3M, FRA_1X4, FRA_
+                         (IRS RISK   LEVEL, CURVE_DNS_        3X6, FRA_6X9, FRA_6X9_LAG1, IRS_CURVE_
+                         FACTORS)    BETA1_SLOPE, CURVE_      POLAND_2Y, IRS_CURVE_POLAND_2Y_LAG1,
+                                     DNS_BETA2_CURVATURE      IRS_CURVE_POLAND_5Y, IRS_CURVE_
+                                                              POLAND_10Y, GDP_POLAND_YOY_LAG1, CPI_
+                                                              POLAND_YOY_LAG1, RETAIL_SALES_
+                                                              POLAND_YOY_LAG1, INDUSTRIAL_
+                                                              PRODUCTION_POLAND_INDEX_LAG1,
+                                                              INDUSTRIAL_CONFIDENCE_POLAND_LAG1,
+                                                              WAGES_POLAND_LAG1
+ Bonds_5y_h365           VAR(1)        CURVE_DNS_BETA0_       CURVE_DNS_BETA0_LEVEL, CURVE_DNS_
+                                       LEVEL, CURVE_DNS_      BETA1_SLOPE, CURVE_DNS_BETA2_
+                                       BETA1_SLOPE, CURVE_    CURVATURE, PL_BENCH_10Y_TTM_365D, PL_
+                                       DNS_BETA2_CURVATURE    BENCH_2Y_TTM_365D, PL_BENCH_5Y_TTM_
+                                                              365D, PL_BENCH_7Y_TTM_365D
+ Bonds_6y_h91            RIDGE         CURVE_DNS_BETA0_       NBP_RATE_REF, WIBOR_3M, FRA_1X4, FRA_
+                                       LEVEL, CURVE_DNS_      3X6, FRA_6X9, FRA_6X9_LAG1, IRS_CURVE_
+                                       BETA1_SLOPE, CURVE_    POLAND_2Y, IRS_CURVE_POLAND_2Y_LAG1,
+                                       DNS_BETA2_CURVATURE    IRS_CURVE_POLAND_5Y, IRS_CURVE_
+                                                              POLAND_10Y, GDP_POLAND_YOY_LAG1, CPI_
+                                                              POLAND_YOY_LAG1, RETAIL_SALES_
+                                                              POLAND_YOY_LAG1, INDUSTRIAL_
+                                                              PRODUCTION_POLAND_INDEX_LAG1,
+                                                              INDUSTRIAL_CONFIDENCE_POLAND_LAG1,
+                                                              WAGES_POLAND_LAG1, YIELD_USA_10Y,
+                                                              YIELD_USA_10Y_LAG1, YIELD_DE_10Y,
+                                                              YIELD_DE_10Y_LAG1, EUR_PLN_CURRENCY,
+                                                              EUR_PLN_CURRENCY_LAG1, VIX_INDEX,
+                                                              VIX_INDEX_LAG1, OIL_BRENT_PRICE
+ Bonds_6y_h365           AR(1)         CURVE_DNS_BETA0_       CURVE_DNS_BETA0_LEVEL, CURVE_DNS_
+                                       LEVEL, CURVE_DNS_      BETA1_SLOPE, CURVE_DNS_BETA2_
+                                       BETA1_SLOPE, CURVE_    CURVATURE, PL_BENCH_10Y_TTM_365D, PL_
+                                       DNS_BETA2_CURVATURE    BENCH_2Y_TTM_365D, PL_BENCH_5Y_TTM_
+                                                              365D, PL_BENCH_7Y_TTM_365D
+
+
+
+
+Uwagi do poszczególnych rodzin modeli, istotne dla integracji:
+
+   • SVM/SVR (ropa). Model regresji wektorów nośnych na cechach opóźnionych i rynko-
+     wych. Eksport do ONNX przez konwerter skl2onnx. Dostosowanie do wzorca banku wy-
+     magało przeniesienia rekonstrukcji poziomu do grafu i wskazania serii bazowej (poziomu)
+     jako kotwicy w zestawie cech.
+   • LSTM (ropa). Sieć rekurencyjna realizująca log-zwrot wewnątrz i zwracająca poziom,
+     z rekonstrukcją Pt · exp(r̂) wpiętą w graf ONNX (eksport torch.onnx). Wykorzystano
+     szablon lstm jako punkt startowy; dostosowano kotwicę i zestaw cech ropy.
+
+
+                                                  16
+• XGBoost (złoto). Model wzmacniania gradientowego na cechach. Eksport do ONNX
+  przez skl2onnx lub konwerter dedykowany.
+• GARCH (złoto). Model prognozuje zmienność warunkową, nie poziom ceny, więc sta-
+  nowi osobną kategorię oceny. Biblioteka arch nie eksportuje się do ONNX, dlatego arte-
+  fakt pozostaje w formacie natywnym – dopuszczalnym jedynie na fazę testów, a nie jako
+  ścieżka produkcyjna. Model przekazano do weryfikacji działania, z zastrzeżeniem braku
+  ścieżki wdrożeniowej w formacie natywnym.
+• XGBoost (bitcoin). Model wzmacniania gradientowego na bieżącym poziomie
+  BTC/USD, 20 opóźnieniach serii oraz zmiennych US10Y i RISK_SCORE. Bieżący poziom
+  BTC_USD_SPOT jest obecny w zestawie cech i pełni rolę kotwicy: model uczy się log-zwrotu,
+  a rekonstrukcja poziomu jest częścią grafu ONNX. Eksport do ONNX analogicznie jak w
+  modelu XGBoost dla złota.
+• SVM/SVR (bitcoin). Regresja wektorów nośnych w tym samym układzie co dla ropy
+  (kotwica w zestawie cech, rekonstrukcja poziomu w grafie, eksport przez skl2onnx). W od-
+  różnieniu od pozostałych modeli BTC korzysta z krótszego zestawu opóźnień (1–5 zamiast
+  1–20).
+• LSTM (bitcoin, USD/PLN). Sieć rekurencyjna zbudowana z szablonu lstm, w tym
+  samym wzorcu co LSTM dla ropy: log-zwrot wewnątrz, rekonstrukcja Pt · exp(r̂) wpięta w
+  graf (eksport torch.onnx). Opóźnienia serii (1–20) tworzą okno wejściowe sieci. Wariant
+  BTC przekazano dla H = 1 i H = 30, wariant USD/PLN (fx_usdpln_lstm_h1) – dla
+  H = 1.
+• TFT (bitcoin, USD/PLN). Temporal Fusion Transformer realizujący ten sam wzorzec
+  zwrotów wewnątrz i poziomów na wyjściu; eksport do ONNX przez torch.onnx, który wy-
+  maga ustalonej długości okna wejściowego i stałego układu cech. Wariant BTC przekazano
+  dla H = 1 i H = 30, wariant USD/PLN (fx_usdpln_tft_h30) – dla H = 30.
+• Prognoza naiwna i XGBoost (EUR/PLN, modele fx_eurpln). Model na-
+  iwny (fx_eurpln_naive_h1) zwraca bieżący poziom kursu wskazany jako kotwica
+  (anchor_feature), więc jego graf ONNX sprowadza się do przekazania wejścia na
+  wyjście. Model fx_eurpln_xgb_h30 korzysta z bieżącego kursu i 21 opóźnień.
+• Modele naiwne (EUR/PLN, USD/PLN, stopa referencyjna NBP). Prognozą jest
+  ostatni znany poziom serii bazowej. Modele pełnią rolę punktu odniesienia, względem któ-
+  rego oceniane są pozostałe modele dla tych samych targetów, i nie wymagają dodatkowych
+  cech poza samą serią.
+• ARIMA (EUR/PLN, USD/PLN, stopa referencyjna NBP). Modele jednowymia-
+  rowe, korzystające wyłącznie z serii bazowej. Biblioteka statsmodels nie eksportuje się do
+  ONNX; ponieważ prognoza ARIMA jest liniową funkcją przeszłych wartości i reszt, warun-
+  kiem ścieżki produkcyjnej jest odwzorowanie równania prognozy w grafie – w przeciwnym
+  razie artefakt pozostaje w formacie natywnym, dopuszczalnym jedynie na fazę testów (jak
+  w przypadku GARCH).
+• VAR i BVAR (EUR/PLN, USD/PLN). Modele wielowymiarowe, w których seria
+  bazowa jest modelowana łącznie z kursem drugiej pary walutowej i ceną ropy Brent. BVAR
+  różni się od VAR rozkładem a priori, który ściąga parametry i stabilizuje oszacowania przy
+  większej liczbie zmiennych. Prognoza na H = 30 powstaje przez iterację równań modelu;
+  uwaga dotycząca eksportu do ONNX jest taka sama jak dla ARIMA.
+• Stopa referencyjna NBP – wariant dzienny (stopa_d). Seria ma charakter schod-
+  kowy i zmienia się rzadko, dlatego dla horyzontów 1 i 30 dni przekazano wyłącznie model
+
+
+
+                                           17
+      naiwny i ARIMA; prognoza naiwna jest w tym przypadku wymagającym punktem odnie-
+      sienia.
+  • Stopa referencyjna NBP – wariant miesięczny (stopa_m). Target zdefiniowany na
+    serii miesięcznej z horyzontami 1 i 12 miesięcy. Modele VAR i BVAR rozszerzają serię
+    bazową o WIBOR_3M i CPI_POLAND_YOY; cechy te są w rejestrze w swojej naturalnej często-
+    tliwości i są dopasowywane do kalendarza targetu złączeniem as-of.
+  • Logit i probit (kierunek decyzji NBP). Modele klasyfikacji binarnej dla
+    NBP_RATE_HIKE_M; zwracają prawdopodobieństwo zdarzenia, a nie poziom serii, więc –
+    podobnie jak GARCH – stanowią osobną kategorię oceny, a wzorzec poziomów na wejściu
+    i wyjściu nie ma do nich zastosowania. Graf sprowadza się do kombinacji liniowej cech
+    i funkcji łączącej (logistycznej albo dystrybuanty rozkładu normalnego). Przekazano
+    warianty dla horyzontu 1 i 12 miesięcy.
+  • Ordered logit i ordered probit (kierunek decyzji NBP). Modele dla uporządko-
+    wanych kategorii decyzji (NBP_RATE_DECISION_M), zwracające prawdopodobieństwa po-
+    szczególnych kategorii wyznaczane przez progi na wspólnym indeksie liniowym. Zestaw
+    cech i kategoria oceny są takie same jak dla modeli binarnych; przekazano warianty dla
+    horyzontu 1 i 12 miesięcy.
+  • Modele obligacji (Bonds_3y, Bonds_5y, Bonds_6y). Zmienną y są trzy czynniki dyna-
+    micznego modelu Nelsona–Siegela (poziom, nachylenie, krzywizna), więc target jest wie-
+    lowymiarowy, a rentowność dla danego tenoru odtwarza się z prognozowanych czynników.
+    Dla każdego tenoru przekazano osobny model dla horyzontu 91 i 365 dni: na krótszym
+    horyzoncie modele VAR+Ridge i Ridge korzystają z szerokiego zestawu zmiennych rynko-
+    wych i makroekonomicznych (stopy, FRA, IRS, rentowności zagraniczne, kurs EUR/PLN,
+    VIX, ropa), na dłuższym – modele AR(1), AR(1)+Ridge i VAR(1) opierają się na samych
+    czynnikach i benchmarkach rentowności (PL_BENCH_*_TTM_365D) lub na węższym zesta-
+    wie zmiennych. Komponent Ridge eksportuje się przez skl2onnx; część autoregresyjna jest
+    liniowa i może zostać odwzorowana w grafie.
+
+
+6.6   Status przekazania i uruchomienia
+
+Status „zaliczony” oznacza poprawne wykonanie treningu i walidacji w ramach dostępnych kom-
+ponentów infrastruktury banku oraz wygenerowanie wyników zgodnych z przebiegiem referencyj-
+nym. Status ten nie oznacza publikacji produkcyjnego artefaktu, ponieważ backend publikacyjny
+GCP pozostawał w okresie realizacji zadania w przebudowie.
+
+                      Tabela 6: Status przekazania i uruchomienia modeli
+
+  Target                Model                  Horyzont      Test          Test integracyjny
+                                                             lokalny       w infrastrukturze
+                                                                           banku
+  Ropa (Brent)          SVM/SVR               1 i 30         zaliczony     zaliczony
+  Ropa (Brent)          LSTM                  1 i 30         zaliczony     zaliczony
+  Złoto                 XGBoost               1 i 30         zaliczony     zaliczony
+  Złoto                 GARCH                 1 i 30         zaliczony     zaliczony
+  Bitcoin (BTC/USD)     XGBoost               1 i 30         zaliczony     zaliczony
+  Bitcoin (BTC/USD)     SVM/SVR               1 i 30         zaliczony     zaliczony
+  Bitcoin (BTC/USD)     LSTM                  1 i 30         zaliczony     zaliczony
+  Bitcoin (BTC/USD)     TFT                   1 i 30         zaliczony     zaliczony
+  EUR/PLN               Prognoza naiwna       1              zaliczony     zaliczony
+
+
+
+                                             18
+ Target                Model                Horyzont         Test        Test integracyjny
+                                                             lokalny     w infrastrukturze
+                                                                         banku
+ EUR/PLN               XGBoost              30               zaliczony   zaliczony
+ USD/PLN               LSTM                 1                zaliczony   zaliczony
+ USD/PLN               TFT                  30               zaliczony   zaliczony
+ EUR/PLN               Naiwny               1 i 30           zaliczony   zaliczony
+ EUR/PLN               ARIMA                1 i 30           zaliczony   zaliczony
+ EUR/PLN               VAR                  1 i 30           zaliczony   zaliczony
+ EUR/PLN               BVAR                 1 i 30           zaliczony   zaliczony
+ USD/PLN               Naiwny               1 i 30           zaliczony   zaliczony
+ USD/PLN               ARIMA                1 i 30           zaliczony   zaliczony
+ USD/PLN               VAR                  1 i 30           zaliczony   zaliczony
+ USD/PLN               BVAR                 1 i 30           zaliczony   zaliczony
+ Stopa ref. NBP        Naiwny               1 i 30           zaliczony   zaliczony
+ (dzienna)
+ Stopa ref. NBP        ARIMA                1 i 30           zaliczony   zaliczony
+ (dzienna)
+ Stopa ref. NBP        Naiwny               1 i 12 (mies.)   zaliczony   zaliczony
+ (miesięczna)
+ Stopa ref. NBP        ARIMA                1 i 12 (mies.)   zaliczony   zaliczony
+ (miesięczna)
+ Stopa ref. NBP        VAR                  1 i 12 (mies.)   zaliczony   zaliczony
+ (miesięczna)
+ Stopa ref. NBP        BVAR                 1 i 12 (mies.)   zaliczony   zaliczony
+ (miesięczna)
+ Kierunek decyzji      Logit                1 i 12 (mies.)   zaliczony   zaliczony
+ NBP
+ Kierunek decyzji      Probit               1 i 12 (mies.)   zaliczony   zaliczony
+ NBP
+ Kierunek decyzji      Ordered logit        1 i 12 (mies.)   zaliczony   zaliczony
+ NBP
+ Kierunek decyzji      Ordered probit       1 i 12 (mies.)   zaliczony   zaliczony
+ NBP
+ Obligacje 3Y          VAR+RIDGE            91               zaliczony   zaliczony
+ Obligacje 3Y          AR(1)+RIDGE          365              zaliczony   zaliczony
+ Obligacje 5Y          VAR+RIDGE (IRS       91               zaliczony   zaliczony
+                       risk factors)
+ Obligacje 5Y          VAR(1)               365              zaliczony   zaliczony
+ Obligacje 6Y          RIDGE                91               zaliczony   zaliczony
+ Obligacje 6Y          AR(1)                365              zaliczony   zaliczony
+
+
+
+
+Kryterium testu działania: model poprawnie uruchomiony w infrastrukturze banku, odczytał
+wymagane dane, wygenerował kompletny zestaw prognoz dla wszystkich horyzontów, zapisał
+wyniki i logi oraz uzyskał rezultat zgodny z przebiegiem lokalnym w przyjętej tolerancji.
+
+
+
+
+                                           19
+7     Wyniki
+
+                                     Tabela 7: Targety
+
+ Target
+ EUR/PLN
+ USD/PLN
+ Stopa procentowa
+ Obligacje
+ WIG20
+ Ropa
+ Złoto
+ BTC
+
+
+W rozdziale przedstawiono wyniki lokalnych testów wszystkich modeli dla ośmiu wskaźników.
+Dla każdego wskaźnika opisano zakres przetestowanych modeli wraz z wynikami na zbiorze te-
+stowym, a następnie zamieszczono do dwóch wykresów: zestawienie poprawy względem bench-
+marku dla obu horyzontów (linia zero oznacza wynik benchmarku, wartości dodatnie – przewagę
+modelu) oraz przykładową ścieżkę prognoz na dłuższym horyzoncie, porównaną z wartościami
+rzeczywistymi i prognozą naiwną. Model na wykresie ścieżki dobrano tak, aby ilustrował zacho-
+wanie charakterystyczne dla danej rodziny, a nie wyłącznie najlepszy wynik. Każdy podrozdział
+kończą wnioski.
+Wyniki należy odczytywać zgodnie z charakterem obecnego etapu (podrozdział 5.4): służą one
+potwierdzeniu poprawności implementacji i protokołu oceny oraz wyznaczeniu punktu odnie-
+sienia dla dalszych prac. Wyniki gorsze od prognozy naiwnej nie świadczą o niepoprawności
+implementacji – wskazują obszary, w których kolejne etapy (dobór hiperparametrów, selekcja
+predyktorów, rozszerzenie danych) powinny przynieść największy przyrost jakości. Zestawienie
+zbiorcze dla wszystkich wskaźników zawiera podrozdział 7.9.
+
+
+7.1     EUR/PLN
+
+7.1.1   Zakres przetestowanych modeli
+
+Dla kursu EUR/PLN przetestowano modele ekonometryczne oraz modele uczenia maszynowego
+i głębokiego uczenia, dla horyzontów 1 i 30 dni notowań. Punktem odniesienia była prognoza
+naiwna. Zbiór testowy obejmuje okres od 28.12.2022 do 16.09.2026 i 31 momentów prognozy (co
+30 notowań).
+
+    • ARIMA – model jednowymiarowy z automatycznym doborem rzędów, oparty wyłącznie
+      na historii kursu.
+    • VAR i BVAR – modele wielowymiarowe z dwoma opóźnieniami, w których kurs
+      EUR/PLN modelowany jest łącznie z kursem USD/PLN i ceną ropy WTI; BVAR
+      wykorzystuje rozkład a priori typu Minnesota, stabilizujący oszacowania parametrów.
+    • XGBoost – gradientowo wzmacniane drzewa decyzyjne na opóźnieniach i średnich kro-
+      czących kursu (oraz predyktorach w wariancie rozszerzonym).
+    • LSTM – rekurencyjna sieć neuronowa z oknem wejściowym 20–60 notowań.
+
+
+                                             20
+   • TFT (Temporal Fusion Transformer) – sieć z mechanizmem uwagi, z oknem wejściowym
+     20–40 notowań.
+
+Modele uczenia maszynowego oceniano w wariancie „tylko target” i „target i predyktory” (ze-
+staw predyktorów w tabeli 2); dla każdego wariantu wybierano jedną z czterech konfiguracji na
+podstawie zbioru walidacyjnego i uruchamiano ją dla trzech ziaren generatora. Modele ML pro-
+gnozowały logarytmiczną stopę zwrotu (z wyjątkiem wybranego na walidacji wariantu LSTM z
+predyktorami, modelującego poziom kursu), a ocena odbywała się na poziomie kursu. Wszystkie
+modele wygenerowały prognozy we wszystkich momentach prognozy zbioru testowego. W dwóch
+ostatnich momentach (czerwiec i lipiec 2026 r.) modele VAR i BVAR korzystały z ostatniej do-
+stępnej ceny ropy WTI (maj 2026 r.).
+
+        Tabela 8: EUR/PLN: MAPE na zbiorze testowym i poprawa względem prognozy naiwnej
+
+                                                         h=1                        h = 30
+   Model               Wariant                 MAPE [%] Poprawa [%]         MAPE [%] Poprawa [%]
+   Prognoza naiwna     ostatnia wartość              0,236                        1,228
+   ARIMA               tylko target                  0,240         −1,9           1,225           0,2
+   VAR                 target i predyktory           0,234          0,7           1,154           6,1
+   BVAR                target i predyktory           0,234          0,6           1,153           6,1
+   XGBoost             tylko target                  0,247         −4,7           1,325         −7,8
+   XGBoost             target i predyktory           0,237         −0,5           1,276         −3,9
+   LSTM                tylko target          0,239 (0,002)         −1,4   1,288 (0,036)         −4,8
+   LSTM                target i predyktory   0,254 (0,006)         −7,7   5,874 (5,271)        −378,1
+   TFT                 tylko target          0,239 (0,004)         −1,4   1,264 (0,011)         −2,9
+   TFT                 target i predyktory   0,242 (0,003)         −2,6   1,294 (0,067)         −5,3
+W nawiasie: odchylenie standardowe MAPE między trzema ziarnami generatora (modele z elementem losowym);
+brak nawiasu oznacza model deterministyczny lub identyczne wyniki dla wszystkich ziaren. Poprawa: względna
+   zmiana MAPE wobec prognozy naiwnej; wartość dodatnia oznacza model dokładniejszy od benchmarku.
+
+
+
+7.1.2     Wykresy
+
+Rysunek 1 przedstawia poprawę MAPE względem prognozy naiwnej dla obu horyzontów, a
+rysunek 2 – prognozy modelu VAR na 30 dni notowań na tle wartości rzeczywistych i prognozy
+naiwnej.
+
+
+
+
+                                                    21
+                                                Poziom (MAPE)                               h=1               h = 30
+
+
+                      ARIMA (tylko target)
+
+                     VAR (z predyktorami)
+
+                    BVAR (z predyktorami)
+
+                    XGBoost (tylko target)
+
+        XGBoost (z predyktorami)
+
+                       LSTM (tylko target)
+
+                    LSTM (z predyktorami)        −378
+
+                           TFT (tylko target)
+
+                     TFT (z predyktorami)
+
+
+                                                    −25    −20     −15     −10      −5        0           5            10
+                                                            poprawa względem prognozy naiwnej [%]
+
+Rysunek 1: EUR/PLN: poprawa MAPE względem prognozy naiwnej na zbiorze testowym (wartości
+poza skalą oznaczono liczbą)
+
+
+
+                                  wartość rzeczywista      prognoza naiwna (h = 30)    VAR (z predyktorami) (h = 30)
+                    4,80
+
+                    4,70
+
+                    4,60
+     PLN za 1 EUR
+
+
+
+
+                    4,50
+
+                    4,40
+
+                    4,30
+
+                    4,20
+
+
+                           01.2023               01.2024            01.2025           01.2026
+
+Rysunek 2: EUR/PLN: prognozy na 30 dni notowań – model VAR i prognoza naiwna; punkty odpo-
+wiadają datom, na które wyznaczono prognozy w kolejnych momentach prognozy
+
+
+7.1.3               Wnioski
+
+Wszystkie modele przeszły pełną procedurę backtestu i wygenerowały komplet prognoz, co po-
+twierdza poprawność ich implementacji i integracji z protokołem oceny. Na horyzoncie jednego
+dnia żaden model nie odbiega istotnie od prognozy naiwnej: najlepsze wyniki uzyskały mo-
+dele VAR i BVAR (poprawa o 0,7% i 0,6%), a większość modeli uczenia maszynowego mieści
+się w przedziale do 5% gorszego MAPE. Jest to zgodne z charakterem dziennych zmian kursu
+walutowego, zbliżonym do błądzenia losowego. Na horyzoncie 30 dni wyraźnie wyróżniają się
+modele VAR i BVAR, uwzględniające kurs USD/PLN i cenę ropy, które obniżyły MAPE o 6,1%
+względem prognozy naiwnej; model ARIMA osiąga wynik zbliżony do benchmarku.
+
+
+
+                                                                   22
+Predyktory pomagały przede wszystkim w modelach ekonometrycznych. W modelach uczenia
+maszynowego rozszerzenie zestawu zmiennych poprawiło wyniki XGBoost (np. na horyzoncie 30
+dni z −7,8% do −3,9%), natomiast dla sieci LSTM i TFT wariant z predyktorami był słabszy niż
+wariant oparty wyłącznie na historii kursu. Szczególnie wyraźne jest to dla LSTM z predyktorami
+na horyzoncie 30 dni, gdzie jedno z trzech uruchomień dało znacznie wyższy błąd (MAPE 12,0%
+wobec 2,7–3,0% w pozostałych), co przekłada się na duży rozrzut między ziarnami. Pozostałe
+modele losowe były stabilne: odchylenie standardowe MAPE między ziarnami nie przekraczało
+0,07 pkt proc., a XGBoost dawał identyczne wyniki dla wszystkich ziaren. Wyniki wskazują,
+że w kolejnym etapie dla sieci neuronowych priorytetem powinny być selekcja predyktorów i
+regularyzacja, a dla horyzontu 30 dni – rozwinięcie specyfikacji wielowymiarowych.
+W infrastrukturze banku uruchomiono dla EUR/PLN modele naiwny, ARIMA, VAR i BVAR
+dla obu horyzontów oraz model XGBoost dla horyzontu 30 dni (rozdział 6).
+
+
+7.2     USD/PLN
+
+7.2.1    Zakres przetestowanych modeli
+
+Dla kursu USD/PLN przetestowano ten sam zestaw modeli, na tych samych okresach i w tych
+samych momentach prognozy co dla EUR/PLN: prognozę naiwną, model ARIMA, modele VAR i
+BVAR (z kursem EUR/PLN i ceną ropy WTI) oraz modele XGBoost, LSTM i TFT w wariantach
+„tylko target” i „target i predyktory”. Zestaw predyktorów modeli ML różni się od zestawu dla
+EUR/PLN i obejmuje m.in. zmianę kursu EUR/PLN, rentowności amerykańskie, dyferencjały
+stóp procentowych i różnicę inflacji USA–Polska (tabela 2). Wszystkie modele wygenerowały
+komplet prognoz.
+
+        Tabela 9: USD/PLN: MAPE na zbiorze testowym i poprawa względem prognozy naiwnej
+
+                                                         h=1                        h = 30
+   Model               Wariant                 MAPE [%] Poprawa [%]         MAPE [%] Poprawa [%]
+   Prognoza naiwna     ostatnia wartość              0,463                        2,357
+   ARIMA               tylko target                  0,460          0,7           2,360          −0,1
+   VAR                 target i predyktory           0,461          0,5           2,225           5,6
+   BVAR                target i predyktory           0,461          0,4           2,227           5,5
+   XGBoost             tylko target                  0,482         −4,0           2,253           4,5
+   XGBoost             target i predyktory           0,467         −0,7           2,281           3,2
+   LSTM                tylko target          0,465 (0,002)         −0,3   2,358 (0,002)           0,0
+   LSTM                target i predyktory   0,482 (0,004)         −4,1   3,272 (0,207)         −38,8
+   TFT                 tylko target          0,469 (0,001)         −1,3   2,238 (0,047)           5,1
+   TFT                 target i predyktory   0,481 (0,008)         −3,8   2,360 (0,195)          −0,1
+W nawiasie: odchylenie standardowe MAPE między trzema ziarnami generatora (modele z elementem losowym);
+brak nawiasu oznacza model deterministyczny lub identyczne wyniki dla wszystkich ziaren. Poprawa: względna
+   zmiana MAPE wobec prognozy naiwnej; wartość dodatnia oznacza model dokładniejszy od benchmarku.
+
+
+
+
+                                                    23
+7.2.2               Wykresy
+
+
+                                                Poziom (MAPE)                               h=1                 h = 30
+
+
+                      ARIMA (tylko target)
+
+                     VAR (z predyktorami)
+
+                    BVAR (z predyktorami)
+
+                    XGBoost (tylko target)
+
+        XGBoost (z predyktorami)
+
+                       LSTM (tylko target)
+
+                    LSTM (z predyktorami)         −39
+
+                           TFT (tylko target)
+
+                     TFT (z predyktorami)
+
+
+                                                    −25     −20     −15     −10      −5        0            5            10
+                                                             poprawa względem prognozy naiwnej [%]
+
+Rysunek 3: USD/PLN: poprawa MAPE względem prognozy naiwnej na zbiorze testowym (wartości
+poza skalą oznaczono liczbą)
+
+
+
+                                  wartość rzeczywista       prognoza naiwna (h = 30)   TFT (tylko target) (h = 30)
+
+
+                    4,40
+
+
+                    4,20
+     PLN za 1 USD
+
+
+
+
+                    4,00
+
+
+                    3,80
+
+
+                    3,60
+
+
+                           01.2023                01.2024                01.2025        01.2026
+
+Rysunek 4: USD/PLN: prognozy na 30 dni notowań – model TFT (tylko target, średnia z trzech ziaren)
+i prognoza naiwna
+
+
+7.2.3               Wnioski
+
+Wyniki dla USD/PLN są jakościowo zbliżone do wyników dla EUR/PLN, ale korzystniejsze dla
+modeli uczenia maszynowego. Na horyzoncie jednego dnia różnice względem prognozy naiwnej
+są niewielkie: modele ARIMA, VAR i BVAR uzyskały poprawę od 0,4% do 0,7%, a modele ML
+wyniki od −4,1% do −0,3%. Na horyzoncie 30 dni lepsze od benchmarku okazały się modele VAR
+(5,6%), BVAR (5,5%), TFT w wariancie „tylko target” (5,1%) oraz XGBoost w obu wariantach
+(4,5% i 3,2%). Wskazuje to, że na dłuższym horyzoncie zarówno modele wielowymiarowe, jak i
+modele uczenia maszynowego są w stanie wykorzystać informację, której nie zawiera prognoza
+
+                                                                    24
+naiwna.
+Dodanie predyktorów nie poprawiło wyników sieci neuronowych – najsłabszy wynik dotyczy,
+podobnie jak dla EUR/PLN, sieci LSTM z predyktorami na horyzoncie 30 dni (−38,8%). Modele
+losowe były stabilne między ziarnami (odchylenie standardowe MAPE do 0,21 pkt proc., przy
+czym największe dla wariantów z predyktorami). Ścieżka prognoz TFT na rysunku 4 pokazuje,
+że prognozy modelu są przeważnie nieco niższe od prognozy naiwnej. W okresie testowym, w
+którym dominowało umocnienie złotego wobec dolara, przełożyło się to na mniejszy błąd; ocena,
+czy przewaga ta utrzyma się w innych warunkach rynkowych, wymaga testów na dłuższej historii
+i będzie elementem kolejnego etapu.
+W infrastrukturze banku uruchomiono dla USD/PLN modele naiwny, ARIMA, VAR i BVAR
+dla obu horyzontów, model LSTM dla horyzontu 1 dnia oraz model TFT dla horyzontu 30 dni
+(rozdział 6).
+
+
+7.3     Stopa procentowa
+
+7.3.1     Zakres przetestowanych modeli
+
+Stopę referencyjną NBP prognozowano w trzech ujęciach. W ujęciu dziennym przetestowano
+prognozę naiwną i model ARIMA oparty wyłącznie na historii stopy, dla horyzontów 1 i 30 dni
+roboczych. W ujęciu miesięcznym przetestowano prognozę naiwną, model ARIMA oraz modele
+VAR i BVAR, w których obok stopy występują WIBOR 3M i inflacja CPI r/r, dla horyzontów
+1 i 12 miesięcy. Kierunek decyzji w kolejnym miesiącu (obniżka, brak zmiany, podwyżka) pro-
+gnozowano modelami logit, probit, ordered logit i ordered probit, w wariancie opartym na samej
+stopie oraz w wariancie z predyktorami (inflacja CPI r/r, różnica między WIBOR 3M a stopą
+referencyjną i miesięczna zmiana kursu EUR/PLN, wszystkie z poprzedniego miesiąca). Wszyst-
+kie modele wygenerowały prognozy we wszystkich momentach prognozy zbioru testowego: 55
+dla szeregu dziennego i 17 dla szeregu miesięcznego.
+Ze względu na schodkowy charakter szeregu i wartości bliskie zera w latach 2020–2021 główną
+miarą jakości dla poziomu stopy jest MAE (podrozdział 5); wyniki przedstawiają tabele 10 i 11.
+
+Tabela 10: Stopa referencyjna NBP: MAE poziomu stopy na zbiorze testowym i poprawa względem
+prognozy naiwnej
+
+                                      horyzont krótki                      horyzont długi
+          Model              MAE [pkt proc.]      Poprawa [%]     MAE [pkt proc.]      Poprawa [%]
+          Szereg dzienny; horyzonty: 1 dzień i 30 dni
+          Prognoza naiwna                0,000                                0,132
+          ARIMA                          0,006             n/d                0,193           −46,6
+          Szereg miesięczny; horyzonty: 1 miesiąc i 12 miesięcy
+          Prognoza naiwna                0,015                                0,882
+          ARIMA                          0,075         −409,8                 1,579           −79,0
+          VAR                            0,115         −683,6                 1,003           −13,6
+          BVAR                           0,105         −611,6                 1,298           −47,1
+ n/d – poprawy nie da się obliczyć, ponieważ błąd prognozy naiwnej jest równy zeru (stopa nie zmieniła się z
+                                dnia na dzień w żadnym momencie prognozy).
+
+
+
+
+                                                     25
+Tabela 11: Prognoza kierunku decyzji NBP na kolejny miesiąc: wyniki na zbiorze testowym (17 mo-
+mentów prognozy)
+
+ Model                                      Wariant               Balanced Accuracy [%] Macro-F1 [%] Trafność [%]
+ Brak zmiany (benchmark)                                                                    50,0           48,5          94,1
+ Logit                                      tylko target                                    50,0           48,5          94,1
+ Logit                                      target i predyktory                             43,8           30,1          82,3
+ Probit                                     tylko target                                    50,0           48,5          94,1
+ Probit                                     target i predyktory                             43,8           30,1          82,3
+ Ordered logit                              tylko target                                    50,0           48,5          94,1
+ Ordered logit                              target i predyktory                             96,9           65,6          94,1
+ Ordered probit                             tylko target                                    50,0           48,5          94,1
+ Ordered probit                             target i predyktory                             96,9           65,6          94,1
+
+
+
+7.3.2                  Wykresy
+
+
+                               szereg dzienny, 1 dzień                            szereg dzienny, 30 dni
+                                                                          0,200
+                       0,006
+     MAE [pkt proc.]
+
+
+
+
+                                                                          0,150
+                       0,004
+                                                                          0,100
+
+                       0,002
+                                                                          0,050
+
+                       0,000                                              0,000
+                                   Naiwna                ARIMA                        Naiwna                 ARIMA
+
+                               szereg miesięczny, 1 miesiąc                       szereg miesięczny, 12 miesięcy
+
+                                                                           1,50
+                       0,100
+     MAE [pkt proc.]
+
+
+
+
+                       0,075                                               1,00
+
+                       0,050
+                                                                           0,50
+                       0,025
+
+                       0,000                                               0,00
+                                Naiwna   ARIMA     VAR        BVAR                 Naiwna     ARIMA   VAR         BVAR
+
+Rysunek 5: Stopa referencyjna NBP: MAE poziomu stopy na zbiorze testowym według modelu i hory-
+zontu
+
+
+
+
+                                                                     26
+                     wartość rzeczywista        prognoza naiwna (h = 12)       VAR (z predyktorami) (h = 12)
+
+          9,00
+
+          8,00
+
+          7,00
+
+          6,00
+      %
+
+
+
+
+          5,00
+
+          4,00
+
+          3,00
+
+                    01.2023   07.2023      01.2024   07.2024    01.2025    07.2025   01.2026    07.2026
+
+Rysunek 6: Stopa referencyjna NBP (szereg miesięczny): prognozy na 12 miesięcy – model VAR i
+prognoza naiwna
+
+
+7.3.3     Wnioski
+
+Wszystkie modele przeszły pełną procedurę backtestu i wygenerowały komplet prognoz, co po-
+twierdza ich poprawność techniczną. Pod względem dokładności prognoza naiwna jest dla stopy
+procentowej bardzo trudnym benchmarkiem, ponieważ stopa przez większość czasu pozostaje
+niezmieniona: na horyzoncie jednego dnia jej błąd na zbiorze testowym wynosi zero, a modele
+ARIMA, VAR i BVAR mają na wszystkich horyzontach wyższe MAE (tabela 10). Najbliżej
+benchmarku jest model VAR na horyzoncie 12 miesięcy (MAE wyższe o 13,6%). Rysunek 6 po-
+kazuje, że model VAR reaguje na zmiany inflacji i stóp rynkowych: już od 2024 r. prognozował
+obniżki stóp, które nastąpiły w latach 2025–2026, jednak z wyprzedzeniem i w części momentów
+prognozy ze zbyt dużą skalą, a w pojedynczych momentach prognozy dawał wartości odstające.
+W modelach VAR i BVAR na danych miesięcznych predyktory wykorzystano bez uwzględnienia
+opóźnienia publikacji, zgodnie z implementacją referencyjną; wyniki te potwierdzają działanie
+implementacji, natomiast ich interpretacja prognostyczna wymaga ostrożności.
+W prognozie kierunku warianty oparte na samej stopie dają wynik równy benchmarkowi „brak
+zmiany”, a modele logit i probit z predyktorami wypadają poniżej niego (tabela 11). Modele
+ordered logit i ordered probit z predyktorami trafnie wskazały jedyną zmianę stopy w zbiorze
+testowym (obniżkę), przy jednym fałszywym sygnale podwyżki. Ponieważ zbiór testowy obej-
+muje 17 momentów prognozy, z których tylko w jednym nastąpiła zmiana stopy, wynik ten
+nie przesądza o jakości prognoz kierunku, ale potwierdza, że modele uporządkowane popraw-
+nie wykorzystują informację zawartą w predyktorach. Wszystkie modele dla stopy procentowej
+(wariant dzienny, miesięczny i kierunek decyzji) zostały uruchomione w infrastrukturze banku
+(rozdział 6).
+
+
+7.4     Obligacje i krzywa rentowności
+
+Modelowanie obligacji miało szerszy zakres niż modelowanie pozostałych wskaźników. Przedmio-
+tem prognozy nie była jedna bezpośrednio obserwowana zmienna, lecz cała krzywa dochodowo-
+ści. Krzywą należało najpierw oszacować na podstawie cen i przepływów pieniężnych dostępnych
+obligacji, następnie opisać za pomocą czynników, prognozować te czynniki i na końcu odtworzyć
+przyszłą krzywą oraz ceny instrumentów.
+Proces obejmował dwa powiązane etapy. W pierwszym estymowano dzienne krzywe dochodo-
+wości i odpowiadające im parametry modelu Dynamic Nelson–Siegel. W drugim prognozowano
+
+
+                                                        27
+przyszłe wartości parametrów, rekonstruowano krzywą dla wskazanego horyzontu oraz oceniano
+wpływ prognozy na rentowności i ceny obligacji.
+Prognozy czynników DNS wykonywano dla horyzontów wyrażonych w dniach roboczych. Hory-
+zont 250D odpowiada w przybliżeniu jednemu rokowi i jest dalej określany również jako horyzont
+1Y. Prognozowane czynniki wykorzystywano do rekonstrukcji całej krzywej dochodowości, dzięki
+czemu możliwe było wyznaczenie rentowności dla dowolnego terminu zapadalności. Wyniki lo-
+kalne oceniano zarówno dla całej krzywej, jak i dla wybranych tenorów. Do testów integracyjnych
+w infrastrukturze banku wykorzystano reprezentatywny podzbiór tenorów 3Y, 5Y i 6Y.
+
+
+7.4.1   Zakres i przygotowanie danych
+
+Podstawę estymacji krzywej stanowiły dane BondSpot obejmujące ceny obligacji, terminy zapa-
+dalności, kupony i przepływy pieniężne. Z około 128,7 tys. surowych rekordów, po zastosowaniu
+filtrów jakościowych, otrzymano około 94,7 tys. obserwacji obligacja–dzień. Próba obejmowała
+94 instrumenty, w tym 58 obligacji kuponowych i 36 obligacji zerokuponowych.
+Procedurę estymacji przeprowadzono dla 5 437 dni z okresu 2004–2026. W pojedynczym dniu
+wykorzystywano przeciętnie około 18 obligacji. Uwzględniano ceny clean oraz pełne przepływy
+pieniężne instrumentów. Obserwacje ważono z wykorzystaniem informacji o spreadzie, a wpływ
+nietypowych kwotowań ograniczano za pomocą odpornej funkcji straty.
+Poza danymi obligacyjnymi analizowano informacje z rynku FRA i IRS, stopy procentowe i kursy
+walutowe, zmienne makroekonomiczne i globalne oraz wybrane informacje dotyczące aukcji i
+płynności. Nie wszystkie bloki były jednocześnie wykorzystywane w modelu końcowym. Ich
+wartość oceniano osobno dla poszczególnych czynników krzywej.
+
+
+7.4.2   Estymacja krzywej dochodowości
+
+Krzywą dochodowości reprezentowano za pomocą trzech czynników modelu Dynamic Nelson–
+Siegel:
+
+                                   1 − exp(−λτ )        1 − exp(−λτ )
+                                                                               
+             yt (τ ) = β0,t + β1,t               + β2,t               − exp(−λτ ) ,         (1)
+                                        λτ                   λτ
+
+gdzie τ oznacza termin do zapadalności, natomiast β0,t , β1,t i β2,t odpowiadają odpowiednio za
+poziom, nachylenie i krzywiznę krzywej.
+Parametr λ ustalono na stałym poziomie 0,602, co odpowiada maksimum obciążenia czynnika
+krzywizny w okolicy 1,66 roku. Dzięki stałej wartości λ funkcje obciążenia tenorów pozostają
+niezmienne w czasie, a szeregi parametrów DNS mają porównywalną interpretację w całej próbie.
+Dla każdego dnia dobierano wartości trzech parametrów tak, aby ceny obligacji wyznaczone
+przez krzywą były możliwie bliskie cenom obserwowanym. Otrzymano w ten sposób trzy dzienne
+szeregi czynników, które następnie traktowano jako zmienne docelowe w części prognostycznej.
+
+
+7.4.3   Prognozowanie czynników DNS
+
+Każdy czynnik prognozowano oddzielnie, ponieważ czynniki charakteryzują się odmienną dy-
+namiką, przewidywalnością i zestawem użytecznych informacji. Jako podstawowy benchmark
+stosowano Random Walk, zgodnie z którym przyszła wartość czynnika jest równa jego ostatniej
+obserwowanej wartości.
+
+
+
+                                              28
+W ramach screeningu porównano modele autoregresyjne i VAR, modele liniowe i regularyzowane,
+modele drzewiaste, metody redukcji wymiarowości, modele mean reversion oraz różne zestawy
+cech rynkowych i makroekonomicznych. Oceniano między innymi AR(1), VAR, Ridge, PLS,
+Random Forest, XGBoost, HistGradientBoosting, Extra Trees i PCA.
+Najsilniejszy sygnał uzyskano dla czynnika nachylenia β1 . Model Ridge wykorzystywał informa-
+cje z rynku FRA i IRS, a jego prognozę stosowano warunkowo, gdy kierunek ruchu był potwier-
+dzony przez sygnał rynkowy. W przeciwnym przypadku pozostawano przy prognozie Random
+Walk.
+Dla czynnika poziomu β0 Random Walk pozostał modelem głównym. Testowany model kon-
+trolowanej zmiany poziomu dawał ograniczoną poprawę prognozy samego czynnika, lecz nie
+poprawiał jeszcze końcowej prognozy całej krzywej. Dla krzywizny β2 model mean reversion
+uzyskiwał poprawę prognozy parametru, ale miał mniejszy wpływ na ceny obligacji.
+
+
+7.4.4   Walidacja prognoz
+
+Prognozy oceniano w schemacie walk-forward dla horyzontów 20, 60, 125 i 250 dni roboczych.
+W każdym momencie wykorzystywano wyłącznie obserwacje, których wartości docelowe były
+już znane. Imputer i scaler dopasowywano wyłącznie na zbiorze treningowym.
+Modele porównywano z Random Walk na wspólnej próbie out-of-sample. Ocenę przeprowadzano
+kolejno na trzech poziomach:
+
+  1. błędu prognozy poszczególnych czynników DNS;
+  2. błędu zrekonstruowanej krzywej dochodowości;
+  3. błędu cen obligacji wyznaczonych na podstawie prognozowanej krzywej.
+
+Dodatkowo wyniki analizowano według terminów zapadalności, lat testowych oraz wielkości
+błędu. Istotność różnic oceniano za pomocą estymatora HAC i bootstrapu blokowego z 5 000
+replikacji.
+
+
+7.4.5   Główne wyniki
+
+Najsilniejszy wynik uzyskano na horyzoncie 250 dni roboczych. Na krótszych horyzontach Ran-
+dom Walk pozostawał bardzo wymagającym benchmarkiem, ponieważ zmiany czynników były
+zwykle niewielkie.
+
+
+7.4.6   Wyniki według terminu zapadalności
+
+Model poprawiał wyniki przede wszystkim w podstawowym zakresie do 10 lat. Dla obligacji
+powyżej 10 lat nie uzyskano stabilnej przewagi nad Random Walk. Segment ten obejmował
+mniejszą próbę i był traktowany jako diagnostyka ekstrapolacji, a nie jako podstawowy zakres
+oceny modelu.
+
+
+7.4.7   Walidacja statystyczna
+
+Statystycznie najmocniejsze były wyniki na poziomie czynników β1 i β2 . Poprawa pełnej krzywej
+i cen obligacji była dodatnia ekonomicznie, ale przy poziomie istotności 5% pozostawała słabsza
+lub graniczna. Wyniki należy traktować jako rezultat etapu rozwojowego, ponieważ okres out-of-
+sample był również wykorzystywany podczas rozwoju architektury i selekcji wariantów modelu.
+
+                                              29
+                  Tabela 12: Główne wyniki modelowania krzywej dochodowości
+
+ Poziom oceny            Horyzont        Poprawa wzglę-        Interpretacja
+                                         dem RW
+ Czynnik β1 : Ridge +    250D            36,3%                 Najsilniejszy i statystycznie
+ filtr potwierdzenia                                           najlepiej potwierdzony wynik
+                                                               prognostyczny.
+ Czynnik β2 : mean re-   250D            22,5%                 Poprawa prognozy parametru,
+ version                                                       lecz mniejszy wpływ na wynik
+                                                               całej krzywej.
+ Pełna krzywa            250D            9,7%                  Poprawa      nachylenia  była
+                                                               częściowo ograniczana przez
+                                                               błędy poziomu i krzywizny.
+ Krzywa w zakresie do    250D            11,7%                 Silniejsza poprawa w podsta-
+ 10 lat                                                        wowym zakresie oceny.
+ Ceny obligacji          250D            6,7%                  Poprawa końcowej wyceny
+                                                               była mniejsza niż poprawa
+                                                               samego czynnika β1 .
+
+                         Tabela 13: Wyniki według horyzontu prognozy
+
+             Horyzont     Poprawa prognozy β1        Poprawa pełnej krzywej
+             60D                              3,9%                          2,5%
+             125D                             7,8%                          6,7%
+             250D                            36,3%                          9,7%
+
+
+7.4.8   Diagnostyka błędów i ograniczenia
+
+Największe błędy modelu nie były rozmieszczone równomiernie w czasie. Dla horyzontu 250
+dni wszystkie obserwacje należące do 5% największych błędów rozpoczynały się w 2021 roku,
+a odpowiadające im daty docelowe przypadały na 2022 rok. Okres ten obejmował gwałtowne
+przejście z reżimu niskich stóp procentowych do inflacyjnego przeszacowania całej krzywej.
+Błąd pełnej krzywej był w tym okresie silnie związany ze zmianami czynnika poziomu. Korela-
+cja bezwzględnej zmiany β0 z błędem krzywej wynosiła około 0,75. Eksperymenty diagnostyczne
+typu oracle wykazały, że nawet idealna znajomość przyszłego β1 nie usuwa większości ekstre-
+malnego błędu. Największy potencjał redukcji błędu znajdował się w czynnikach β0 i β2 .
+Zidentyfikowano trzy główne mechanizmy błędu:
+
+  1. zmianę reżimu, podczas której jednocześnie przesuwają się poziom i krzywizna;
+  2. błąd momentu, kiedy rynek sygnalizuje właściwy kierunek ruchu, ale realizacja następuje
+     wolniej niż prognozuje model;
+  3. fałszywy sygnał, kiedy FRA lub IRS wskazują ruch, który ostatecznie nie materializuje się
+     na krzywej.
+
+Wyniki te uzasadniły zastosowanie filtra potwierdzenia dla prognozy β1 oraz dalsze testy modeli
+wykrywających ryzyko dużej zmiany poziomu. Zmienne makroekonomiczne nie poprawiały sta-
+bilnie bezwarunkowej prognozy dokładnej zmiany β0 , ale wykazywały użyteczność jako wskaźniki
+reżimu i prawdopodobieństwa dużego ruchu.
+
+
+                                              30
+              Tabela 14: Błąd cen obligacji według terminu zapadalności, horyzont 250D
+
+                     Segment       RMSE RW          RMSE modelu           Zmiana
+                     0–2Y                    2,34                 2,04      +12,5%
+                     2–5Y                    6,47                 5,93       +8,3%
+                     5–10Y                  11,20                10,66       +4,8%
+                     10Y+                    5,36                 8,01       -49,3%
+
+                     Tabela 15: Walidacja statystyczna najważniejszych wyników
+
+ Wynik                                                          Poprawa      HAC p       Bootstrap p
+ β1 Ridge, 250D                                                    30,47%      0,0130            0,0174
+ β1 z filtrem, 250D                                                36,28%      0,0027            0,0078
+ β2 mean reversion, 250D                                           22,51%      0,0032            0,0114
+ Pełna krzywa, 250D                                                 9,73%      0,0728            0,0886
+ Ceny obligacji, 250D                                               6,86%      0,0933            0,1074
+
+
+W przypadku obligacji rezultatem nie był pojedynczy model szeregu czasowego, lecz kompletny
+proces obejmujący dane o instrumentach i przepływach, dzienną estymację czynników DNS,
+prognozę poziomu, nachylenia i krzywizny, rekonstrukcję przyszłej krzywej oraz ocenę prognoz
+na rentownościach i cenach obligacji.
+
+
+7.5     WIG20
+
+7.5.1    Zakres przetestowanych modeli
+
+Dla indeksu WIG20 przetestowano dwa typy zadań. W prognozie poziomu indeksu oceniano
+model ARIMA (w wariancie z predyktorami jako regresję z błędami ARIMA) oraz XGBoost,
+w wariantach „tylko target” i „target i predyktory”, względem prognozy naiwnej. W progno-
+zie zmienności oceniano modele GARCH, EGARCH i GJR-GARCH z rozkładem t-Studenta,
+względem benchmarku zmienności historycznej. Zbiór testowy obejmuje sesje od 12.03.2024 do
+17.09.2026, a backtest prowadzono z krokiem jednej sesji (599 momentów prognozy). Wszystkie
+modele wygenerowały komplet prognoz. W 57 z 599 momentów prognozy predyktory z rynku
+amerykańskiego były utrzymywane na ostatniej dostępnej wartości (tabela 2).
+
+        Tabela 16: WIG20: MAPE na zbiorze testowym i poprawa względem prognozy naiwnej
+
+                                                         h=1                       h = 30
+      Model              Wariant               MAPE [%] Poprawa [%] MAPE [%] Poprawa [%]
+      Prognoza naiwna    ostatnia wartość           1,017                       4,668
+      ARIMA              tylko target               1,019          −0,1         4,669           0,0
+      ARIMA              target i predyktory        1,009           0,8         4,669           0,0
+      XGBoost            tylko target               1,037          −2,0         5,928         −27,0
+      XGBoost            target i predyktory        1,038          −2,1         5,506         −17,9
+W nawiasie: odchylenie standardowe MAPE między trzema ziarnami generatora (modele z elementem losowym);
+brak nawiasu oznacza model deterministyczny lub identyczne wyniki dla wszystkich ziaren. Poprawa: względna
+   zmiana MAPE wobec prognozy naiwnej; wartość dodatnia oznacza model dokładniejszy od benchmarku.
+
+
+
+
+                                                    31
+                       Tabela 17: WIG20: prognoza zmienności na zbiorze testowym
+
+                                                         h=1                          h = 30
+         Model            Wariant         MAE RMSE Poprawa [%] MAE RMSE Poprawa [%]
+         Benchmark        średnia 5 dni   1,901       3,304                2,033    3,683
+         GARCH            tylko target    1,796       3,159            5,5 1,801    3,217               11,4
+         EGARCH           tylko target    1,754       3,127            7,7 1,735    3,227               14,6
+         GJR-GARCH        tylko target    1,743       3,125            8,3 1,773    3,230               12,8
+ Błędy prognozy wariancji warunkowej względem kwadratu dziennej logarytmicznej stopy zwrotu wyrażonej w
+ procentach (jednostka: %2 ). Poprawa: względna zmiana MAE wobec benchmarku (średnia kwadratów pięciu
+                                          ostatnich stóp zwrotu).
+
+
+
+7.5.2     Wykresy
+
+
+                                     Poziom (MAPE)                                 h=1               h = 30
+
+
+             ARIMA (tylko target)
+
+
+         ARIMA (z predyktorami)
+
+
+           XGBoost (tylko target)
+
+
+        XGBoost (z predyktorami)
+
+                                −30       −25        −20     −15     −10     −5        0         5            10
+                                                     poprawa względem prognozy naiwnej [%]
+
+                                     Zmienność (MAE)
+
+            GARCH (tylko target)
+
+
+           EGARCH (tylko target)
+
+
+        GJR-GARCH (tylko target)
+
+                                    −5           0              5           10              15                20
+                                                poprawa względem benchmarku zmienności [%]
+
+Rysunek 7: WIG20: poprawa względem benchmarku na zbiorze testowym – prognoza poziomu (MAPE)
+i prognoza zmienności (MAE)
+
+
+
+
+                                                          32
+                      wartość rzeczywista         prognoza naiwna (h = 30)        XGBoost (tylko target) (h = 30)
+
+
+            4000
+
+
+            3500
+      pkt
+
+
+
+
+            3000
+
+
+            2500
+
+
+            2000
+                        07.2024         01.2025         07.2025         01.2026        07.2026
+
+      Rysunek 8: WIG20: prognozy na 30 sesji – model XGBoost (tylko target) i prognoza naiwna
+
+
+7.5.3       Wnioski
+
+W prognozie poziomu WIG20 model ARIMA osiąga wyniki praktycznie równe prognozie na-
+iwnej na obu horyzontach; w wariancie z predyktorami na horyzoncie jednej sesji uzyskał nie-
+wielką poprawę (0,8%). Model XGBoost jest słabszy od benchmarku, szczególnie na horyzoncie
+30 sesji (−27,0% w wariancie „tylko target” i −17,9% z predyktorami). Rysunek 8 pokazuje
+źródło tej różnicy: w okresie testowym, zdominowanym przez silny trend wzrostowy indeksu,
+prognozy XGBoost były systematycznie niższe od bieżącego poziomu – model przenosił do pro-
+gnozy wzorce zachowania indeksu z okresu treningowego. Predyktory częściowo ograniczyły ten
+efekt. Wyniki XGBoost były identyczne dla wszystkich ziaren generatora.
+W prognozie zmienności wszystkie modele z rodziny GARCH były lepsze od benchmarku na
+obu horyzontach: poprawa MAE wyniosła od 5,5% do 8,3% dla jednej sesji i od 11,4% do
+14,6% dla 30 sesji. Najlepsze wyniki uzyskały modele asymetryczne (GJR-GARCH dla h = 1,
+EGARCH dla h = 30), uwzględniające silniejszą reakcję zmienności na spadki cen, co jest zgodne
+z obserwacjami dla rynków akcji.
+Wyniki dla WIG20 wyraźnie pokazują różnicę między trudnością prognozowania poziomu in-
+deksu a dokładnością szacowania jego zmienności. O ile model uczenia maszynowego nie nadążał
+za silnym trendem wzrostowym, o tyle klasyczne modele z rodziny GARCH na obu horyzontach
+poprawiły prognozę zmienności względem benchmarku. Modele WIG20 nie były w bieżącym
+etapie przedmiotem przekazania do infrastruktury banku (rozdział 6).
+
+
+7.6     Ropa
+
+7.6.1       Zakres przetestowanych modeli
+
+Targetem była cena ropy Brent (kontrakt najbliższy). W prognozie poziomu przetestowano mo-
+del ARIMA, regresję wektorów nośnych (SVR), XGBoost i sieć LSTM – każdy w wariantach
+„tylko target” i „target i predyktory” – oraz model dekompozycyjny, w którym szereg rozkładany
+jest metodą VMD (variational mode decomposition) na pięć składowych prognozowanych mo-
+delem XGBoost. W prognozie zmienności oceniano modele GARCH, EGARCH i GJR-GARCH
+oraz model GARCH-MIDAS, łączący zmienność dzienną z miesięczną stopą Fed Funds jako
+zmienną niskiej częstotliwości. Zbiór testowy obejmuje sesje od 31.10.2023 do 1.09.2026, z kro-
+kiem jednej sesji (685 momentów prognozy).
+Wszystkie modele, z wyjątkiem modelu dekompozycyjnego, wygenerowały komplet prognoz.
+
+                                                         33
+Model dekompozycyjny wyznaczył prognozy w około połowie momentów prognozy; jego imple-
+mentacja wymaga dopracowania, dlatego wynik tego modelu podano w tabeli informacyjnie i
+nie uwzględniano go we wnioskach porównawczych.
+
+     Tabela 18: Ropa Brent: MAPE na zbiorze testowym i poprawa względem prognozy naiwnej
+
+                                                         h=1                          h = 30
+  Model                Wariant                MAPE [%] Poprawa [%]            MAPE [%] Poprawa [%]
+  Prognoza naiwna      ostatnia wartość            1,677                            8,156
+  ARIMA                tylko target                1,682           −0,3             8,226         −0,8
+  ARIMA                target i predyktory         1,682           −0,3             8,150          0,1
+  SVR                  tylko target                1,696           −1,1             8,657         −6,1
+  SVR                  target i predyktory         1,714           −2,3             9,810        −20,3
+  XGBoost              tylko target                1,760           −5,0             8,174         −0,2
+  XGBoost              target i predyktory         1,757           −4,8             8,514         −4,4
+  LSTM                 tylko target        1,700 (0,007)           −1,4     8,425 (0,449)         −3,3
+  LSTM                 target i predyktory 1,708 (0,003)           −1,9    11,054 (0,698)        −35,5
+  VMD + XGBoost        tylko target               1,932∗          −15,2            9,259∗        −13,5
+W nawiasie: odchylenie standardowe MAPE między trzema ziarnami generatora (modele z elementem losowym);
+brak nawiasu oznacza model deterministyczny lub identyczne wyniki dla wszystkich ziaren. Poprawa: względna
+   zmiana MAPE wobec prognozy naiwnej; wartość dodatnia oznacza model dokładniejszy od benchmarku.
+                ∗
+                  Kompletność prognoz poniżej 100% (MAPE liczone z dostępnych prognoz).
+
+
+                  Tabela 19: Ropa Brent: prognoza zmienności na zbiorze testowym
+
+                                                         h=1                          h = 30
+   Model              Wariant               MAE RMSE Poprawa [%] MAE RMSE Poprawa [%]
+   Benchmark          średnia 5 dni         6,585   16,912                 7,759   19,638
+   GARCH              tylko target          6,324   15,994           4,0   7,579   18,128          2,3
+   EGARCH             tylko target          6,317   16,302           4,1   6,578   17,623         15,2
+   GJR-GARCH          tylko target          6,449   16,209           2,1   7,429   18,126          4,3
+   GARCH-MIDAS        target i predyktory   6,339   16,065           3,7   7,788   18,580         −0,4
+ Błędy prognozy wariancji warunkowej względem kwadratu dziennej logarytmicznej stopy zwrotu wyrażonej w
+ procentach (jednostka: %2 ). Poprawa: względna zmiana MAE wobec benchmarku (średnia kwadratów pięciu
+                                          ostatnich stóp zwrotu).
+
+
+
+
+                                                    34
+7.6.2          Wykresy
+
+
+                                                  Poziom (MAPE)                                  h=1            h = 30
+
+
+                          ARIMA (tylko target)
+
+                      ARIMA (z predyktorami)
+
+                            SVR (tylko target)
+
+                         SVR (z predyktorami)
+
+                        XGBoost (tylko target)
+
+                     XGBoost (z predyktorami)
+
+                           LSTM (tylko target)
+
+                        LSTM (z predyktorami)         −36
+
+        Dekompozycja VMD (tylko target)
+
+
+                                                       −30       −25   −20   −15    −10    −5      0            5        10
+                                                                 poprawa względem prognozy naiwnej [%]
+
+                                                  Zmienność (MAE)
+
+                         GARCH (tylko target)
+
+                        EGARCH (tylko target)
+
+                     GJR-GARCH (tylko target)
+
+               GARCH-MIDAS (z predyktorami)
+
+                                                 −5                0             5        10             15              20
+                                                              poprawa względem benchmarku zmienności [%]
+
+Rysunek 9: Ropa Brent: poprawa względem benchmarku na zbiorze testowym – prognoza poziomu
+(MAPE) i prognoza zmienności (MAE)
+
+
+
+                           wartość rzeczywista              prognoza naiwna (h = 30)     LSTM (tylko target) (h = 30)
+
+
+
+               250
+
+
+               200
+     USD/bbl
+
+
+
+
+               150
+
+
+               100
+
+
+                50
+                         01.2024       07.2024              01.2025         07.2025    01.2026       07.2026
+
+Rysunek 10: Ropa Brent: prognozy na 30 sesji – sieć LSTM (tylko target, średnia z trzech ziaren) i
+prognoza naiwna
+
+
+                                                                       35
+7.6.3    Wnioski
+
+W prognozie poziomu ceny ropy modele uzyskały wyniki zbliżone do prognozy naiwnej lub od
+niej słabsze. Najbliżej benchmarku są modele ARIMA (od −0,9% do +0,1%) oraz XGBoost w
+wariancie „tylko target” na horyzoncie 30 sesji (−0,2%). Na horyzoncie jednej sesji wszystkie
+modele mieszczą się w przedziale do 5% gorszego MAPE. Dodanie predyktorów rynkowych nie
+poprawiło wyników na horyzoncie 30 sesji, a w przypadku SVR i LSTM wyraźnie je pogor-
+szyło (−20,3% i −35,5%). Eksperymenty dla ropy uwidoczniły główne ryzyko prognozowania
+dynamicznego: błędy sieci neuronowych mogą się silnie kumulować w okresach gwałtownych
+zmian cen. Rysunek 10 ilustruje ten mechanizm: w okresie gwałtownego wzrostu cen ropy w
+marcu i kwietniu 2026 r. prognozy LSTM na 30 sesji, budowane krok po kroku z własnych
+prognoz modelu, w pojedynczych momentach przyjmowały wartości skrajne. Rozrzut wyników
+między ziarnami był niewielki na horyzoncie jednej sesji (odchylenie standardowe MAPE poniżej
+0,01 pkt proc.) i większy na horyzoncie 30 sesji (0,45–0,70 pkt proc.).
+Prognoza zmienności daje wyraźnie lepsze rezultaty: modele GARCH, EGARCH i GJR-GARCH
+były lepsze od benchmarku na obu horyzontach, a największą poprawę uzyskał EGARCH na
+horyzoncie 30 sesji (15,2%). Przewaga modelu EGARCH jest zgodna z silną, asymetryczną reak-
+cją zmienności na rynku ropy na szoki cenowe. GARCH-MIDAS poprawił wynik na horyzoncie
+jednej sesji (3,7%), a na horyzoncie 30 sesji był zbliżony do benchmarku (−0,4%).
+Dalsze prace dla ropy powinny skupić się na wprowadzeniu zabezpieczeń zapobiegających nie-
+realistycznym odchyleniom prognoz na dłuższych horyzontach, np. ograniczeń prognozowanych
+stóp zwrotu. W infrastrukturze banku uruchomiono dla ropy modele SVR i LSTM dla obu
+horyzontów (rozdział 6).
+
+
+7.7     Złoto
+
+7.7.1    Zakres przetestowanych modeli
+
+Dla ceny złota przetestowano w prognozie poziomu model ARIMA, XGBoost i sieć LSTM,
+każdy w wariantach „tylko target” i „target i predyktory”, a w prognozie zmienności modele
+GARCH, EGARCH i GJR-GARCH z asymetrycznym rozkładem t-Studenta. Zbiór testowy
+obejmuje sesje od 10.10.2022 do 1.09.2026, z krokiem jednej sesji (951 momentów prognozy).
+Okres testowy obejmuje bezprecedensowy wzrost cen złota – z ok. 1700 do ponad 5300 USD za
+uncję na początku 2026 r. – oraz późniejszą korektę. Wszystkie modele wygenerowały komplet
+prognoz.
+
+         Tabela 20: Złoto: MAPE na zbiorze testowym i poprawa względem prognozy naiwnej
+
+                                                        h=1                         h = 30
+   Model               Wariant                MAPE [%] Poprawa [%]          MAPE [%] Poprawa [%]
+   Prognoza naiwna     ostatnia wartość            0,883                          5,196
+   ARIMA               tylko target                0,913           −3,4           5,194           0,0
+   ARIMA               target i predyktory         0,910           −3,1           5,193           0,1
+   XGBoost             tylko target                0,899           −1,8           6,058         −16,6
+   XGBoost             target i predyktory         0,884           −0,1           6,010         −15,7
+   LSTM                tylko target        0,882 (0,001)            0,1   4,999 (0,009)           3,8
+   LSTM                target i predyktory 0,889 (0,004)           −0,7   5,715 (0,185)         −10,0
+W nawiasie: odchylenie standardowe MAPE między trzema ziarnami generatora (modele z elementem losowym);
+brak nawiasu oznacza model deterministyczny lub identyczne wyniki dla wszystkich ziaren. Poprawa: względna
+   zmiana MAPE wobec prognozy naiwnej; wartość dodatnia oznacza model dokładniejszy od benchmarku.
+
+
+                                                   36
+                        Tabela 21: Złoto: prognoza zmienności na zbiorze testowym
+
+                                                      h=1                          h = 30
+         Model            Wariant         MAE RMSE Poprawa [%] MAE RMSE Poprawa [%]
+         Benchmark        średnia 5 dni   1,842    5,436                2,063    5,855
+         GARCH            tylko target    1,760    5,123            4,5 1,832    5,216               11,2
+         EGARCH           tylko target    1,747    5,101            5,2 1,779    5,215               13,8
+         GJR-GARCH        tylko target    1,758    5,103            4,6 1,858    5,210                9,9
+ Błędy prognozy wariancji warunkowej względem kwadratu dziennej logarytmicznej stopy zwrotu wyrażonej w
+ procentach (jednostka: %2 ). Poprawa: względna zmiana MAE wobec benchmarku (średnia kwadratów pięciu
+                                          ostatnich stóp zwrotu).
+
+
+
+7.7.2     Wykresy
+
+
+                                     Poziom (MAPE)                              h=1               h = 30
+
+
+             ARIMA (tylko target)
+
+         ARIMA (z predyktorami)
+
+           XGBoost (tylko target)
+
+        XGBoost (z predyktorami)
+
+              LSTM (tylko target)
+
+           LSTM (z predyktorami)
+
+
+                                −20        −15         −10        −5          0               5            10
+                                                  poprawa względem prognozy naiwnej [%]
+
+                                     Zmienność (MAE)
+
+            GARCH (tylko target)
+
+
+           EGARCH (tylko target)
+
+
+        GJR-GARCH (tylko target)
+
+                                    −5        0              5           10              15                20
+                                             poprawa względem benchmarku zmienności [%]
+
+Rysunek 11: Złoto: poprawa względem benchmarku na zbiorze testowym – prognoza poziomu (MAPE)
+i prognoza zmienności (MAE)
+
+
+
+
+                                                       37
+                            wartość rzeczywista         prognoza naiwna (h = 30)    XGBoost (tylko target) (h = 30)
+
+
+                  5000
+
+
+
+                  4000
+      USD/uncja
+
+
+
+
+                  3000
+
+
+
+                  2000
+
+
+                         01.2023              01.2024               01.2025        01.2026
+
+      Rysunek 12: Złoto: prognozy na 30 sesji – model XGBoost (tylko target) i prognoza naiwna
+
+
+7.7.3             Wnioski
+
+Na horyzoncie jednej sesji wyniki wszystkich modeli poziomu są bliskie prognozie naiwnej (od
+−3,4% do +0,1%). Na horyzoncie 30 sesji najlepszy wynik uzyskała sieć LSTM w wariancie
+„tylko target”, która obniżyła MAPE o 3,8% względem prognozy naiwnej, przy niewielkim roz-
+rzucie między ziarnami (odchylenie standardowe 0,01 pkt proc.). Dobry i stabilny wynik sieci
+LSTM na horyzoncie 30 sesji stanowi mocny punkt wyjścia do dalszego rozwoju modeli dla tego
+aktywa. Model ARIMA osiąga wynik równy benchmarkowi, natomiast model XGBoost jest na
+tym horyzoncie słabszy od benchmarku o ok. 16%. Rysunek 12 wskazuje prawdopodobną przy-
+czynę: w okresie dynamicznego wzrostu cen prognozy XGBoost pozostawały poniżej bieżącego
+poziomu. Modele oparte na drzewach decyzyjnych, wybrane na walidacji w wariancie modelują-
+cym poziom ceny, nie ekstrapolują poza zakres wartości obserwowanych w danych uczących, co
+przy kolejnych rekordach cenowych prowadzi do systematycznego niedoszacowania. Wskazuje to
+na potrzebę modelowania stóp zwrotu zamiast poziomów w tej rodzinie modeli. Predyktory nie
+poprawiły wyników na horyzoncie 30 sesji.
+W prognozie zmienności wszystkie modele były lepsze od benchmarku: poprawa MAE wyniosła
+4,5–5,2% dla jednej sesji i 9,9–13,8% dla 30 sesji, przy najlepszym wyniku modelu EGARCH na
+obu horyzontach. Za najbardziej obiecujący kierunek dalszych prac dla złota uznano połączenie
+stabilizacji prognoz poziomu ceny, przez modelowanie stóp zwrotu zamiast poziomów, z oceną
+ryzyka za pomocą modeli z rodziny GARCH. W infrastrukturze banku uruchomiono dla złota
+model XGBoost (prognoza poziomu) i model GARCH (prognoza zmienności) dla obu horyzontów
+(rozdział 6).
+
+
+7.8        BTC
+
+7.8.1             Zakres przetestowanych modeli
+
+Dla kursu BTC/USD przetestowano pięć rodzin modeli uczenia maszynowego i głębokiego ucze-
+nia: XGBoost, regresję wektorów nośnych (SVR), sieć LSTM, Temporal Fusion Transformer
+(TFT) oraz PatchTST (transformer operujący na fragmentach szeregu), każdą w wariantach
+„tylko target” i „target i predyktory” (predyktory z rynku akcji, dolara, rentowności UST 10Y i
+złota). Dla każdego wariantu wybierano jedną z czterech konfiguracji na zbiorze walidacyjnym i
+uruchamiano ją dla trzech ziaren generatora. Notowania BTC są dostępne 7 dni w tygodniu, dla-
+tego horyzonty wynoszą 1 i 30 dni kalendarzowych. Zbiór testowy obejmuje okres od 1.09.2023
+do 31.03.2025, z krokiem jednego dnia (549 momentów prognozy); jest to okres wcześniejszy niż
+
+                                                               38
+dla pozostałych wskaźników ze względu na zakres dostępnych danych. Wszystkie modele wyge-
+nerowały komplet prognoz. Dodatkowo zaimplementowano model Helformer i przeprowadzono
+dla niego przebieg walidacyjny; jego ocena na zbiorze testowym zostanie wykonana w kolejnym
+etapie.
+
+     Tabela 22: BTC/USD: MAPE na zbiorze testowym i poprawa względem prognozy naiwnej
+
+                                                           h=1                           h = 30
+   Model                 Wariant                 MAPE [%] Poprawa [%]          MAPE [%] Poprawa [%]
+   Prognoza naiwna       ostatnia wartość              1,852                        11,246
+   SVR                   tylko target                  1,862         −0,5           11,047           1,8
+   SVR                   target i predyktory           1,881         −1,6           13,026         −15,8
+   XGBoost               tylko target                  1,902         −2,7           13,324         −18,5
+   XGBoost               target i predyktory           1,903         −2,8           12,455         −10,8
+   LSTM                  tylko target          1,867 (0,001)         −0,8   11,286 (0,101)          −0,3
+   LSTM                  target i predyktory   1,962 (0,021)         −6,0   18,320 (0,907)         −62,9
+   TFT                   tylko target          1,859 (0,004)         −0,4   11,166 (0,012)           0,7
+   TFT                   target i predyktory   1,855 (0,001)         −0,2   11,654 (0,285)          −3,6
+   PatchTST              tylko target          2,017 (0,045)         −8,9   13,258 (1,022)         −17,9
+   PatchTST              target i predyktory   2,235 (0,040)        −20,7   22,368 (2,658)         −98,9
+W nawiasie: odchylenie standardowe MAPE między trzema ziarnami generatora (modele z elementem losowym);
+brak nawiasu oznacza model deterministyczny lub identyczne wyniki dla wszystkich ziaren. Poprawa: względna
+   zmiana MAPE wobec prognozy naiwnej; wartość dodatnia oznacza model dokładniejszy od benchmarku.
+
+
+
+7.8.2     Wykresy
+
+
+                                     Poziom (MAPE)                             h=1            h = 30
+
+
+                SVR (tylko target)
+
+            SVR (z predyktorami)
+
+           XGBoost (tylko target)
+
+        XGBoost (z predyktorami)
+
+               LSTM (tylko target)
+
+           LSTM (z predyktorami)      −63
+
+                TFT (tylko target)
+
+             TFT (z predyktorami)
+
+           PatchTST (tylko target)
+
+        PatchTST (z predyktorami)     −99
+
+
+                                        −30    −25    −20    −15    −10     −5       0        5        10
+                                                 poprawa względem prognozy naiwnej [%]
+
+Rysunek 13: BTC/USD: poprawa MAPE względem prognozy naiwnej na zbiorze testowym (wartości
+poza skalą oznaczono liczbą)
+
+
+
+                                                      39
+                          wartość rzeczywista   prognoza naiwna (h = 30)   TFT (tylko target) (h = 30)
+
+
+
+            100000
+
+
+             80000
+      USD
+
+
+
+
+             60000
+
+
+             40000
+
+
+
+                     09.2023        01.2024     05.2024          09.2024    01.2025
+
+Rysunek 14: BTC/USD: prognozy na 30 dni – model TFT (tylko target, średnia z trzech ziaren) i
+prognoza naiwna
+
+
+7.8.3       Wnioski
+
+Wszystkie modele zastosowane do prognozowania kursu BTC/USD działają poprawnie i wyge-
+nerowały komplet prognoz, a część z nich uzyskała dokładność lepszą od prognozy naiwnej. Kurs
+BTC/USD okazał się jednak wskaźnikiem, dla którego prognoza naiwna jest szczególnie trudna
+do poprawienia. Na horyzoncie jednego dnia wszystkie modele są od niej nieco słabsze; najbliżej
+benchmarku są TFT (w obu wariantach) oraz SVR i LSTM w wariancie „tylko target” (od
+−0,2% do −0,8%). Na horyzoncie 30 dni lepsze od benchmarku okazały się SVR (1,8%) i TFT
+(0,7%) w wariancie „tylko target”, a LSTM uzyskał wynik zbliżony do benchmarku (−0,4%).
+Prognozy TFT na rysunku 14 podążają za trendem kursu, pozostając blisko prognozy naiwnej.
+Dodanie predyktorów rynkowych w większości przypadków pogorszyło wyniki, co sugeruje, że
+w obecnym zestawie zmienne te wnoszą więcej szumu niż informacji o przyszłym kursie BTC;
+poprawę przyniosły jedynie w modelu XGBoost na horyzoncie 30 dni (−10,8% wobec −18,5%)
+oraz, w niewielkim stopniu, w modelu TFT na horyzoncie 1 dnia. Najsłabsze i najmniej sta-
+bilne między ziarnami były modele PatchTST oraz LSTM z predyktorami na horyzoncie 30 dni
+(odchylenie standardowe MAPE od 0,9 do 2,7 pkt proc.), podczas gdy pozostałe modele losowe
+były stabilne (odchylenie standardowe do 0,3 pkt proc.).
+Spośród zastosowanych metod najbardziej obiecujący jest model TFT, który przy stosunkowo
+krótkim czasie uczenia (z wykorzystaniem procesorów graficznych) osiąga na tle pozostałych
+modeli ponadprzeciętną dokładność, a wstępna analiza wskazuje, że wyraźnie korzysta ze zwięk-
+szenia liczby cech. Znacznej poprawy dokładności należy oczekiwać po rozszerzeniu zestawu cech
+o zmienne specyficzne dla rynku kryptoaktywów, w szczególności o wskaźniki sentymentu ryn-
+kowego i dane z analizy on-chain. Wyniki wskazują, że dla BTC priorytetem kolejnego etapu
+powinny być rozszerzenie i selekcja predyktorów, aktualizacja danych oraz strojenie architek-
+tur transformerowych. W infrastrukturze banku uruchomiono dla BTC modele XGBoost, SVR,
+LSTM i TFT dla obu horyzontów (rozdział 6).
+
+
+7.9     Podsumowanie wyników
+
+Tabela 23 zestawia wyniki wszystkich eksperymentów lokalnych. Łącznie oceniono 190 kombi-
+nacji modelu, wariantu danych i horyzontu (dla obligacji także tenoru), obejmujących 24 typy
+modeli – od modeli ekonometrycznych (ARIMA, VAR, BVAR, rodzina GARCH, modele wyboru
+dyskretnego, modele krzywej rentowności) po modele uczenia maszynowego i głębokiego ucze-
+
+
+                                                     40
+nia (XGBoost, SVR, lasy losowe, LSTM, TFT, PatchTST). Prognozy wygenerowano w pełnym
+zakresie dla 188 z 190 kombinacji; wyjątkiem jest model dekompozycyjny dla ropy, wymagający
+dopracowania implementacji.
+
+                    Tabela 23: Zestawienie zbiorcze wyników na zbiorach testowych
+
+  Wskaźnik i zadanie           Miara    Konfig. Kompletność Lepsze Najlepszy wynik względem
+                                                                   benchmarku
+EUR/PLN                       MAPE                  18           100%         5 BVAR (h = 30): 6,1%
+USD/PLN                       MAPE                  18           100%         8 VAR (h = 30): 5,6%
+Stopa NBP – szereg            MAE                    2           100%         0 ARIMA (h = 30): −46,6%
+dzienny
+Stopa NBP – szereg            MAE                    6           100%         0 VAR (h = 12): −13,6%
+miesięczny
+Stopa NBP – kierunek          BA                     8           100%         2 modele uporządkowane z
+decyzji                                                                         predyktorami: BA 96,9%
+                                                                                (benchmark 50,0%)
+Obligacje – rozszerzony       RMSE zob. sekcja 7.4               100%         – Najsilniejszy wynik dla β1 :
+proces DNS                                                                      36,3%; pełna krzywa: 9,7%;
+                                                                                ceny obligacji: 6,7%
+WIG20 – poziom                MAPE                   8           100%         1 ARIMA (h = 1): 0,8%
+WIG20 – zmienność             MAE                    6           100%         6 EGARCH (h = 30): 14,6%
+Ropa – poziom                 MAPE                  18     16/18 pełne        1 ARIMA (h = 30): 0,1%
+Ropa – zmienność              MAE                    8           100%         7 EGARCH (h = 30): 15,2%
+Złoto – poziom                MAPE                  12           100%         4 LSTM (h = 30): 3,8%
+Złoto – zmienność             MAE                    6           100%         6 EGARCH (h = 30): 13,8%
+BTC/USD                       MAPE                  20           100%         2 SVR (h = 30): 1,8%
+
+
+Konfig. – liczba ocenionych kombinacji model × wariant × horyzont (dla obligacji także × tenor), bez benchmarku.
+Lepsze – liczba kombinacji o mierze głównej lepszej niż benchmark. BA – Balanced Accuracy.
+
+Z perspektywy celów zadania 1.4 najważniejsze jest potwierdzenie, że wszystkie rodziny modeli
+działają poprawnie w jednolitym, odtwarzalnym protokole oceny. Co do zasady modele korzy-
+stają wyłącznie z informacji dostępnej w momencie prognozy, generują kompletne prognozy dla
+horyzontów objętych daną konfiguracją i są porównywalne z benchmarkiem w identycznych wa-
+runkach. Wyjątkiem są modele oparte na miesięcznym panelu stopy procentowej, w których
+predyktory, w tym inflację CPI, wykorzystano bez uwzględnienia opóźnienia publikacji. Z tego
+względu ich wyniki prognostyczne mają charakter wstępny, choć potwierdzają poprawne działa-
+nie implementacji.
+Pod względem dokładności prognoz wyniki układają się w spójny obraz:
+
+   • prognoza zmienności – modele z rodziny GARCH były lepsze od benchmarku w 19 z 20
+     przypadków, z poprawą do ok. 15% na horyzoncie 30 dni; to obszar o najbardziej stabilnej
+     przewadze modeli;
+   • krzywa rentowności – modele czynnikowe DNS poprawiły prognozę naiwną w większości
+     konfiguracji, najsilniej dla krótkiego końca krzywej;
+   • kursy walut – na horyzoncie 30 dni modele VAR i BVAR (oraz dla USD/PLN także TFT
+     i XGBoost) obniżyły błąd o 3–6%, na horyzoncie 1 dnia wyniki są zbliżone do benchmarku;
+   • ceny instrumentów rynkowych (WIG20, ropa, złoto, BTC) – prognoza naiwna pozo-
+     staje trudnym benchmarkiem; pojedyncze modele (LSTM dla złota, SVR i TFT dla BTC)
+     uzyskały przewagę na horyzoncie 30 dni, a część modeli ujawniła ograniczenia (brak eks-
+
+
+                                                      41
+      trapolacji w modelach drzewiastych modelujących poziom, kumulacja błędu w prognozie
+      dynamicznej sieci);
+    • stopa procentowa – prognoza naiwna dominuje dla poziomu stopy, natomiast modele
+      uporządkowane z predyktorami poprawnie wskazały zmianę stopy w prognozie kierunku
+      decyzji.
+
+Zgodnie z charakterem etapu (podrozdział 5.4) wyniki te stanowią punkt odniesienia dla ko-
+lejnych prac. Zidentyfikowane obszary poprawy – selekcja i rozszerzenie zestawów predyktorów,
+systematyczny dobór hiperparametrów, modelowanie stóp zwrotu zamiast poziomów w mode-
+lach drzewiastych, zabezpieczenia prognoz wielokrokowych oraz aktualizacja danych (szczególnie
+dla BTC) – wyznaczają kierunki dalszego uczenia i parametryzacji modeli.
+
+
+8     Podsumowanie realizacji zadania
+
+W ramach zadania przygotowano i poddano wstępnemu procesowi uczenia, kalibracji oraz oceny
+grupę modeli prognostycznych dla uzgodnionych wskaźników. Prace objęły modele klasyczne,
+modele uczenia maszynowego i głębokiego uczenia, modele zmienności, modele klasyfikacyjne
+oraz modele krzywej rentowności.
+Lokalne testy służyły potwierdzeniu poprawności implementacji, wstępnej kalibracji modeli oraz
+określeniu ich właściwości prognostycznych. Uzyskane wyniki pokazują, że skuteczność poszcze-
+gólnych metod zależy od prognozowanego wskaźnika i horyzontu. W części przypadków modele
+poprawiały wynik względem benchmarku, natomiast w pozostałych prognoza naiwna pozosta-
+wała trudnym punktem odniesienia. Słabszy wynik prognostyczny nie oznaczał błędu technicz-
+nego implementacji.
+Technicznie sprawne modele dostosowano do wspólnego interfejsu wykorzystywanego w infra-
+strukturze banku. W ramach dostępnych komponentów przeprowadzono testy integracyjne obej-
+mujące uruchomienie modeli, odczyt danych, wykonanie procedur uczenia i predykcji oraz wy-
+generowanie wyników. Wyniki uzyskane w tym środowisku porównano z przebiegami referencyj-
+nymi wykonanymi lokalnie.
+Ze względu na trwającą przebudowę części infrastruktury chmurowej testy integracyjne nie obej-
+mowały we wszystkich przypadkach pełnej publikacji produkcyjnego artefaktu. Zaliczenie testu
+oznacza zatem poprawne działanie modelu w zakresie dostępnych komponentów infrastruktury,
+a nie jego akceptację do zastosowania produkcyjnego.
+Szczególnie rozbudowany zakres miały prace dotyczące obligacji, które objęły nie tylko progno-
+zowanie, lecz także budowę dziennej reprezentacji krzywej dochodowości, rekonstrukcję przyszłej
+krzywej, wycenę instrumentów, walidację statystyczną oraz diagnostykę źródeł błędu.
+Przeprowadzone prace zrealizowały cel zadania polegający na przygotowaniu grupy modeli, wy-
+konaniu ich wstępnego uczenia i kalibracji, potwierdzeniu poprawności działania oraz dostoso-
+waniu technicznie sprawnych implementacji do infrastruktury banku.
+Przygotowane modele, konfiguracje, wyniki referencyjne i dokumentacja stanowią podstawę do
+dalszej kalibracji oraz późniejszego wyboru modeli w kolejnych etapach projektu.
+
+
+
+
+                                              42
+
