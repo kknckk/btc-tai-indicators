@@ -1,0 +1,221 @@
+---
+title: "Review prac BTC-TAI po commicie 2d915c8"
+subtitle: "Uwagi metodologiczne i merytoryczne: harness ewaluacji, program SGH, raport Quarto — w odniesieniu do raportu SGH zad. 1.4 (PKO BP) i recenzji sol"
+author: "Krzysztof Kanciak"
+date: "2026-11-08"
+lang: pl
+format:
+  docx:
+    toc: true
+    toc-depth: 3
+  html:
+    toc: true
+    theme: cosmo
+---
+
+# Zakres i metoda review
+
+Przejżałem stan repo `kknckk/btc-tai-indicators` po commicie `2d915c8` (08.11.2026):
+nowe moduły ewaluacji (`evaluation/`), raport pkf (`docs/_quarto/`), 32 pliki programu
+SGH (`results/SGH_*.md`), wyniki TSFM i baselines. Punktem odniesienia jest raport
+SGH z zadania 1.4 (projekt FENG, 30.10.2026) oraz jego recenzja wykonana przez sol
+(`reports/pko-feng/REVIEW_SOL_zad1_4.md`).
+
+Wszystkie liczby poniżej pochodzą z committed artefaktów repo albo z odpalonych przeze mnie
+obliczeń na kodzie z tego commita. Gdzie się da, wskazuję plik i linię.
+
+# Stan po commicie — co jest faktycznie, a co jest planem
+
+| Artefakt | Stan | Dowód |
+|---|---|---|
+| Harness walk-forward z purge/embargo + causal guard | **wykonany, działa** | `evaluation/walk_forward.py`, asercje na nakładanie labeli; 13/14 testów przechodzi |
+| Targety poziom/log-zwrot, dzień/miesiąc | wykonane | `evaluation/targets.py`, test zgodności z `forward_log_return` |
+| Backtest ekonomiczny z kosztami 10/20 bps | **wykonany, liczby są** | `results/economic.md`, `results/baselines.json` |
+| Kalibracja przedziałów (split-conformal, CQR) | kod + testy, częsciowe wyniki | `evaluation/calibration.py`, `results/calibration.md` |
+| MCS + DM (istotność przewag) | **kod jest, wyników brak** | `evaluation/mcs.py`, `evaluation/dm_test.py`; `economic.md`: „MCS not computed" |
+| Program SGH (29 plików specyfikacji w `results/SGH_*.md`, z planowanych 34 serii TRD-29..62) | **wyłącznie kod i specyfikacje, zero wyników liczbowych** | brak jakiegokolwiek `results/sgh_*.json`; każdy `results/SGH_*.md` kończy się „Po uruchomieniu eksperymentu liczby trafiają do…" |
+| Wyniki TSFM (chronos, timesfm, 300 originów) | wykonane | `results/tsfm_full_chronos/tsfm.json`, `results/tsfm_full_timesfm/tsfm.json` |
+| Raport Quarto do PKO (`docs/_quarto/index.qmd`) | **szkic z błędami, nie nadaje się do wysyłki** | szczegóły w rozdziale o defektach |
+
+# Co jest dobrze — i odpowiada uwagom recenzji sol
+
+Recenzja raportu SGH (REVIEW\_SOL\_zad1\_4.md) wskazała jako warunki wiarygodnego
+porównania: chronologiczny walk-forward z odtwarzalnymi chwilami prognozy, kontrola
+dostępności cech point-in-time, testy istotności parowanych różnic strat, ocenę
+ekonomiczną po kosztach i traktowanie małych przewag jako hipotez. Nasz nowy harness
+te wymogi w dużej mierze spelnia:
+
+1. **Purge + embargo + strażnik przyczynowości.** `run_walk_forward` obcina z treningu
+   `h` ostatnich obserwacji (etykiety zachodzą na blok testowy) i ma opcjonalny embargo.
+   `check_causal` wykonuje test niezmienniczości względem obcięcia szeregu — cecha
+   zaglądająca w przyszłość wybudzi błąd zanim ruszy jakikolwiek fold. Tego w raporcie
+   SGH nie ma; tam wprost zapisano wyjątek dla panelu miesięcznego NBP (§4.4).
+2. **Wspólny panel i wspólne chwile prognozy.** `align_forecast_frames` sprowadza modele
+   do przecięcia dat — DM i MCS liczone na identycznych originach, nie na różnych oknach.
+3. **Testy istotności.** `dm_test.py` implementuje DM z korektą Harvey-Leybourne-Newbold
+   i długookresową wariancją MA(h-1); `mcs.py` robi sekwencyjną eliminację w stylu
+   Hansen-Lunde-Nason z blokowym bootstrapem. To dokładnie ten standard, którego
+   recenzja sol żąda od raportu SGH dla „BTC +0,7%".
+4. **Ekonomiczna prawda po kosztach.** `economic.md` liczy Sharpe, MaxDD i turnover
+   przy 10/20 bps — i uczciwie pokazuje, że buy&hold (Sharpe 1,04-1,07) bije wszystkie
+   nasze strategie modelowe na h=1/7/30. XGBoost przy turnoverze 102/rok i 20 bps
+   traci 14 pkt proc. Sharpe'a (1,07 -> 0,74). Bardziej wiarygodne niż sam MAPE.
+5. **Uczciwe przedziały.** TimesFM bez kalibracji ma pokrycie 48,7-59,0% przy nominalnych
+   80% — `calibration.md` pokazuje to wprost zamiast sprzedawać surowe kwantyle modelu.
+   CQR na originach OOS (expanding, tylko przeszłość) to poprawna konstrukcja.
+
+# Defekty wykazane liczbowo
+
+## D1. Commit przeszedł z czerwonym testem kalibracji
+
+`pytest tests/test_evaluation_harness.py` na commicie 2d915c8:
+
+```
+FAILED tests/test_evaluation_harness.py::test_calibrate_frame_cqr_on_quantile_synthetic
+1 failed, 13 passed
+```
+
+Przyczyna jest konstrukcyjna: test buduje kwantyle jako `q_lo = y - 2`, `q_hi = y + 2`,
+czyli wyrocznię znającą realizację. Score CQR jest wtedy stały (-2), procedura
+degeneruje przedział do punktu i pokrycie wynosi **1,0000** — asercja żąda przedziału
+[0,75; 0,92], więc test pada deterministicznie, nie losowo. Naprawa to kwantyle
+wyznaczone bez znajomości realizacji y (np. modelowe z szumem) i kontrola zarówno
+pokrycia, jak i szerokości — samo dopuszczenie pokrycia 100% uczyniłoby test zielonym,
+ale nie sprawdzałoby własności kalibracji. Wniosek procesowy jest
+ważniejszy niż sam test: **reguła „review + zielone testy przed pushem" nie zadziałała**.
+
+## D2. Test Diebolda-Mariano w MCS zawsze liczony z h=1
+
+`evaluation/mcs.py:71` — `dm_matrix({names[i]: L[:, i] for i in range(M)}, h=1)`.
+Parametr `h` testu DM to horyzont prognozy (długookresowa wariancja bierze h-1
+autokowariancji, bo prognozy h-krokowe mają błędy zbliżone do MA(h-1)). Dla h=7 i h=30
+wpisanie h=1 usuwa wszystkie autokowariancje i wyłącza właściwą korektę HLN.
+Demonstracja na syntetycznych stratach MA(29) (reprodukcja: `evaluation/dm_test.py`,
+T=4000, dwie serie o wspólnym szumie, ziarno 0):
+
+| test | statystyka DM | p-wartość |
+|---|---|---|
+| DM z h=1 (jak w kodzie) | +2,15 | **0,031** |
+| DM z h=30 (poprawne) | +0,38 | **0,703** |
+
+Ta sama para modeli: przy h=1 „istotnie gorszy", przy poprawnym h=30 różnica
+nieodróżnialna od szumu. Przy dodatniej autokorelacji strat h=1 zawyża istotność
+(zaniża wariancję długookresową); kierunek błędu w ogólności zależy od znaku
+autokowariancji, ale dla nakładających się celów horyzontu >1 ustawienie h=1 jest
+po prostu wadliwym testem. To dokładnie pułapka „nachodzących celów h=30", którą
+recenzja sol zarzuciła raportowi SGH (§4.4) — i którą nasz własny moduł istotności
+na dziś reprodukuje.
+
+Dwie uwagi drugiego stopnia z niezależnej recenzji: (i) samo przekazanie `h` naprawia
+tabele par DM, ale nie procedurę eliminacji MCS — `mcs.py` bootstrapuje różnicę
+najgorszego modelu względem próbnego najlepszego, a nie rozkład maksimum statystyk
+po aktywnym zbiorze jak w HLN-MCS, a blok bootstrapu `ceil(T^(1/3))` może być krótszy
+niż zakres nakładania dla h=30; (ii) eliminację trzeba zwalidować na procesach
+z zależnością i remisami, a dla par DM rozważyć estymator HAC (Newey-West) z jawnym
+pasmem. Poprawka minimalna: `mcs()` przyjmuje haryzont, `run_economic.py` woła per h.
+
+## D3. `economic.md` nie zgadza się z committed `baselines.json`
+
+`economic.md` deklaruje: „Current tables use committed `baselines.json`". Sharpe
+i MaxDD rzeczywiście się zgadzają, ale kolumna turnover dla h=7 i h=30 wpisuje
+16,62 dla wszystkich trzech modeli — wartość odpowiadającą turnoverowi GARCH dla h=1
+(16,6192...):
+
+| horyzont | model | turnover wg `economic.md` | turnover wg `baselines.json` |
+|---|---|---|---|
+| h=7 | har_rv | 16,62 | **5,33** |
+| h=7 | garch | 16,62 | **14,95** |
+| h=7 | xgboost | 16,62 | **28,36** |
+| h=30 | har_rv | 16,62 | **1,98** |
+| h=30 | garch | 16,62 | **9,33** |
+| h=30 | xgboost | 16,62 | **3,32** |
+
+Sześć błędnych komórek. Na marginesie: kolumna hit rate stoi w `n/a`, bo committed
+`baselines.json` ma tam `null` — osobna luka. Skąd wzięła się 16,62 na obu
+horyzontach, z plików ustalić się nie da; pewne jest, że tabela nie została
+wygenerowana z obecnego JSON. Tabele raportowe trzeba regenerować skryptem
+i automatycznie porównywać z artefaktem, nie edytować ręcznie.
+
+## D4. MCS „not computed" — parquety predykcji są ignorowane przez git
+
+`results/preds/.gitignore` (wpis `*.parquet`, obecny od 20.10) sprawia, że ramki
+predykcji zapisywane przez `run_baselines.py` nie trafiają do repo, a te ramki są
+jedynym źródłem, z którego `run_economic.py` umie policzyć MCS. Na świeżym klonie
+(repo jest źródłem prawdy dla PKO) MCS nie odtworzy się z dostarczonych artefaktów —
+trzeba najpierw pełnie przeliczyć `run_baselines`, potem `run_economic`. `economic.md`
+w repo melduje „MCS not computed" dla wszystkich trzech horyzontów, a tabeli MCS ani
+`economic.json` w `results/` nie ma. Moduł istotności istnieje (D2), ale **wynik MCS
+nie istnieje nigdzie**. Do czasu regeneracji raport nie ma prawa cytować rankingu
+modeli z testem istotności. Druga uwaga: `run_economic.py` woła `mcs` przy dowolnej
+niepustej liczbie ramek, a przy jednej ramce dostaniemy trywialny „confidence set"
+— skrypt powinien wymagać co najmniej dwóch wyrównanych modeli i odnotować skład
+panelu.
+
+## D5. Raport Quarto (`index.qmd`) się nie zbuduje i wprowadza w błąd
+
+1. Komórki Python czytają `results/tsfm_full_chronos/metrics.json` — ten plik
+   **nie istnieje** (jest `tsfm.json`), a ścieżka jest względna wobec katalogu qmd.
+   Analogicznie `results/full_seed42/metrics.json` — w tym katalogu są `neural.json`
+   i `neural.md`. Render pada na odczycie.
+2. `date: "`r Sys.Date()`"` — literał R w dokumencie bez silnika R; w DOCX wyjdzie
+   „`r Sys.Date()`" zamiast daty.
+3. Tabela 3.4 miesza liczby z `tsfm_full_chronos/tsfm.json`. Dla chronos podaje
+   skill −5,19 / −3,55 / −7,10% (h=1/7/30); committed JSON ma **−7,10 / −4,93 / −3,55%**
+   (−5,19% to średnia z pola `aggregate`, nie h=1). Dla TimesFM podaje DirAcc 45,3%
+   i skill −9,0% — to również średnie po horyzontach (48,3/43,0/44,7% i
+   −3,1/−8,8/−15,1%) prezentowane pod nagłówkiem „h=1/7/30". Czytelnik dostaje liczby,
+   których nie odtworzy z artefaktów 1:1.
+4. Streszczenie twierdzi, że modele SGH „zostały zaimplementowane i przetestowane na
+   danych NBP/Yahoo". Przetestowane = przeszły testy jednostkowe na syntetyku.
+   **Żaden eksperyment SGH nie ma wyników** — `results/sgh_*.json` nie istnieją,
+   a sekcja 7.4 („wyniki szczegółowe: 34 pliki SGH") ma zły licznik: plików
+   `SGH_*.md` jest **29**, nie 34, i są to specyfikacje zadań, nie wyniki. Ta sama
+   sekcja podaje „8 passed" przy teście harnessu — aktualnie jest 13 passed / 1 failed
+   (patrz D1). W wersji do PKO te zdania trzeba przepisać, zanim ktokolwiek z banku
+   zapyta o liczby.
+
+# Konsekwencje wobec raportu SGH zad. 1.4
+
+Nasz krytyczny stosunek do raportu SGH (brak testów istotności, przeciek w panelu
+NBP, nieaktualne dane BTC) jest utrzymany — ale commit 2d915c8 pokazuje, że sami
+jeszcze nie spelniamy własnego standardu dowodu:
+
+- Standard „parowane różnice strat + przedziały ufności" mamy w kodzie, lecz bez
+  wyniku (D4) i z wadliwym parametrem h (D2).
+- Deklaracja „przegrania modeli do Banku" dla kredytów konsumpcyjnych i hipotecznych
+  (TRD-36..39) pozostaje pusta po obu stronach — SGH nie zrealizowało bloków wcale,
+  my mamy kod bez liczb.
+- Nasza realna przewaga nad raportem SGH to **aktualność danych BTC** (panel do
+  12.06.2026 vs ich eksport do 31.03.2025) i harness z causal guard. To wystarcza
+  jako argument do wspólnego protokołu, ale nie jako wynik.
+
+# Nota o procesie tego review
+
+Ustalenia D1-D5 przeszły niezależną recenzję drugim modelem (gpt-6-sol, effort high,
+sesja 01a1bbf5). Recenzja **potwierdziła wszystkie pięć defektów** z własnym
+sprawdzeniem plików i jednorazowym uruchomieniem testu CQR, doprecyzowała D2
+(kierunek błędu DM; ograniczenia samej procedury eliminacji MCS) i D3 (sześć komórek
+zamiast czterech), oraz poprawiła przypisanie reguły gitignore w D4. Zapis recenzji:
+`docs/review_2d915c8/REVIEW_SOL_HIGH.md`. Zaplanowane sekcje „pominięte wady harnessu"
+i „ocena rekomendacji" nie zostały domknięte — gateway RON obcięło sesję limitem
+429 przed końcem; dokończyć przy okazji poprawek P0.
+
+# Werdykt i następne kroki
+
+Commit 2d915c8 to dobry etap budowy infrastruktury dowodowej — nie wyniki. Zanim
+cokolwiek z tego stanu trafi do PKO:
+
+| Priorytet | Działanie | Adres defektu |
+|---|---|---|
+| P0 | naprawić konstrukcję testu CQR (kwantyle modelowe, nie wyrocznia); wymusić zielone testy przed push | D1 |
+| P0 | `mcs()` przyjmuje horyzont i przekazuje do DM; `run_economic` woła per h | D2 |
+| P0 | regenerować `economic.md` wyłącznie skryptem; usunąć ręczne edycje | D3 |
+| P0 | odpalić `run_baselines` + `run_economic` na wspólnym panelu, opublikować MCS (nawet prywatnym artefaktem poza gitem, o którym raport wie) | D4 |
+| P1 | przepisać `index.qmd`: realne ścieżki, `date: today`, tabela 3.4 z JSON, zdanie o „przetestowane" SGH na zgodne ze stanem | D5 |
+| P1 | uruchomić pierwszy blok SGH z wynikami (stawiam na TRD-32/33 NBP + TRD-58/59 BTC — najkrótsza droga do porównania z raportem SGH 1:1) | stan programu |
+| P2 | dopiero potem wersja do PKO: jeden dokument, jeden protokół, liczby odtwarzalne z repo | — |
+
+Bez P0 lista „co przejąć od SGH" z recenzji sol staje się dwustronna: oni mają
+protokół opisany w raporcie, my mamy protokół opisany w kodzie. Obie strony mają
+dowody częsciowe. Różnica jest taka, że nasze defekty da się naprawić w kilka dni —
+ich dane BTC kończą się w marcu 2025 i to już zostanie.
