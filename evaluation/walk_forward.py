@@ -55,10 +55,15 @@ def check_causal(
     rng = np.random.default_rng(seed)
     full = feature_fn(panel)
     n = len(panel)
+    # porównujemy wyłącznie kolumny numeryczne (odejmowanie); kolumny tekstowe
+    # (np. surowe komunikaty RPP w tier2) nie uczestniczą w teście przyczynowości
+    num_cols = [c for c in full.columns if pd.api.types.is_numeric_dtype(full[c])]
+    full = full[num_cols]
     cuts = rng.integers(int(n * 0.3), n - 2, size=n_probes)
     offenders: set[str] = set()
     for cut in cuts:
         part = feature_fn(panel.iloc[: cut + 1])
+        part = part[[c for c in part.columns if c in num_cols]]
         a, b = full.iloc[: cut + 1][part.columns], part
         diff = ((a - b).abs() > tol) & ~(a.isna() & b.isna())
         diff |= a.isna() ^ b.isna()

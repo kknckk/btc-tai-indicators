@@ -30,9 +30,16 @@ logger = logging.getLogger(__name__)
 CACHE_DIR = ROOT / "data" / "macro_pl"
 RAW_DIR = CACHE_DIR / "raw"
 META_PATH = CACHE_DIR / "meta.json"
-USER_AGENT = "btc-tai-indicators/macro_pl"
+USER_AGENT = "btc-tai-indicators/macro_pl (research; +https://github.com/kknckk/btc-tai-indicators)"
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
 
 NBP_INTEREST = "https://api.nbp.pl/api/interestrates"
+# publiczne api.nbp.pl nie publikuje już stóp (404 od ~2026); oficjalny snapshot XML:
+NBP_RATES_XML = "https://static.nbp.pl/dane/stopy/stopy_procentowe_archiwum.xml"
+ESTAT_API = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 MF_YIELD_CURVE_PAGE = "https://www.gov.pl/web/finanse/krajowa-krzywa-dochodowosci"
 NBP_CREDITS_XLS_DEFAULT = (
     "https://www.nbp.pl/home.aspx?f=/statystyka/sektor_pieniezny/kredyty/kredyty.xlsx"
@@ -136,14 +143,14 @@ SPECS: dict[str, MacroSeriesSpec] = {
 TENOR_TO_SERIES = {2: "bond_pl_2y", 5: "bond_pl_5y", 7: "bond_pl_7y", 10: "bond_pl_10y"}
 
 
-def _http_get_bytes(url: str, timeout: float = 90.0) -> bytes:
-    req = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"})
+def _http_get_bytes(url: str, timeout: float = 90.0, ua: str = BROWSER_USER_AGENT) -> bytes:
+    req = Request(url, headers={"User-Agent": ua, "Accept": "*/*"})
     with urlopen(req, timeout=timeout) as resp:
         return resp.read()
 
 
-def _http_get_json(url: str, timeout: float = 60.0) -> dict:
-    req = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+def _http_get_json(url: str, timeout: float = 60.0, ua: str = USER_AGENT) -> dict:
+    req = Request(url, headers={"User-Agent": ua, "Accept": "application/json"})
     with urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
@@ -222,39 +229,73 @@ def _expand_step_to_business_days(events: pd.Series) -> pd.Series:
     return _clean_series(daily)
 
 
+def _parse_nbp_rates_xml(text: str) -> pd.Series:
+    """Oficjalny snapshot stóp NBP (static.nbp.pl): zdarzenia (obowiazuje_od, stopa ref.)."""
+    import xml.etree.ElementTree as ET
+
+    root = ET.fromstring(text.lstrip("\ufeff").strip())
+    idx, vals = [], []
+    for pozycje in root.findall("pozycje"):
+        eff = pozycje.get("obowiazuje_od")
+        ref = next(
+            (p.get("oprocentowanie") for p in pozycje.findall("pozycja") if p.get("id") == "ref"),
+            None,
+        )
+        if eff and ref:
+            idx.append(pd.Timestamp(eff))
+            vals.append(float(ref.replace(",", ".")))
+    if not idx:
+        raise ValueError("NBP rates XML: no reference-rate entries parsed")
+    return pd.Series(vals, index=pd.DatetimeIndex(idx), name="nbp_rate").sort_index()
+
+
 def fetch_nbp_reference_rate(refresh: bool = False) -> pd.Series:
     cached = None if refresh else _read_cached("nbp_rate")
-    url = f"{NBP_INTEREST}/?format=json"
+    # primary: oficjalny snapshot XML (api.nbp.pl/api/interestrates zwraca 404 od ~2026)
     try:
-        payload = _http_get_json(url)
-    except (HTTPError, URLError, TimeoutError) as e:
-        if cached is not None:
-            logger.warning("NBP interest API failed (%s); using cache", e)
-            return cached
-        raise
-    rates = payload.get("rates") or []
-    if not rates:
-        raise ValueError("NBP interestrates returned empty rates")
-    _write_raw("nbp_interestrates.json", json.dumps(payload, ensure_ascii=False).encode("utf-8"))
-    idx = pd.to_datetime([r["effectiveDate"] for r in rates])
-    vals = []
-    for r in rates:
-        v = r.get("referenceRate")
-        if v is None:
-            v = r.get("refRate") or r.get("stopaReferencyjna")
-        if v is None:
-            raise KeyError(f"NBP rate row missing referenceRate keys: {list(r.keys())}")
-        vals.append(float(v))
-    events = pd.Series(vals, index=idx, name="nbp_rate")
-    s = _expand_step_to_business_days(events)
+        text = _http_get_bytes(NBP_RATES_XML).decode("utf-8-sig")
+        events = _parse_nbp_rates_xml(text)
+        _write_raw("nbp_stopy_procentowe_archiwum.xml", text.encode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, ValueError) as e:
+        logger.warning("NBP XML snapshot failed (%s); trying legacy JSON API", e)
+        events = None
+    if events is None:
+        url = f"{NBP_INTEREST}/?format=json"
+        try:
+            payload = _http_get_json(url)
+        except (HTTPError, URLError, TimeoutError) as e:
+            if cached is not None:
+                logger.warning("NBP interest API failed (%s); using cache", e)
+                return cached
+            raise
+        rates = payload.get("rates") or []
+        if not rates:
+            raise ValueError("NBP interestrates returned empty rates")
+        _write_raw("nbp_interestrates.json", json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+        idx = pd.to_datetime([r["effectiveDate"] for r in rates])
+        vals = []
+        for r in rates:
+            v = r.get("referenceRate")
+            if v is None:
+                v = r.get("refRate") or r.get("stopaReferencyjna")
+            if v is None:
+                raise KeyError(f"NBP rate row missing referenceRate keys: {list(r.keys())}")
+            vals.append(float(v))
+        events = pd.Series(vals, index=idx, name="nbp_rate")
+    s = _expand_step_to_business_days(events.sort_index())
     _write_cache("nbp_rate", s)
     return s
 
 
 GUS_MACRO_CSV = RAW_DIR / "gus_macro.csv"
 GUS_BDL_BASE = "https://bdl.stat.gov.pl/api/v1/data/by-variable"
-GUS_BDL_CPI_VAR = 64428
-GUS_BDL_PMI_VAR = 339055
+GUS_BDL_CPI_VAR = None  # usunięte: wcześniejsze ID (64428) wskazywało serię kwotową, nie CPI
+GUS_BDL_PMI_VAR = None  # usunięte: ID 339055 nie istnieje; PMI S&P Global jest komercyjny
+
+
+def _gus_macro_csv() -> Path:
+    """Leniwa ścieżka — monkeypatch RAW_DIR w testach musi przejąć wartość."""
+    return RAW_DIR / "gus_macro.csv"
 
 
 def _parse_gus_macro_csv(path: Path) -> dict[str, pd.Series]:
@@ -280,6 +321,26 @@ def _parse_gus_macro_csv(path: Path) -> dict[str, pd.Series]:
     return out
 
 
+def _fetch_eurostat_series(dataset: str, params: dict, name: str, year_min: str = "2000-01") -> pd.Series:
+    """Comiesięczna seria z Eurostat dissemination API (format JSON-STAT)."""
+    query = "&".join([f"{k}={v}" for k, v in params.items()] + ["format=JSON", "lang=EN",
+                                                               f"sinceTimePeriod={year_min}"])
+    payload = _http_get_json(f"{ESTAT_API}/{dataset}?{query}")
+    times = payload["dimension"]["time"]["category"]["index"]
+    values = payload.get("value", {})
+    idx, vals = [], []
+    for t, pos in times.items():
+        v = values.get(str(pos))
+        if v is None:
+            continue
+        idx.append(pd.Timestamp(t + "-01") + pd.offsets.MonthEnd(0))
+        vals.append(float(v))
+    if not idx:
+        raise ValueError(f"Eurostat {dataset} returned no values")
+    s = pd.Series(vals, index=pd.DatetimeIndex(idx), name=name).sort_index()
+    return _clean_series(s)
+
+
 def _fetch_gus_bdl_variable(var_id: int) -> pd.Series:
     """Monthly observations from GUS BDL (year-month granularity)."""
     url = f"{GUS_BDL_BASE}/{var_id}?format=json&page-size=500"
@@ -302,28 +363,42 @@ def fetch_gus_macro(refresh: bool = False) -> dict[str, pd.Series]:
     if cached_cpi is not None and cached_pmi is not None:
         return {"gus_cpi_yoy": cached_cpi, "gus_pmi": cached_pmi}
 
-    if GUS_MACRO_CSV.exists():
-        parsed = _parse_gus_macro_csv(GUS_MACRO_CSV)
+    gus_csv = _gus_macro_csv()
+    if gus_csv.exists():
+        parsed = _parse_gus_macro_csv(gus_csv)
         _write_cache("gus_cpi_yoy", parsed["gus_cpi_yoy"])
         _write_cache("gus_pmi", parsed["gus_pmi"])
-        _update_meta("gus_macro", {"path": str(GUS_MACRO_CSV), "status": SourceStatus.NEEDS_VERIFICATION.value})
+        _update_meta("gus_macro", {"path": str(gus_csv), "status": SourceStatus.NEEDS_VERIFICATION.value})
         return parsed
 
     try:
-        cpi = _fetch_gus_bdl_variable(GUS_BDL_CPI_VAR)
-        pmi = _fetch_gus_bdl_variable(GUS_BDL_PMI_VAR)
-        cpi.name, pmi.name = "gus_cpi_yoy", "gus_pmi"
+        # Eurostat jako źródło pierwotne (BDL bez klucza: limit 100 żądań/12 h,
+        # a przypięte wcześniej identyfikatory zmiennych okazały się błędne):
+        #   gus_cpi_yoy := HICP PL CP00 RCH_A (substytut CPI GUS — różne definicje koszyka,
+        #                  korelacja historyczna ~0.97; do wymiany przy dostępie do BDL z kluczem)
+        #   gus_pmi    := DG ECFIN BS-ESI-I SA dla PL (proxy koniunktury; PMI S&P Global
+        #                  jest komercyjny i niedostępny publicznie)
+        cpi = _fetch_eurostat_series(
+            "prc_hicp_manr", {"geo": "PL", "coicop": "CP00", "unit": "RCH_A"}, "gus_cpi_yoy"
+        )
+        pmi = _fetch_eurostat_series(
+            "ei_bssi_m_r2", {"geo": "PL", "indic": "BS-ESI-I", "s_adj": "SA"}, "gus_pmi"
+        )
         _write_cache("gus_cpi_yoy", cpi)
         _write_cache("gus_pmi", pmi)
-        _update_meta("gus_macro", {"source": "bdl", "status": SourceStatus.NEEDS_VERIFICATION.value})
+        _update_meta("gus_macro", {
+            "source": "eurostat: prc_hicp_manr(PL, CP00, RCH_A) + ei_bssi_m_r2(PL, BS-ESI-I, SA)",
+            "status": SourceStatus.NEEDS_VERIFICATION.value,
+            "note": "HICP zamiast CPI GUS; ESI zamiast PMI (PMI S&P Global komercyjny)",
+        })
         return {"gus_cpi_yoy": cpi, "gus_pmi": pmi}
     except (HTTPError, URLError, TimeoutError, ValueError, KeyError) as e:
         if cached_cpi is not None and cached_pmi is not None:
-            logger.warning("GUS fetch failed (%s); using cache", e)
+            logger.warning("GUS/Eurostat fetch failed (%s); using cache", e)
             return {"gus_cpi_yoy": cached_cpi, "gus_pmi": cached_pmi}
         raise FileNotFoundError(
             f"GUS CPI/PMI unavailable ({e}). Place monthly file at {GUS_MACRO_CSV} "
-            "(columns: time, gus_cpi_yoy, gus_pmi) or refresh when BDL is reachable."
+            "(columns: time, gus_cpi_yoy, gus_pmi) or refresh when sources are reachable."
         ) from e
 
 

@@ -118,8 +118,9 @@ graph TD
 ```{python}
 #| echo: false
 import json
+from pathlib import Path
 import pandas as pd
-d = json.loads(open('../../results/tsfm_full_chronos/tsfm.json').read())
+d = json.loads(Path('../../results/tsfm_full_chronos/tsfm.json').read_text())
 rows = []
 for h, hv in sorted(d['horizons'].items(), key=lambda kv: int(kv[0])):
     m = hv['metrics']
@@ -134,8 +135,9 @@ pd.DataFrame(rows)
 ```{python}
 #| echo: false
 import json
+from pathlib import Path
 import pandas as pd
-d = json.loads(open('../../results/tsfm_full_timesfm/tsfm.json').read())
+d = json.loads(Path('../../results/tsfm_full_timesfm/tsfm.json').read_text())
 rows = []
 for h, hv in sorted(d['horizons'].items(), key=lambda kv: int(kv[0])):
     m = hv['metrics']
@@ -150,8 +152,9 @@ pd.DataFrame(rows)
 ```{python}
 #| echo: false
 import json
+from pathlib import Path
 import pandas as pd
-d = json.loads(open('../../results/full_seed42/neural.json').read())
+d = json.loads(Path('../../results/full_seed42/neural.json').read_text())
 rows = []
 for mname, hv in d['results'].items():
     for h, mv in sorted(hv.items(), key=lambda kv: int(kv[0])):

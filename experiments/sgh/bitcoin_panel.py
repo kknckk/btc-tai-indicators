@@ -19,14 +19,24 @@ def build_bitcoin_daily_panel(
 
 
 def bitcoin_features(panel: pd.DataFrame) -> pd.DataFrame:
-    """Causal on-chain feature set plus spot level for level-forecast fallbacks."""
+    """Causal on-chain feature set plus spot level for level-forecast fallbacks.
+
+    Kolumny o pokryciu <80% panelu (późne serie on-chain startujące ~2022) są odrzucane,
+    pozostałe forward-fillowane (point-in-time: ffill używa wyłącznie przeszłości).
+    Bez tego `X.notna().all(axis=1)` w Forecasterach wycinało pierwsze foldy do zera."""
     X = build_features(panel)
+    coverage = X.notna().mean(axis=0)
+    X = X.loc[:, coverage >= 0.80]
+    X = X.ffill()
     X[PRICE_COL] = panel[PRICE_COL]
     return X
 
 
-def demo_bitcoin_panel(n_days: int = 900, seed: int = 58) -> pd.DataFrame:
-    """Deterministic synthetic BTC panel — smoke tests only (not production metrics)."""
+def demo_bitcoin_panel(n_days: int = 2600, seed: int = 58) -> pd.DataFrame:
+    """Deterministic synthetic BTC panel — smoke tests only (not production metrics).
+
+    2600 dni domyślnie, bo config tier-I ma min_train=1000 i 3 horyzonty do 30 dni;
+    krótszy panel łamał --demo z „not enough data for a single fold"."""
     rng = np.random.default_rng(seed)
     idx = pd.date_range("2016-01-01", periods=n_days, freq="D")
     logp = np.zeros(n_days)

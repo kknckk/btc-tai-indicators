@@ -132,9 +132,21 @@ class OrderedForecaster:
     _result: object | None = field(default=None, init=False)
     _cols: list[str] = field(default_factory=list, init=False)
     _fallback: ForwardLinearForecaster | None = field(default=None, init=False)
+    _mids: np.ndarray = field(default_factory=lambda: CHANGE_MIDPOINTS.copy(), init=False)
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> OrderedForecaster:
-        self._cols = list(X.columns)
+        # statsmodels OrderedModel odrzuca modele z (implikowaną) stałą — np. para
+        # kolumn różniących się stałą (infl_gap = cpi_yoy - 2.5). Bez tego filtra
+        # każdy fold cicho spadał do fallback Ridge i „ordered logit/probit” w wynikach
+        # wcale nie był estymowany (identyczne metryki jak forward_linear).
+        keep: list[str] = []
+        for c in X.columns:
+            dup = any(
+                float((X[c] - X[k]).std()) < 1e-12 for k in keep
+            )
+            if not dup:
+                keep.append(c)
+        self._cols = keep
         rate_now = X["rate_now"].reindex(y.index).fillna(X["rate_l1"])
         (Xf, yf), _ = _split_train_val(X, y, self.val_frac)
         cats_f = _change_categories(yf, Xf["rate_now"].fillna(Xf["rate_l1"]))
@@ -149,8 +161,13 @@ class OrderedForecaster:
             mod_val = OrderedModel(cats_f.astype(int), Xf[self._cols].fillna(0.0), distr=self.link)
             mod_val.fit(method="bfgs", disp=False, maxiter=200)
             cats_all = _change_categories(y, X["rate_now"].fillna(X["rate_l1"]))
+            active = np.sort(pd.unique(cats_all.astype(int)))
             mod = OrderedModel(cats_all.astype(int), X[self._cols].fillna(0.0), distr=self.link)
             self._result = mod.fit(method="bfgs", disp=False, maxiter=200)
+            # statsmodels numeruje kategorie 0..K-1 w kolejności obecności — midpointy
+            # trzeba brać wyłącznie dla kategorii aktywnych, inaczej probs @ MIDPOINTS
+            # wywala się na wymiarze, gdy w foldzie nie ma skrajnych zmian stopy.
+            self._mids = CHANGE_MIDPOINTS[active]
             self._fallback = None
         except Exception:
             self._fallback = ForwardLinearForecaster(val_frac=self.val_frac)
@@ -165,8 +182,8 @@ class OrderedForecaster:
         probs = self._result.predict(exog=X[self._cols].fillna(0.0))
         probs = np.asarray(probs)
         if probs.ndim == 1:
-            probs = probs.reshape(-1, len(CHANGE_MIDPOINTS))
-        exp_chg = probs @ CHANGE_MIDPOINTS
+            probs = probs.reshape(-1, len(self._mids))
+        exp_chg = probs @ self._mids
         rate_now = X["rate_now"].fillna(X["rate_l1"]).ffill()
         return (rate_now + exp_chg).to_numpy()
 

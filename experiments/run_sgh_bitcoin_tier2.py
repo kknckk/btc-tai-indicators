@@ -104,7 +104,8 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
         spec = _target(h)
         res_h: dict = {}
         frames: dict[str, pd.DataFrame] = {}
-        for name in MODELS:
+        models = tuple(cfg.get("models", MODELS))
+        for name in models:
             t0 = time.time()
             r = run_walk_forward(
                 panel,
@@ -129,10 +130,10 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
                 "last_test": r["folds"][-1]["test_end"],
                 "runtime_s": round(time.time() - t0, 1),
             }
-        idx = frames["lstm"].index
+        idx = frames[models[0]].index
         se = {m: ((f["y_true"] - f["y_pred"]) ** 2).reindex(idx).to_numpy() for m, f in frames.items()}
         naive_se = _naive_losses(panel, spec, idx)
-        for m in MODELS:
+        for m in models:
             stat, p = dm_test(se[m], naive_se, h)
             res_h[m]["dm_mse_vs_naive"] = {"stat": stat, "p": p}
             rw = (frames[m]["y_true"] - frames[m]["price"]).to_numpy()
@@ -149,7 +150,7 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
         out["horizons"][hs] = res_h
         t1_name, t1_skill = _best_tier1_skill(hs)
         best_t2, best_t2_skill = None, None
-        for m in MODELS:
+        for m in models:
             sk = res_h[m].get("skill_vs_naive")
             if sk is None or not np.isfinite(sk):
                 continue
@@ -185,8 +186,12 @@ def write_md(out: dict, path: Path) -> None:
         "| h (dni) | model | RMSE | skill vs RW | skill vs naive | DM-p vs naive | DM-p vs RW |",
         "|---:|---|---:|---:|---:|---:|---:|",
     ]
+    models_run = [m for h, block in out["horizons"].items() for m in block]
+    models_run = list(dict.fromkeys(models_run)) or list(MODELS)
     for h, block in out["horizons"].items():
-        for m in MODELS:
+        for m in models_run:
+            if m not in block:
+                continue
             row = block[m]
             pt = row["metrics"]["point"]
             dm_n = row.get("dm_mse_vs_naive") or {}

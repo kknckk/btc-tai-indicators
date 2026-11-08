@@ -15,6 +15,19 @@ NBP_INTEREST_FIXTURE = {
     ],
 }
 
+NBP_RATES_XML_FIXTURE = """<?xml version="1.0" encoding="utf-8"?>
+<stopy_procentowe_archiwum data_publikacji="2024-01-15">
+    <pozycje obowiazuje_od="2024-01-01">
+        <pozycja id="ref" oprocentowanie="5,75" />
+        <pozycja id="lom" oprocentowanie="6,25" />
+    </pozycje>
+    <pozycje obowiazuje_od="2024-01-10">
+        <pozycja id="ref" oprocentowanie="5,50" />
+        <pozycja id="lom" oprocentowanie="6,00" />
+    </pozycje>
+</stopy_procentowe_archiwum>
+"""
+
 MF_CSV_FIXTURE = """data,2Y,5Y,7Y,10Y
 2024-01-02,5.1,5.2,5.25,5.3
 2024-01-03,5.11,5.21,5.26,5.31
@@ -30,6 +43,7 @@ def cache_dir(monkeypatch, tmp_path):
 
 
 def test_expand_nbp_reference_rate(cache_dir, monkeypatch):
+    monkeypatch.setattr(mp, "_http_get_bytes", lambda url, **kw: NBP_RATES_XML_FIXTURE.encode("utf-8"))
     monkeypatch.setattr(mp, "_http_get_json", lambda url: NBP_INTEREST_FIXTURE)
     s = mp.fetch_nbp_reference_rate(refresh=True)
     assert s.name == "nbp_rate"
@@ -38,6 +52,16 @@ def test_expand_nbp_reference_rate(cache_dir, monkeypatch):
     assert s.loc[pd.Timestamp("2024-01-10")] == 5.50
     csv_p, pq_p = mp._cache_paths("nbp_rate")
     assert csv_p.exists() and pq_p.exists()
+
+
+def test_expand_nbp_reference_rate_legacy_json_fallback(cache_dir, monkeypatch):
+    """Gdy snapshot XML nie odpowiada (sieć), fetcher spada na stare JSON API."""
+    from urllib.error import URLError
+
+    monkeypatch.setattr(mp, "_http_get_bytes", lambda url, **kw: (_ for _ in ()).throw(URLError("down")))
+    monkeypatch.setattr(mp, "_http_get_json", lambda url: NBP_INTEREST_FIXTURE)
+    s = mp.fetch_nbp_reference_rate(refresh=True)
+    assert s.loc[pd.Timestamp("2024-01-10")] == 5.50
 
 
 def test_parse_mf_yield_csv_to_four_series(cache_dir):

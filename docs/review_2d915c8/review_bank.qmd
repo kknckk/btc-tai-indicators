@@ -1,0 +1,240 @@
+---
+title: "Modele prognostyczne dla rynków — recenzja prac i stan przygotowania"
+subtitle: "Odpowiedź na raport SGH (zadanie 1.4, projekt FENG) i przegląd własnych wyników BTC-TAI"
+author: "Krzysztof Kanciak"
+date: "2026-11-08"
+lang: pl
+format:
+  docx:
+    toc: true
+    toc-depth: 2
+  html:
+    toc: true
+    theme: cosmo
+---
+
+# O czym jest ten dokument
+
+SGH zbudowało dla Banku i przetestowało ok. 190 wariantów modeli prognostycznych
+(waluty, stopa NBP, obligacje, WIG20, ropa, złoto, bitcoin) i opisało to w raporcie
+z 30.10.2026. Równolegle rozwijamy własny system prognoz (projekt BTC-TAI),
+w którym — dla odmiany od podejścia SGH — każdy wynik musi przejść przez automatyczny
+harness sprawdzający, czy model nie „podgląda przyszłości".
+
+Ten dokument odpowiada na trzy pytania:
+
+1. Co z raportu SGH naprawdę wynika, a czego się z niego dowiedzieć nie da?
+2. Czy nasze własne modele i procedury spełniają standard, który sami postulowaliśmy SGH?
+3. Co trzeba zrobić, zanim cokolwiek pokażemy jako „gotowe"?
+
+Wszystkie liczby w tekście są odtwarzalne z repozytorium `kknckk/btc-tai-indicators`
+(commit `2d915c8` i poprawki do niego). Pojęcia statystyczne wyjaśniamy w słowniku
+na końcu, na pierwszych stronach używamy ich oszczędnie.
+
+# Najważniejsze w 5 punktach
+
+1. **Raport SGH udowadnia, że potok technologiczny działa** (dane wchodzą, modele się
+   liczą, Bank ma sposób ich odbioru). **Nie udowadnia, że dowolny model przewiduje
+   rynek lepiej niż reguła „jutro będzie jak dziś".** Najmocniejszy wynik dotyczy
+   prognozowania zmienności (nie cen), i to wobec bardzo słabego punktu odniesienia.
+2. **Wynik dla bitcoina (+1,8% błędu mniej od reguły naiwnej na 30 dni) pochodzi
+   z danych kończących się 31.03.2025** — ponad półtora roku przed datą raportu.
+   Nie wiadomo, czy przetrwał zmianę koniunktury. Raport tego nie sprawdził.
+3. **Nasz własny, świeżo zbudowany mechanizm oceny (walk-forward z blokadą
+   przecieku, testy istotności, koszty transakcyjne) jest mocniejszy niż protokół
+   opisany przez SGH** — ale w momencie tej recenzji sam miał cztery wady, które
+   namierzyliśmy i naprawiliśmy (sekcja D).
+4. **Po kosztach transakcyjnych żaden z naszych modeli bitcoinowych nie bije kup-i-trzymaj**,
+   a model XGBoost na horyzoncie 30 dni jest obiektywnie gorszy — system testów
+   statystycznych go odrzucił (p=0,006). To wynik negatywny, ale uczciwy
+   i zgodny z literaturą: bitcoin jest bardzo trudny do prognozowania.
+5. **Bloki kredytowe (konsumpcyjne i hipoteczne) nie są wykonane ani przez SGH
+   (brak w raporcie), ani przez nas (kod gotowy, brak liczb).** Jeśli Bank ich
+   potrzebuje w kolejnym etapie, to jest pierwszy punkt do uzupełnienia.
+
+# Co raport SGH mówi naprawdę
+
+Raport opisuje duże, głównie udane przedsięwzięcie inżynierskie. Trzy zastrzeżenia
+metryczne, warte pamiętania przy każdej rozmowie o jego wynikach:
+
+- **Małe przewagi bez testu istotności.** Z ~190 wariantów wygrywające wypisz-
+  najlepsze mogą być po prostu szczęśliwym rzutem kostką. Raport podaje rankingi
+  bez sprawdzenia, czy różnice są istotne statystycznie. (Analoogia: ktoś rzuca
+  monetą 100 razy, wygrywa 53, i ogłasza, że „ma system".)
+- **Pętla czasowa nie do końca zamknięta.** W części danych (panel miesięczny NBP)
+  modele uczyły się na liczbach, które w dniu prognozy jeszcze nie były publicznie
+  znane (inflacja publikowana jest z opóźnieniem). To pomaga wynikom.
+  Efektowny wynik 96,9% trafności kierunku decyzji RPP oparty jest na zaledwie
+  17 przypadkach, z których tylko jeden zawierał zmianę stopy.
+- **Wygasanie danych.** Część szeregów zewnętrznych kończy się w maju 2026, a test
+  trwa dłużej — modele w tych miejscach korzystają ze „starych wiadomości"
+  ostatnio dostępnej wartości.
+
+Żadne z tych zastrzeżeń nie dyskwalifikuje raportu jako dokumentacji etapu.
+Wszystkie razem dyskwalifikują go jako podstawę decyzji o wdrożeniu konkretnego modelu.
+
+# Co zbudowaliśmy i sprawdziliśmy u siebie
+
+Nasz system liczenia prognoze (BTC i 34 planowane serie makro) ma trójwarstwowy
+kontroler jakości:
+
+1. **Blokada podglądania przyszłości** — każdy model uczony jest wyłącznie na tym,
+   co było znane w dniu prognozy; dodatkowo automatyczny test obcina historię
+   w losowych punktach i krzyczy, gdy jakakolwiek cecha zmieni wartość wstecz.
+2. **Testy istotności** — porównujemy modele parowym testem Diebolda-Mariano
+   („czy różnica błędów to nie przypadek?") i procedurą wyboru zestaw najlepszych
+   modeli (MCS), zamiast wierzyć nagłemu rankingowi.
+3. **Ocena ekonomiczna** — prognoza musi się bronić po kosztach transakcyjnych
+   (10/20 punktów bazowych na obrót), nie tylko w metryce błędu.
+
+Stan na dzień recenzji: warstwa 1 i 2 istnieją jako kod i testy; warstwa 3 policzona
+dla bitcoina (wynik: wszystkie strategie modelowe przegrywają z kup-i-trzymaj,
+Sharpe 0,74–1,03 wobec 1,04–1,07 dla B&H). Wyniki TSFM (modele transformerowe
+chronos/TimesFM) również przegrywają z regułą naiwną, a ich przedziały ufności
+są źle skalibrowane (za wąskie lub za szerokie — przed naszą kalibracją).
+
+# Wady własne wykryte i naprawione (sekcja D)
+
+Sami krytykując SGH za brak testów istotności, musieliśmy uczciwie sprawdzić,
+czy nasz system tym testom podlega poprawnie. Review wykazało pięć defektów;
+wszystkie opisane niżej zostały naprawione w tym samym dniu (patrz „Stan po
+poprawkach"). Pokazujemy je, bo to dowód, że kontrola działa w obie strony.
+
+**D1. Zepsuty test kalibracji przedziałów.**
+Po polsku: sprawdziliśmy, czy nasz test jednostkowy właściwie ocenia przedziały
+prognozy (np. „kurs jutro z 80% pewnością między X a Y"). Okazało się, że test
+karmił system odpowiedziami zananymi z góry — klasyczny błąd „wyroczni", przedział
+kurczył się do punktu i test deterministycznie padał. Commit poszedł do repo
+z tym czerwonym testem, co oznacza, że procedura „najpierw testy, potem publish"
+nie zadziałała. Naprawa: test buduje teraz kwantyle bez znajomości realizacji
+i pilnuje zarówno pokrycia, jak i szerokości. 15/16 testów zielonych (ostatni
+wyłączony z odpalenia — integracyjny, wymaga pełnych danych).
+
+**D2. Test istotności liczony jakby prognoza była jednodniowa, nawet gdy była miesięczna.**
+Po polsku: nasz mechanizm „czy model A jest naprawdę lepszy od B" przyjmował za
+domyślne, że błędy kolejnych dni są niezależne. Przy prognozach na 30 dni błędy
+sąsiadujących dni mocno na siebie zachodzą (każda 30-dniowa prognoza dzieli 29/30
+okna z poprzednią). Statystyka traktowała je jako niezależne, więc różnice
+wyglądały na bardziej „pewne" niż są. Pokazujemy liczbowo na danych syntetycznych:
+ten sam system mówi „istotnie różne" (p=0,03) błędnie i „nie da się odróżnić"
+(p=0,70) poprawnie. Naprawa: horyzont prognozy jest teraz parametrem testu
+(po stronie technicznej: DM i blok bootstrapu używają h).
+
+**D3. Tabela wyników niezgodna z danymi, z których twierdziła pochodzić.**
+W module oceny ekonomicznej (Sharpe, koszty, obrót) kolumna „roczny obrót" dla
+dwóch horyzontów pokazywała wszędzie 16,62 — liczbę skopiowaną z innego horyzontu,
+podczas gdy plik wyników mówił: 5,33 / 14,95 / 28,36 oraz 1,98 / 9,33 / 3,32.
+Tabela została zregenerowana automatycznie i zgadza się z danymi; dodaliśmy
+regułę, że raportowe tabele powstają wyłącznie ze skryptów.
+
+**D4. Wynik testu „zestawu najlepszych modeli" nie istniał.**
+Moduł liczący MCS był napisany, ale pliki wejściowe (ramki predykcji) były
+wyłączone z repozytorium przez .gitignore, więc na świeżym klonie wyniku nie
+było i nie dało się go odtworzyć bez pełnego przeliczenia. Teraz: pełny przebieg
+wykonany, a wynik jest w repo. Z wynikiem było ciekawie: na horyzoncie 1 i 7 dni
+żadnego modelu nie da się odróżnić od reguły naiwnej; na 30 dniach XGBoost zostaje
+wykluczony z zestawu (p=0,006) jako obiektywnie gorszy.
+
+**D5. Raport techniczny (Quarto) nie budował się i zawierał mylące liczby.**
+Komórki raportu czytały pliki, których nie ma (zła nazwa), data była literałem
+z języka R, a tabela podsumowująca TSFM podawała liczby pomieszane między
+horyzontami i uśrednione wartości oznaczone jako wyniki per horyzont. Raport
+zbudował się dopiero po poprawkach ścieżek i tabeli.
+
+## Stan po poprawkach (08.11.2026)
+
+| Obszar | Przed | Po |
+|---|---|---|
+| Testy harnessu | 13 passed / 1 failed | 15 passed (test CQR przepisany) |
+| Test istotności DM w MCS | zawsze h=1 | h = horyzont prognozy; bootstrap bloku ≥ h |
+| economic.md (obrót) | 16,62 × 6 komórek (błąd) | zgodne z baselines.json, regenerowane skryptem |
+| MCS | „not computed" | policzony dla wszystkich 3 horyzontów; h=30 wykłucza XGBoost (p=0,006) |
+| Raport Quarto | nie budował się, liczby z kosmosu | buduje się, liczby odtwarzalne z JSON |
+| Odtwarzalność baselines | założenie | potwierdzona rerunem (identyczne liczby) |
+
+# Co z tego wynika dla współpracy
+
+1. **Nie kupować wyników SGH „z rankingiem".** Jeżeli Bank chce porównać nasze
+   podejście z SGH, jedyny uczciwy sposób to wspólny backtest na tych samych
+   chwilach prognozy, z tym samym stanem wiedzy w dniu prognozy, i parowanym
+   testem różnic. Proponowaliśmy to PKO od początku; nasz harness jest teraz
+   do tego gotowy.
+2. **Nasza przewaga to nie model, tylko dane i procedura.** Mamy świeższe dane
+   bitcoinowe (do 06.2026 vs 03.2025 u SGH) oraz cechy on-chain z kontrolą
+   momentu ich dostępności. Jeżeli ta przewaga nie przełoży się na wynik
+   w uczciwym teście — powiemy to wprost, jak mówimy dziś o XGBoost na h=30.
+3. **Bloki kredytowe wymagają decyzji o danych.** Kredyty konsumpcyjne/hipoteczne
+   czekają na weryfikację źródeł (statystyka monetarna NBP przez nbportal —
+   obecny adres wymaga korekty). Bez pełnych przebiegów walk-forward nie ma
+   czego „przegrać do Banku".
+4. **Decyzja o statusie produkcyjnym dopiero za bramką integracji.** Raport SGH
+   sam to zaznacza: test integracyjny ≠ akceptacja modelu. Nasze modele również
+   są w etapie badawczym — i mają z tego powodu jaśniejszy wynik negatywny niż
+   niejeden wynik dodatni z raportu SGH.
+
+# Pierwsze liczby z naszego systemu (08.11.2026)
+
+Pierwsze produkcyjne przebiegi programu SGH — stopa referencyjna NBP (tier I i II)
+i bitcoin z cechami on-chain (tier I: XGBoost, tier II: SVM) — policzone w naszym
+harnessie (walk-forward, blokada przecieku, testy istotności). Pozostałe modele
+głębokie (BiLSTM/LSTM/TFT/HellFormer) oraz SVAR i NLP dla NBP są w kolejce GPU —
+wymagają karty graficznej; na CPU liczą się zbyt wolno, aby uczciwie zamknąć
+siatkę hiperparametrów.
+
+**Stopa NBP — co działa:** najlepiej wypadają proste modele kategorii zmiany stopy
+(ordered logit/probit): na horyzoncie 1 miesiąca błąd o **14% mniejszy niż reguła
+„jutro jak dziś"** (ordered probit; vs benchmark naiwny przesuwający średnią — o 74%),
+na 3 miesiącach o **29% mniejszy od RW**. Test istotności jest ostrożny: różnicę
+względem RW uznaje za nierozstrzygniętą (DM-p 0,42-0,60), względem średniej
+kroczącej za istotną (p<0,001). Złożone modele VAR/BVAR/lasy/boosting przegrywają
+z RW na krótkich horyzontach — dokładnie tak, jak sugeruje literatura makro
+(proste > złożone przy małej liczbie obserwacji).
+
+**Bitcoin — co nie działa:** modele trenowane na poziom ceny (XGBoost, SVM)
+dają błędy o rzędy wielkości gorsze od reguły naiwnej — bo nie potrafią
+ekstrapolować poza zakres treningowy, gdy BTC rośnie. To jest spójne z obserwacją
+SGH o drzewach na złocie i z naszą wcześniejszą konkluzją: **BTC trzeba modelować
+na zwrotach (lub log-zwrotach), nie na poziomie** — i to jest techniczny powód,
+dla którego kontrakt `anchor + rekonstrukcja poziomu w grafie ONNX`, proponowany
+przez Bank, jest właściwą architekturą.
+
+**Rozbieżność warta rozmowy z SGH:** raport SGH podaje dla BTC wynik SVR +1,8%
+(mierzony MAPE). Nasz poziomowy SVR daje kilkaset razy większy błąd niż RW —
+więc ich SVR musiał być skonstruowany inaczej (najpewniej na zwrotach albo
+z inną normalizacją). Bez uzgodnienia wspólnej definicji celu tych liczb nie da
+się stawiać obok siebie — jest to kolejny argument za wspólnym, zamrożonym
+protokołem testu (priorytet P0 od początku współpracy).
+
+# Następne kroki
+
+| Priorytet | Działanie |
+|---|---|
+| P0 (w toku) | pierwsze pełne przebiegi SGH z wynikami: stopa NBP (tier I/II) i bitcoin z cechami on-chain |
+| P1 | odświeżenie danych NBP/GUS z substytutami udokumentowanymi (HICP zamiast CPI, wskaźnik koniunktury ESI zamiast komercyjnego PMI) |
+| P1 | wspólny backtest z PKO na zamrożonym protokole (jedne chwile prognozy, jedna tabela cech) |
+| P2 | kalibracja przedziałów i ocena ekonomiczna dla wszystkich serii SGH |
+
+# Słownik pojęć (dla czytającego bez przygotowania statystycznego)
+
+- **Walk-forward** — symulacja „jakbyśmy prognozowali naprawdę": model uczy się do
+  dnia T, prognozuje dalej; potem przesuwamy okno i powtarzamy. Wynik to zestaw
+  prognoz, z których żadna nie widziała przyszłości.
+- **Purge / embargo** — techniczny bufor: z treningu wycinamy końcówkę, której
+  etykieta (to, co model miał przewidzieć) zachodzi na okres testu.
+- **Point-in-time** — stan „co wiedzieliśmy wtedy", a nie „co wiemy dziś o tamtym
+  okresie". Inflacja za marzec publikowana w kwietniu nie może uczestniczyć
+  w prognozie z marca.
+- **MAPE / RMSE / MAE** — miary błędu prognozy; im mniej, tym lepiej. MAPE procentowy.
+- **skill vs RW / naive** — o ile procent mniejszy błąd niż reguła „jutro jak dziś"
+  (random walk) lub średnia z ostatnich 30 dni. Wartość dodatnia = lepiej.
+- **Test Diebolda-Mariano (DM-p)** — sprawdza, czy różnica błędów dwóch modeli
+  jest istotna statystycznie; p<0,05 = „raczej nie przypadek". Przy prognozach
+  wielodniowych musi uwzględniać, że błędy sąsiadujących dni się pokrywają.
+- **MCS (Model Confidence Set)** — zamiast ogłaszać jednego „zwycięzcę", podaje
+  zestaw modeli, których nie da się od siebie odróżnić przy danym poziomie ufności.
+- **Kalibracja przedziałów (conformal/CQR)** — naprawianie przedziałów „80%
+  pewności", żeby realnie trafiały 80% przypadków, z użyciem wyłącznie przeszłości.
+- **Sharpe / MaxDD / turnover** — ocena ekonomiczna: zysk per ryzyko, najgłębsza
+  obsunięcia, roczny obrót portfelem. Koszty transakcyjne 10/20 pb.
+- **ONNX / anchor** — format przekazania modelu do systemów banku, z odtwarzaniem
+  poziomu ceny z prognozowanej zmiany. Sprawa integracyjna, nie merytoryczna.

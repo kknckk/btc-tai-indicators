@@ -247,6 +247,7 @@ class XGBLevelForecaster:
         self.subsample = float(cfg.get("subsample", 0.8))
         self.colsample = float(cfg.get("colsample_bytree", 0.8))
         self.early_stopping = int(cfg.get("early_stopping_rounds", 20))
+        self.n_jobs = int(cfg.get("n_jobs", 4))
         self._model: xgb.XGBRegressor | None = None
         self._cols: list[str] = []
         self._diag: dict = {}
@@ -271,6 +272,7 @@ class XGBLevelForecaster:
                     tree_method="hist",
                     random_state=self.seed,
                     early_stopping_rounds=self.early_stopping,
+                    n_jobs=self.n_jobs,
                 )
                 model.fit(
                     X_tr,
@@ -293,6 +295,7 @@ class XGBLevelForecaster:
             tree_method="hist",
             random_state=self.seed,
             early_stopping_rounds=self.early_stopping,
+            n_jobs=self.n_jobs,
         )
         cut = max(1, int(len(Xf) * (1 - 0.15)))
         self._model.fit(

@@ -1,0 +1,17 @@
+series_id: nbp_rate
+horizons: [1, 3, 12]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 72
+  step: 6
+  embargo: 0
+costs_bps: [10, 20]
+# pierwszy przebieg CPU: bez SVAR (fit statsmodels maxiter=500 per punkt testowy)
+# i bez rpp_nlp (wymaga rpp_communications.csv) — oba do domknięcia na sgh-4
+models:
+  - var
+  - bvar
+  - expectations_comm
+  - random_forest
+  - gradient_boosting
