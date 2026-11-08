@@ -99,7 +99,21 @@ def test_validate_macro_monthly_gaps():
 
 
 def test_load_panel_cache_only(cache_dir, monkeypatch):
+    monkeypatch.setattr(mp, "_http_get_bytes", lambda url, **kw: NBP_RATES_XML_FIXTURE.encode("utf-8"))
     monkeypatch.setattr(mp, "_http_get_json", lambda url: NBP_INTEREST_FIXTURE)
     mp.fetch_nbp_reference_rate(refresh=True)
     s = mp.load_series("nbp_rate", use_cache_only=True)
     assert len(s) > 0
+
+
+def test_eurostat_series_parses_jsonstat(cache_dir, monkeypatch):
+    """Fixturka JSON-STAT Eurostatu: dwie daty, jedna wartość pusta."""
+    payload = {
+        "dimension": {"time": {"category": {"index": {"2024-01": 0, "2024-02": 1, "2024-03": 2}}}},
+        "value": {"0": 2.8, "2": 3.1},
+    }
+    monkeypatch.setattr(mp, "_http_get_json", lambda url, **kw: payload)
+    s = mp._fetch_eurostat_series("prc_hicp_manr", {"geo": "PL"}, "gus_cpi_yoy")
+    assert s.name == "gus_cpi_yoy"
+    assert list(s.index.strftime("%Y-%m")) == ["2024-01", "2024-03"]
+    assert s.iloc[-1] == 3.1

@@ -252,11 +252,13 @@ def _parse_nbp_rates_xml(text: str) -> pd.Series:
 def fetch_nbp_reference_rate(refresh: bool = False) -> pd.Series:
     cached = None if refresh else _read_cached("nbp_rate")
     # primary: oficjalny snapshot XML (api.nbp.pl/api/interestrates zwraca 404 od ~2026)
+    import xml.etree.ElementTree as ET
+
     try:
         text = _http_get_bytes(NBP_RATES_XML).decode("utf-8-sig")
         events = _parse_nbp_rates_xml(text)
         _write_raw("nbp_stopy_procentowe_archiwum.xml", text.encode("utf-8"))
-    except (HTTPError, URLError, TimeoutError, ValueError) as e:
+    except (HTTPError, URLError, TimeoutError, ValueError, ET.ParseError) as e:
         logger.warning("NBP XML snapshot failed (%s); trying legacy JSON API", e)
         events = None
     if events is None:
