@@ -21,5 +21,4 @@ format:
     hyperrefoptions:
       - linktoc=all
       - pdfpagemode=FullScreen
-    include: true
     keep-tex: true

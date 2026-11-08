@@ -73,6 +73,24 @@ def test_mcs_synthetic_ranking():
     assert list(rank_by_mean_loss(losses).index)[0] == "best"
 
 
+def test_mcs_dm_uses_forecast_horizon():
+    """Pairwise DM inside mcs must use the horizon h: h-step overlapping targets have
+    MA(h-1)-like loss differences, so h=1 inflates significance. For a weak effect the
+    DM p-value at h=30 must be (much) larger than at h=1 on identical losses."""
+    rng = np.random.default_rng(0)
+    T = 4000
+    eps_a = rng.normal(0, 1, T + 60)
+    eps_b = eps_a + 0.02 * rng.normal(1, 1, T + 60)
+    ma30 = lambda e: sum(e[i:i + T] for i in range(30)) / 30.0
+    losses = {"a": ma30(eps_a) ** 2, "b": ma30(eps_b) ** 2}
+    out1 = mcs(losses, n_bootstrap=50, seed=0, h=1)
+    out30 = mcs(losses, n_bootstrap=50, seed=0, h=30)
+    p1 = out1["dm_p"]["a"]["b"]
+    p30 = out30["dm_p"]["a"]["b"]
+    assert np.isfinite(p1) and np.isfinite(p30)
+    assert p30 > p1  # horizon-aware long-run variance deflates spurious significance
+
+
 def test_cqr_interval_covers_on_synthetic():
     rng = np.random.default_rng(1)
     n = 200
@@ -112,11 +130,13 @@ def test_calibrate_frame_cqr_on_quantile_synthetic():
     n = 120
     y = rng.normal(100.0, 5.0, n)
     price = y + rng.normal(0, 1.0, n)
-    q_lo = y - 2.0
-    q_hi = y + 2.0
-    frame = pd.DataFrame({"y_true": y, "q_lo": q_lo, "q_hi": q_hi, "price": price})
+    # Model quantiles computed WITHOUT knowing y: fixed 98–102 band around the mean,
+    # deliberately too narrow for sd=5 (raw coverage ~31%). Rolling CQR must EXPAND
+    # the band and bring coverage near the nominal 80% using only past OOS rows.
+    frame = pd.DataFrame({"y_true": y, "q_lo": np.full(n, 98.0), "q_hi": np.full(n, 102.0), "price": price})
     _, summ = calibrate_frame_cqr(frame, alpha=0.20, min_cal=20)
-    assert 0.75 <= summ.empirical_coverage <= 0.92
+    assert 0.70 <= summ.empirical_coverage <= 0.92
+    assert summ.median_width > 4.0  # CQR expanded the too-narrow raw band
 
 
 def test_split_conformal_coverage_on_linear_synthetic():

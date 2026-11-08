@@ -162,8 +162,15 @@ def run(cfg: dict, preds_dir: Path, mcs_bootstrap: int = 2000) -> dict:
                 aligned = frames
             for m, f in aligned.items():
                 block["economic"][m] = backtest_on_frame(f, _position_fn(m, cfg), tuple(cfg["costs_bps"]))
-            losses = squared_return_losses(aligned)
-            block["mcs"] = mcs(losses, n_bootstrap=mcs_bootstrap, seed=cfg["seed"])
+            if len(aligned) >= 2:
+                losses = squared_return_losses(aligned)
+                block["mcs"] = mcs(losses, n_bootstrap=mcs_bootstrap, seed=cfg["seed"], h=h)
+            else:
+                logger.warning(
+                    "h=%s: tylko %d model(i) z ramkami predykcji — MCS/DM pominięte (wymagane >= 2)",
+                    h, len(aligned),
+                )
+                block["mcs_skipped"] = "fewer than 2 aligned models"
             block["from_baselines"] = False
             block["n_common_days"] = len(next(iter(aligned.values())))
             block["models_loaded"] = sorted(aligned)

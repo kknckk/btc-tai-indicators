@@ -2,7 +2,7 @@
 title: "BTC-TAI & SGH — Raport badawczy modeli predykcyjnych"
 subtitle: "Projekt BTC-TAI (KNC-376..384) + Program SGH × PKO BP"
 author: "Krzysztof Kanciak"
-date: "`r Sys.Date()`"
+date: "2026-11-08"
 lang: pl
 format:
   html:
@@ -30,11 +30,11 @@ format:
 # Streszczenie wykonawcze
 
 ## Kontekst i cele
-Projekt **BTC-TAI** (KNC-376..384) oraz **Program SGH × PKO BP** mają na celu zbudowanie systemu prognozowania rynków finansowych z uwzględnieniem specyfiki polskiego rynku bankowego. Raport przedstawia wyniki testów modeli predykcyjnych na szeregach czasowych BTC oraz 34 seriach SGH (NBP, obligacje, kredyty, depozyty, aktywa TFI, EUR/PLN, USD/PLN, WIG20, surowce, Bitcoin).
+Projekt **BTC-TAI** (KNC-376..384) oraz **Program SGH × PKO BP** mają na celu zbudowanie systemu prognozowania rynków finansowych z uwzględnieniem specyfiki polskiego rynku bankowego. Raport przedstawia zakończone wyniki testów modeli predykcyjnych na szeregach czasowych BTC oraz stan implementacji 34 planowanych serii SGH (NBP, obligacje, kredyty, depozyty, aktywa TFI, EUR/PLN, USD/PLN, WIG20, surowce, Bitcoin).
 
 ## Kluczowe ustalenia
-- **BTC:** modele chronos-bolt i TimesFM 2.5 nie biją naiwnego baseline'u „jutro taka sama cena” (skill vs RW ujemny).
-- **SGH:** modele liniowe, VAR, gradient boosting i NLP zostały zaimplementowane i przetestowane na danych NBP/Yahoo (stooq blokuje boty).
+- **BTC:** modele chronos-bolt i TimesFM 2.5 nie biją naiwnego baseline'u „jutro taka sama cena” (skill vs RW ujemny na wszystkich horyzontach 1/7/30).
+- **SGH:** 29 specyfikacji eksperymentów (`results/SGH_*.md`, 34 serie planowane w TRD-29..62) — modele liniowe, VAR, gradient boosting i NLP są **zaimplementowane i objęte testami jednostkowymi**; pełne przebiegi walk-forward z wynikami liczbowymi są w toku.
 - **Infrastruktura:** pipeline GCP na koncie `btc-ind` z billingiem `01AFC5-6E7E31-0E79E0` (100 PLN), kwoty Vertex L4 po 1, koszt przebiegów ≈ 0,10–0,15 USD.
 
 ## Wnioski i rekomendacje
@@ -117,35 +117,60 @@ graph TD
 
 ```{python}
 #| echo: false
+import json
 import pandas as pd
-pd.read_json('results/tsfm_full_chronos/metrics.json')
+d = json.loads(open('../../results/tsfm_full_chronos/tsfm.json').read())
+rows = []
+for h, hv in sorted(d['horizons'].items(), key=lambda kv: int(kv[0])):
+    m = hv['metrics']
+    rows.append({'h': h, 'n_origins': hv['n_origins'], 'dir_acc': m['dir_acc'],
+                 'skill_vs_rw': m['rmse_skill_vs_rw'], 'r2_oos': m['r2_oos_vs_rw'],
+                 'coverage_p10_p90': hv.get('interval_coverage_p10_p90')})
+pd.DataFrame(rows)
 ```
 
 ## 3.2 TimesFM 2.5
 
 ```{python}
 #| echo: false
+import json
 import pandas as pd
-pd.read_json('results/tsfm_full_timesfm/metrics.json')
+d = json.loads(open('../../results/tsfm_full_timesfm/tsfm.json').read())
+rows = []
+for h, hv in sorted(d['horizons'].items(), key=lambda kv: int(kv[0])):
+    m = hv['metrics']
+    rows.append({'h': h, 'n_origins': hv['n_origins'], 'dir_acc': m['dir_acc'],
+                 'skill_vs_rw': m['rmse_skill_vs_rw'], 'r2_oos': m['r2_oos_vs_rw'],
+                 'coverage_p10_p90': hv.get('interval_coverage_p10_p90')})
+pd.DataFrame(rows)
 ```
 
 ## 3.3 ModernTCN i PatchTST
 
 ```{python}
 #| echo: false
+import json
 import pandas as pd
-pd.read_json('results/full_seed42/metrics.json')
+d = json.loads(open('../../results/full_seed42/neural.json').read())
+rows = []
+for mname, hv in d['results'].items():
+    for h, mv in sorted(hv.items(), key=lambda kv: int(kv[0])):
+        rows.append({'model': mname, 'h': h, 'rmse': mv.get('RMSE'),
+                     'r2_oos_vs_rw': mv.get('R2_OOS_vs_RW'),
+                     'dir_acc': mv.get('directional_accuracy'),
+                     'n_folds': mv.get('n_folds_used')})
+pd.DataFrame(rows)
 ```
 
 ## 3.4 Podsumowanie BTC
 
-| Model         | DirAcc | skill vs RW (h=1/7/30) | R² OOS (h=1/7/30) |
-|---------------|--------|------------------------|-------------------|
-| chronos-bolt  | 53,1%  | -5,19% / -3,55% / -7,10% | -               |
-| TimesFM 2.5   | 45,3%  | -9,0%                  | -                |
-| ModernTCN     | 51,2%  | -                      | -0,31 / -0,80 / -0,85 |
-| PatchTST      | 51,1%  | -                      | -0,28 / -0,35 / -0,38 |
-| XGBoost       | 51,8%  | -                      | 0,0071            |
+| Model         | DirAcc (h=1/7/30) | skill vs RW (h=1/7/30)     | R² OOS (h=1/7/30)        |
+|---------------|-------------------|----------------------------|--------------------------|
+| chronos-bolt  | 53,0% / 53,7% / 52,7% | -7,10% / -4,93% / -3,55% | -                        |
+| TimesFM 2.5   | 48,3% / 43,0% / 44,7% | -3,11% / -8,84% / -15,08% | -                        |
+| ModernTCN     | 51,2%             | -                          | -0,31 / -0,80 / -0,85  |
+| PatchTST      | 51,1%             | -                          | -0,28 / -0,35 / -0,38  |
+| XGBoost       | 51,8%             | -                          | 0,0071                   |
 
 **Wniosek:** żaden model nie bije naiwnego baseline'u „jutro taka sama cena”. Konieczna kalibracja i MCS.
 
@@ -180,9 +205,9 @@ pd.read_json('results/full_seed42/metrics.json')
 
 ## 4.3 Podsumowanie SGH
 
-- **Modele liniowe:** DirAcc 50–60%, RMSE niski.
-- **Modele nieliniowe:** DirAcc 45–55%, RMSE wyższy.
-- **Wnioski:** modele liniowe sprawdzają się lepiej na danych makroekonomicznych.
+- **Stan:** implementacje tier I/II gotowe dla 29 specyfikacji; wyniki liczbowe (`results/sgh_*.json`) — w toku, pierwsze przebiegi (NBP, BTC on-chain) w kolejce.
+- **Oczekiwane kierunki** (z literatury, do weryfikacji naszymi przebiegami): modele liniowe na danych makro sprawdzają się zwykle lepiej niż nieliniowe.
+- **Wnioski:** nie raportujemy jeszcze rankingów modeli SGH — publikowalne liczby dopiero po pełnych walk-forward z DM/MCS.
 
 # 5. Infrastruktura i koszty
 
@@ -248,8 +273,8 @@ pd.read_json('results/full_seed42/metrics.json')
 ## 7.4 Wyniki szczegółowe
 
 - **BTC:** `results/tsfm_full_chronos/`, `results/tsfm_full_timesfm/`.
-- **SGH:** `results/SGH_*.md` (34 pliki).
-- **Testy:** `tests/test_evaluation_harness.py` (8 passed).
+- **SGH:** `results/SGH_*.md` (29 plików — specyfikacje eksperymentów; wyniki liczbowe po przebiegach).
+- **Testy:** `tests/test_evaluation_harness.py` (15 passed, 08.11.2026, po poprawce testu CQR i parametryzacji h w MCS).
 
 # 8. Podziękowania
 
