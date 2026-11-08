@@ -1,0 +1,25 @@
+title: "BTC-TAI & SGH — Raport badawczy modeli predykcyjnych"
+subtitle: "Projekt BTC-TAI (KNC-376..384) + Program SGH × PKO BP"
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    theme: cosmo
+    css: styles.css
+    include-after-body: footer.html
+  pdf:
+    documentclass: scrartcl
+    papersize: a4
+    fontsize: 10pt
+    toc: true
+    toc-depth: 3
+    geometry:
+      - margin=2cm
+      - headheight=14pt
+    colorlinks: true
+    hyperrefoptions:
+      - linktoc=all
+      - pdfpagemode=FullScreen
+    include: true
+    keep-tex: true

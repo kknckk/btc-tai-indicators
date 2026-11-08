@@ -1,0 +1,256 @@
+---
+title: "BTC-TAI & SGH — Raport badawczy modeli predykcyjnych"
+subtitle: "Projekt BTC-TAI (KNC-376..384) + Program SGH × PKO BP"
+author: "Krzysztof Kanciak"
+date: "`r Sys.Date()`"
+lang: pl
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    theme: cosmo
+    css: styles.css
+    include-after-body: footer.html
+  pdf:
+    documentclass: scrartcl
+    papersize: a4
+    fontsize: 10pt
+    toc: true
+    toc-depth: 3
+    geometry:
+      - margin=2cm
+      - headheight=14pt
+    colorlinks: true
+    hyperrefoptions:
+      - linktoc=all
+      - pdfpagemode=FullScreen
+---
+
+# Streszczenie wykonawcze
+
+## Kontekst i cele
+Projekt **BTC-TAI** (KNC-376..384) oraz **Program SGH × PKO BP** mają na celu zbudowanie systemu prognozowania rynków finansowych z uwzględnieniem specyfiki polskiego rynku bankowego. Raport przedstawia wyniki testów modeli predykcyjnych na szeregach czasowych BTC oraz 34 seriach SGH (NBP, obligacje, kredyty, depozyty, aktywa TFI, EUR/PLN, USD/PLN, WIG20, surowce, Bitcoin).
+
+## Kluczowe ustalenia
+- **BTC:** modele chronos-bolt i TimesFM 2.5 nie biją naiwnego baseline'u „jutro taka sama cena” (skill vs RW ujemny).
+- **SGH:** modele liniowe, VAR, gradient boosting i NLP zostały zaimplementowane i przetestowane na danych NBP/Yahoo (stooq blokuje boty).
+- **Infrastruktura:** pipeline GCP na koncie `btc-ind` z billingiem `01AFC5-6E7E31-0E79E0` (100 PLN), kwoty Vertex L4 po 1, koszt przebiegów ≈ 0,10–0,15 USD.
+
+## Wnioski i rekomendacje
+- Kontynuować badania nad kalibracją i MCS dla BTC.
+- Dla SGH rozważyć modele panelowe i sentymentowe.
+- Wdrożyć pipeline produkcyjny z automatycznym odświeżaniem danych i modeli.
+
+# 1. Wprowadzenie
+
+## 1.1 Cel projektu
+
+Celem projektu jest zbudowanie systemu prognozowania rynków finansowych, który wspiera decyzje inwestycyjne i zarządzanie ryzykiem w PKO BP. Projekt składa się z dwóch części:
+
+- **BTC-TAI:** modele predykcyjne dla szeregów czasowych BTC (dane od 2010-07-18 do 2026-05-23).
+- **Program SGH × PKO BP:** 34 serie makroekonomiczne i rynkowe dla polskiego rynku (NBP, obligacje, kredyty, depozyty, aktywa TFI, EUR/PLN, USD/PLN, WIG20, surowce, Bitcoin).
+
+## 1.2 Zespół i infrastruktura
+
+- **Zespół:** Krzysztof Kanciak (ekspert kryptografii, cyberbezpieczeństwa, bankowości).
+- **Infrastruktura:**
+  - Projekt GCP: `btc-ind` (numer 203925818774).
+  - Billing: `01AFC5-6E7E31-0E79E0` „My Billing Account” (100 PLN).
+  - Region: `europe-west4` (L4 GPU dostępne, Warszawa nie).
+  - Repozytorium: `kknckk/btc-tai-indicators` (`/opt/data/grok_push/btc-tai-indicators`).
+  - Dane: NBP API, Yahoo Finance, stooq.pl (blokuje boty).
+
+## 1.3 Dane i modele
+
+### BTC
+- Źródło: `api/csv/PriceUSD.csv` (5789 obserwacji).
+- Modele: chronos-bolt, TimesFM 2.5, ModernTCN, PatchTST, XGBoost.
+- Metryki: RMSE, MAE, MAPE, sMAPE, DirAcc, skill vs RW, R² OOS.
+
+### SGH
+- 34 serii podzielonych na tier I (modele liniowe, VAR, ordered logit/probit) i tier II (modele nieliniowe, NLP, gradient boosting, LSTM).
+- Źródła: NBP API (stopy, kursy), Yahoo Finance (WIG20, surowce, Bitcoin).
+
+# 2. Metodologia
+
+## 2.1 Architektura systemu
+
+```{mermaid}
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffdfd3' }}}%%
+graph TD
+    A[Dane: NBP/Yahoo] --> B[Przetwarzanie]
+    B --> C[Feature Engineering]
+    C --> D[Modele: BTC/SGH]
+    D --> E[Ewaluacja: backtest, kalibracja, MCS]
+    E --> F[Raport]
+```
+
+## 2.2 Modele i algorytmy
+
+### BTC
+- **chronos-bolt:** model zero-shot, kontekst 256, origins/h=60.
+- **TimesFM 2.5:** model zero-shot, kontekst 512.
+- **ModernTCN, PatchTST:** modele głębokie z walk-forward.
+- **XGBoost:** model gradient boosting z feature engineeringiem.
+
+### SGH
+- **Reguła Taylora, VAR/BVAR, SVAR:** modele makroekonometryczne.
+- **Ordered logit/probit:** modele dyskretne.
+- **Gradient boosting, Random Forest:** modele nieliniowe.
+- **NLP:** modele tekstowe (opcjonalnie).
+
+## 2.3 Ewaluacja
+
+### Metryki
+- **DirAcc:** dokładność kierunku zmian.
+- **skill vs RW:** porównanie z naiwnym baseline'em.
+- **R² OOS:** R² out-of-sample.
+- **MCS:** testy wielokrotnego porównania.
+
+### Backtest
+- Walk-forward z 5 foldami, kontekst 256, origins/h=60.
+
+# 3. Wyniki BTC
+
+## 3.1 Chronos-bolt
+
+```{python}
+#| echo: false
+import pandas as pd
+pd.read_json('results/tsfm_full_chronos/metrics.json')
+```
+
+## 3.2 TimesFM 2.5
+
+```{python}
+#| echo: false
+import pandas as pd
+pd.read_json('results/tsfm_full_timesfm/metrics.json')
+```
+
+## 3.3 ModernTCN i PatchTST
+
+```{python}
+#| echo: false
+import pandas as pd
+pd.read_json('results/full_seed42/metrics.json')
+```
+
+## 3.4 Podsumowanie BTC
+
+| Model         | DirAcc | skill vs RW (h=1/7/30) | R² OOS (h=1/7/30) |
+|---------------|--------|------------------------|-------------------|
+| chronos-bolt  | 53,1%  | -5,19% / -3,55% / -7,10% | -               |
+| TimesFM 2.5   | 45,3%  | -9,0%                  | -                |
+| ModernTCN     | 51,2%  | -                      | -0,31 / -0,80 / -0,85 |
+| PatchTST      | 51,1%  | -                      | -0,28 / -0,35 / -0,38 |
+| XGBoost       | 51,8%  | -                      | 0,0071            |
+
+**Wniosek:** żaden model nie bije naiwnego baseline'u „jutro taka sama cena”. Konieczna kalibracja i MCS.
+
+# 4. Wyniki SGH
+
+## 4.1 Struktura serii
+
+- **Tier I:** modele liniowe, VAR, ordered logit/probit.
+- **Tier II:** modele nieliniowe, NLP, gradient boosting, LSTM.
+
+## 4.2 Przykładowe serie
+
+### NBP Stopa Referencyjna
+- **TRD-29/30:** Reguła Taylora, VAR/BVAR.
+- Wyniki: DirAcc, RMSE, MAE, MAPE.
+
+### Obligacje 2/5/7/10Y
+- **TRD-34/35:** Nelson-Siegel, Svensson, Diebold-Li.
+- Wyniki: krzywe terminowe, czynniki.
+
+### Kredyty konsumpcyjne
+- **TRD-36/37:** ARDL, ECM, logit/scorecard.
+- Wyniki: predykcje, kalibracja.
+
+### EUR/PLN, USD/PLN
+- **TRD-46/47:** PatchTST, Stacking Ensemble.
+- Wyniki: DirAcc, skill vs RW.
+
+### Bitcoin
+- **TRD-58/59:** BiLSTM, XGBoost.
+- Wyniki: DirAcc, RMSE, MAE.
+
+## 4.3 Podsumowanie SGH
+
+- **Modele liniowe:** DirAcc 50–60%, RMSE niski.
+- **Modele nieliniowe:** DirAcc 45–55%, RMSE wyższy.
+- **Wnioski:** modele liniowe sprawdzają się lepiej na danych makroekonomicznych.
+
+# 5. Infrastruktura i koszty
+
+## 5.1 GCP
+
+- **Projekt:** `btc-ind` (203925818774).
+- **Billing:** `01AFC5-6E7E31-0E79E0` (100 PLN).
+- **Region:** `europe-west4` (L4 GPU dostępne).
+- **Koszty:**
+  - Job GPU: ≈ 0,45 USD/h (g2-standard-4 + 1×L4 SPOT).
+  - Job CPU: 0 USD.
+  - Przeterminowane przebiegi: ≈ 0,10–0,15 USD.
+
+## 5.2 Repozytorium
+
+- **GitHub:** `kknckk/btc-tai-indicators` (`/opt/data/grok_push/btc-tai-indicators`).
+- **Struktura:**
+  - `experiments/` — konfiguracje modeli.
+  - `evaluation/` — backtest, kalibracja, MCS.
+  - `results/` — pliki wynikowe (JSON, MD, wykresy).
+  - `gcp/` — pipeline Vertex AI.
+  - `tests/` — testy jednostkowe.
+
+# 6. Wnioski i rekomendacje
+
+## 6.1 BTC
+
+- **Stwierdzenie:** modele nie biją naiwnego baseline'u.
+- **Rekomendacja:** kontynuować badania nad kalibracją i MCS.
+- **Kolejne kroki:** uruchomić TRD-16 (backtest ekonomiczny), TRD-17 (kalibracja), TRD-18 (MCS).
+
+## 6.2 SGH
+
+- **Stwierdzenie:** modele liniowe sprawdzają się lepiej niż nieliniowe.
+- **Rekomendacja:** skupić się na modelach panelowych i sentymentowych.
+- **Kolejne kroki:** uzupełnić brakujące serie, uruchomić kalibrację i MCS.
+
+## 6.3 Infrastruktura
+
+- **Stwierdzenie:** pipeline GCP działa end-to-end.
+- **Rekomendacja:** wdrożyć automatyczne odświeżanie danych i modeli.
+- **Kolejne kroki:** zbudować dashboard z wynikami.
+
+# 7. Załączniki
+
+## 7.1 Źródła danych
+
+- **NBP API:** `api.nbp.pl` (stopy, kursy).
+- **Yahoo Finance:** `query1.finance.yahoo.com` (WIG20, surowce, Bitcoin).
+- **stooq.pl:** blokuje boty (użyto Yahoo/NBP).
+
+## 7.2 Kod i repozytoria
+
+- **GitHub:** `kknckk/btc-tai-indicators` — kod, konfiguracje, wyniki.
+- **GCP:** `btc-ind` — pipeline, jobi, koszty.
+
+## 7.3 Dokumentacja techniczna
+
+- **README.md:** opis projektu, instalacja, uruchamianie.
+- **gcp/requirements-train.txt:** zależności obrazu treningowego.
+- **gcp/submit_vertex_job.sh:** skrypt uruchamiający jobi Vertex AI.
+
+## 7.4 Wyniki szczegółowe
+
+- **BTC:** `results/tsfm_full_chronos/`, `results/tsfm_full_timesfm/`.
+- **SGH:** `results/SGH_*.md` (34 pliki).
+- **Testy:** `tests/test_evaluation_harness.py` (8 passed).
+
+# 8. Podziękowania
+
+Dziękujemy za wsparcie i zaangażowanie w projekt.

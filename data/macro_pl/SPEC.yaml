@@ -1,0 +1,35 @@
+# SGH macro/banking — source registry (TRD-29). Status values: verified | do_weryfikacji | paid_or_contract
+verified_at: null
+
+nbp_rate:
+  status: do_weryfikacji
+  url: https://api.nbp.pl/api/interestrates/?format=json
+  license: NBP public API
+  update: RPP decisions (irregular)
+
+gus_macro:
+  series: [gus_cpi_yoy, gus_pmi]
+  status: do_weryfikacji
+  url: https://bdl.stat.gov.pl/api/v1/ (BDL API) or raw/gus_macro.csv
+  license: GUS public statistics (BDL terms)
+  update: monthly
+
+bonds_pl:
+  series: [bond_pl_2y, bond_pl_5y, bond_pl_7y, bond_pl_10y]
+  status: do_weryfikacji
+  url: https://www.gov.pl/web/finanse/krajowa-krzywa-dochodowosci
+  paid_alternative: GPW Benchmark SPW (license required)
+  update: daily
+
+nbp_monetary:
+  series: [credit_consumer, credit_mortgage, credit_corporate, deposits_households]
+  status: do_weryfikacji
+  url: https://statystyka.nbp.pl/
+  license: NBP monetary statistics
+  update: monthly
+
+tfi_assets:
+  status: do_weryfikacji
+  url: https://www.izfia.pl/
+  paid_alternative: Analizy.pl (no automated fetch)
+  update: monthly

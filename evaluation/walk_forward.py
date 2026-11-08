@@ -15,8 +15,16 @@ from typing import Callable, Optional, Protocol
 import numpy as np
 import pandas as pd
 
+from evaluation import backtest as BT
 from evaluation import metrics as M
-from experiments.data import forward_log_return
+from evaluation.targets import (
+    TargetSpec,
+    benchmark_naive,
+    benchmark_rw_values,
+    forward_target,
+    point_scores,
+    resolve_price,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +66,9 @@ def check_causal(
     return sorted(offenders)
 
 
-def _fold_starts(n: int, h: int, min_train: int, embargo: int, step: int) -> list[int]:
-    first = min_train + h + embargo
-    last = n - h  # exclusive: origin t needs t+h <= n-1
+def _fold_starts(n: int, purge: int, min_train: int, embargo: int, step: int, last_origin: int | None = None) -> list[int]:
+    last = last_origin if last_origin is not None else n - purge
+    first = min_train + purge + embargo
     return list(range(first, last, step))
 
 
@@ -87,7 +95,7 @@ def make_folds(
         region = max(1, last - (min_train + horizon + embargo))
         step = max(horizon, region // max(1, n_folds))
     folds: list[dict] = []
-    for a in _fold_starts(n, horizon, min_train, embargo, step)[:n_folds]:
+    for a in _fold_starts(n, horizon, min_train, embargo, step, last_origin=n - horizon)[:n_folds]:
         tr_end = a - horizon - embargo
         te_end = min(a + step, last)
         if tr_end < 1 or te_end <= a:
@@ -109,25 +117,36 @@ def run_walk_forward(
     seed: int = 42,
     causal_check: bool = True,
     max_folds: Optional[int] = None,
+    target: TargetSpec | None = None,
+    series_id: str = "btc",
 ) -> dict:
     """Expanding walk-forward evaluation. Returns a dict with per-origin predictions (``frame``),
-    ``folds`` (boundaries + model diagnostics) and ``metrics`` (point, vol, economic)."""
+    ``folds`` (boundaries + model diagnostics) and ``metrics`` (point, vol, economic).
+
+    Default target is BTC ``h``-day log return (``log_price``). Pass ``target`` for other series,
+    level forecasts, or month horizons.
+    """
     np.random.seed(seed)
     if causal_check:
         bad = check_causal(feature_fn, panel)
         if bad:
             raise ValueError(f"feature_fn is not causal (changes when future rows are removed): {bad[:10]}")
 
-    idx = panel.index[panel["log_price"].notna()]
+    spec = target or TargetSpec.btc_log_return(h)
+    purge = spec.purge_rows(panel.index)
+    idx = panel.index[panel[spec.validity_col].notna()]
     sub = panel.loc[idx]
     n = len(sub)
     X_all = feature_fn(panel).loc[idx]
-    y_all = forward_log_return(sub["log_price"], h)
-    r = sub["logret_1"]
-    rv_fwd = (r ** 2).rolling(h).mean().shift(-h)  # mean daily r^2 over (t, t+h]  (label for vol models)
+    price = resolve_price(sub, spec)
+    y_all = forward_target(price, spec)
+    r = sub["logret_1"] if "logret_1" in sub.columns else price.diff()
+    h_vol = h if spec.unit == "day" and spec.kind == "log_return" else max(h, purge)
+    rv_fwd = (r ** 2).rolling(h_vol).mean().shift(-h_vol)
     next_ret = r.shift(-1)
 
-    starts = _fold_starts(n, h, min_train, embargo, step)
+    last_origin = spec.last_valid_origin(sub.index)
+    starts = _fold_starts(n, purge, min_train, embargo, step, last_origin=last_origin)
     if max_folds:
         starts = starts[:max_folds]
     if not starts:
@@ -135,11 +154,11 @@ def run_walk_forward(
 
     preds, vols, folds = [], [], []
     for k, a in enumerate(starts):
-        tr_end = a - h - embargo
-        te_end = min(a + step, n - h)
+        tr_end = a - purge - embargo
+        te_end = min(a + step, last_origin)
         tr, te = slice(0, tr_end), slice(a, te_end)
         X_tr, y_tr = X_all.iloc[tr], y_all.iloc[tr]
-        assert y_tr.notna().all() and tr_end + h - 1 < a, "label window of the train fold reaches the test block"
+        assert y_tr.notna().all() and tr_end + purge - 1 < a, "label window of the train fold reaches the test block"
         assert X_all.index[tr_end - 1] < X_all.index[a]
         model = model_factory()
         model.fit(X_tr, y_tr)
@@ -160,27 +179,75 @@ def run_walk_forward(
 
     pred = pd.concat(preds)
     vol_pred = pd.concat(vols) if vols else None
+    px = sub["PriceUSD"] if "PriceUSD" in sub.columns else np.exp(price) if spec.price_col == "log_price" else price
     frame = pd.DataFrame({
         "y_true": y_all.loc[pred.index], "y_pred": pred, "rv_true": rv_fwd.loc[pred.index],
-        "next_ret": next_ret.loc[pred.index], "price": sub["PriceUSD"].loc[pred.index],
+        "next_ret": next_ret.loc[pred.index], "price": px.loc[pred.index],
     })
     if vol_pred is not None:
         frame["var_pred"] = vol_pred
     frame = frame[frame["y_true"].notna()]
 
-    res: dict = {"h": h, "frame": frame, "folds": folds, "min_train": min_train, "embargo": embargo, "step": step}
-    res["metrics"] = summarize(frame, position_fn, costs_bps)
+    res: dict = {
+        "h": h,
+        "series_id": series_id,
+        "target": spec,
+        "frame": frame,
+        "folds": folds,
+        "min_train": min_train,
+        "embargo": embargo,
+        "step": step,
+    }
+    res["metrics"] = summarize(frame, position_fn, costs_bps, target=spec, price=price)
     return res
 
 
-def summarize(frame: pd.DataFrame, position_fn: PositionFn, costs_bps: tuple[float, ...] = (10, 20),
-              since: Optional[str] = None) -> dict:
+def run_multi_series(
+    panels: dict[str, pd.DataFrame],
+    h: int,
+    feature_fn: FeatureFn,
+    model_factory: Callable[[], Forecaster],
+    target: TargetSpec,
+    **kwargs,
+) -> dict[str, dict]:
+    """Run the same walk-forward protocol on several aligned panels (e.g. multi-asset)."""
+    return {
+        sid: run_walk_forward(p, h, feature_fn, model_factory, target=target, series_id=sid, **kwargs)
+        for sid, p in panels.items()
+    }
+
+
+def summarize(
+    frame: pd.DataFrame,
+    position_fn: PositionFn,
+    costs_bps: tuple[float, ...] = (10, 20),
+    since: Optional[str] = None,
+    target: TargetSpec | None = None,
+    price: pd.Series | None = None,
+) -> dict:
     """Point, volatility and economic metrics on (optionally a sub-period of) a result frame."""
     f = frame.loc[since:] if since else frame
     out: dict = {"n_obs": int(len(f)), "start": str(f.index[0].date()), "end": str(f.index[-1].date())}
-    out["point"] = M.point_metrics(f["y_true"].to_numpy(), f["y_pred"].to_numpy())
+    if target is not None and target.kind == "level" and price is not None:
+        po = price.reindex(f.index).to_numpy()
+        out["point"] = point_scores(f["y_true"].to_numpy(), f["y_pred"].to_numpy(), target, po)
+    else:
+        out["point"] = M.point_metrics(f["y_true"].to_numpy(), f["y_pred"].to_numpy())
+    if target is not None and price is not None:
+        y = f["y_true"]
+        rw = benchmark_rw_values(y.index, price, target)
+        nv = benchmark_naive(price, target, y)
+        m = y.notna() & f["y_pred"].notna() & rw.notna() & nv.notna()
+        err_m = (y[m] - f["y_pred"][m]).to_numpy()
+        err_rw = (y[m] - rw[m]).to_numpy()
+        err_nv = (y[m] - nv[m]).to_numpy()
+        out["vs_benchmarks"] = {
+            "mse_model": float(np.mean(err_m ** 2)),
+            "mse_rw": float(np.mean(err_rw ** 2)),
+            "mse_naive": float(np.mean(err_nv ** 2)),
+        }
     if "var_pred" in f:
         out["vol"] = M.vol_metrics(f["rv_true"].to_numpy(), f["var_pred"].to_numpy())
     pos = position_fn(f["y_pred"], f["var_pred"] if "var_pred" in f else None)
-    out["economic"] = M.economic_metrics(pos, f["next_ret"], costs_bps)
+    out["economic"] = BT.run_backtest(pos, f["next_ret"], costs_bps)
     return out

@@ -94,12 +94,10 @@ SPEC_FILE="$(mktemp)"
 trap 'rm -f "$SPEC_FILE"' EXIT
 
 {
-  echo "displayName: ${DISPLAY_NAME}"
-  echo "jobSpec:"
   if [[ -n "$SERVICE_ACCOUNT" ]]; then
     echo "  serviceAccount: ${SERVICE_ACCOUNT}"
   fi
-  echo "  workerPoolSpecs:"
+  echo "workerPoolSpecs:"
   echo "  - machineSpec:"
   echo "      machineType: ${MACHINE_TYPE}"
   if [[ "$ACCELERATOR_TYPE" != "none" && -n "$ACCELERATOR_TYPE" ]]; then
@@ -117,8 +115,10 @@ trap 'rm -f "$SPEC_FILE"' EXIT
     echo "        - name: PRICE_CSV_GCS"
     echo "          value: \"${PRICE_CSV_GCS}\""
   fi
-  echo "  baseOutputDirectory:"
-  echo "    outputUriPrefix: \"${OUTPUT_URI}\""
+  echo "baseOutputDirectory:"
+  echo "  outputUriPrefix: \"${OUTPUT_URI}\""
+  echo "scheduling:"
+  echo "  strategy: SPOT"
 } > "$SPEC_FILE"
 
 if [[ "$PRINT_SPEC" -eq 1 ]]; then
@@ -132,6 +132,7 @@ echo "   output=${OUTPUT_URI}"
 gcloud ai custom-jobs create \
   --project="$PROJECT_ID" \
   --region="$REGION" \
+  --display-name="$DISPLAY_NAME" \
   --config="$SPEC_FILE"
 
 cat <<EOF

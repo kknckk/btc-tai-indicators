@@ -1,0 +1,14 @@
+series_id: nbp_rate
+horizons: [1, 3, 12]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 72
+  step: 6
+  embargo: 0
+costs_bps: [10, 20]
+models:
+  - taylor_rule
+  - forward_linear
+  - ordered_logit
+  - ordered_probit

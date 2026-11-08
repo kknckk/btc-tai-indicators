@@ -220,6 +220,34 @@ def run_horizon(
     step: int,
     batch_size: int,
 ) -> Dict[str, Any]:
+    origins, pred, act, last, prev, lo, hi = _horizon_predictions(
+        y, forecaster, horizon, context_len, max_origins, step, batch_size
+    )
+
+    metrics = compute_metrics(pred, act, last, prev)
+    coverage = float(np.mean((act >= lo) & (act <= hi)))
+    return {
+        "horizon": horizon,
+        "n_origins": int(len(origins)),
+        "first_origin": str(_origin_date(y, origins[0])) if len(origins) else None,
+        "last_origin": str(_origin_date(y, origins[-1])) if len(origins) else None,
+        "metrics": metrics,
+        "interval_coverage_p10_p90": coverage,
+        "median_interval_width_pct": float(np.mean((hi - lo) / last) * 100.0)
+        if len(last)
+        else None,
+    }
+
+
+def _horizon_predictions(
+    y: np.ndarray,
+    forecaster: Any,
+    horizon: int,
+    context_len: int,
+    max_origins: int,
+    step: int,
+    batch_size: int,
+) -> Tuple[List[int], np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     origins = build_origins(len(y), context_len, horizon, max_origins, step)
     predictions: List[float] = []
     lows: List[float] = []
@@ -246,20 +274,52 @@ def run_horizon(
     prev = np.asarray(prev_obs)
     lo = np.asarray(lows)
     hi = np.asarray(highs)
+    return origins, pred, act, last, prev, lo, hi
 
-    metrics = compute_metrics(pred, act, last, prev)
-    coverage = float(np.mean((act >= lo) & (act <= hi)))
-    return {
-        "horizon": horizon,
-        "n_origins": int(len(origins)),
-        "first_origin": str(_origin_date(y, origins[0])) if len(origins) else None,
-        "last_origin": str(_origin_date(y, origins[-1])) if len(origins) else None,
-        "metrics": metrics,
-        "interval_coverage_p10_p90": coverage,
-        "median_interval_width_pct": float(np.mean((hi - lo) / last) * 100.0)
-        if len(last)
-        else None,
-    }
+
+def _origin_frame_from_arrays(
+    series_index: Any,
+    origins: List[int],
+    act: np.ndarray,
+    pred: np.ndarray,
+    lo: np.ndarray,
+    hi: np.ndarray,
+    last: np.ndarray,
+) -> "Any":
+    import pandas as pd
+
+    if series_index is not None and len(series_index):
+        idx = [series_index[o] for o in origins]
+    else:
+        idx = origins
+    return pd.DataFrame(
+        {
+            "y_true": act,
+            "y_pred": pred,
+            "q_lo": lo,
+            "q_hi": hi,
+            "price": last,
+        },
+        index=pd.Index(idx, name="origin"),
+    )
+
+
+def collect_horizon_frame(
+    y: np.ndarray,
+    forecaster: Any,
+    horizon: int,
+    context_len: int,
+    max_origins: int,
+    step: int,
+    batch_size: int,
+) -> "Any":
+    """Per-origin price-level forecasts and nominal p10–p90 intervals."""
+    origins, pred, act, last, _prev, lo, hi = _horizon_predictions(
+        y, forecaster, horizon, context_len, max_origins, step, batch_size
+    )
+    return _origin_frame_from_arrays(
+        series_index=getattr(y, "index", None), origins=origins, act=act, pred=pred, lo=lo, hi=hi, last=last
+    )
 
 
 def _origin_date(y: np.ndarray, index: int) -> Any:

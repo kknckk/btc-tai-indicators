@@ -1,0 +1,108 @@
+{
+  "status": "ok",
+  "generated_at": "2026-10-30T16:32:14+00:00",
+  "mode": "real",
+  "stub": false,
+  "model": "chronos-bolt",
+  "requested_model": "chronos-bolt",
+  "model_id": "amazon/chronos-bolt-small",
+  "git_commit": null,
+  "python": "3.11.18",
+  "data": {
+    "source": "api/csv/PriceUSD.csv",
+    "n_obs": 5789,
+    "start": "2010-07-18",
+    "end": "2026-05-23"
+  },
+  "config": {
+    "context_len": 256,
+    "horizons": [
+      1,
+      7,
+      30
+    ],
+    "n_origins": 60,
+    "step": 1,
+    "batch_size": 16,
+    "device": "cpu",
+    "quantiles": [
+      0.1,
+      0.5,
+      0.9
+    ]
+  },
+  "horizons": {
+    "1": {
+      "horizon": 1,
+      "n_origins": 60,
+      "first_origin": "5728",
+      "last_origin": "5787",
+      "metrics": {
+        "rmse": 1503.3881609988769,
+        "mae": 1211.9504755172632,
+        "mape_pct": 1.6173598689932633,
+        "smape_pct": 1.6267155620302165,
+        "dir_acc": 0.43333333333333335,
+        "dir_acc_rw_momentum": 0.48333333333333334,
+        "dir_edge_vs_rw": -0.04999999999999999,
+        "rmse_naive_rw": 1346.7861974703371,
+        "mae_naive_rw": 1048.3337092028016,
+        "rmse_skill_vs_rw": -0.11627826586186019,
+        "r2_oos_vs_rw": -0.24607716683556213
+      },
+      "interval_coverage_p10_p90": 0.8833333333333333,
+      "median_interval_width_pct": 6.634834768989401
+    },
+    "7": {
+      "horizon": 7,
+      "n_origins": 60,
+      "first_origin": "5722",
+      "last_origin": "5781",
+      "metrics": {
+        "rmse": 3341.6290881846558,
+        "mae": 2911.5042464546464,
+        "mape_pct": 3.9192696556950355,
+        "smape_pct": 3.947060114488158,
+        "dir_acc": 0.4166666666666667,
+        "dir_acc_rw_momentum": 0.5333333333333333,
+        "dir_edge_vs_rw": -0.11666666666666664,
+        "rmse_naive_rw": 3088.1605688112704,
+        "mae_naive_rw": 2683.4804045130927,
+        "rmse_skill_vs_rw": -0.08207750656921098,
+        "r2_oos_vs_rw": -0.17089173022304105
+      },
+      "interval_coverage_p10_p90": 0.95,
+      "median_interval_width_pct": 15.811244193777249
+    },
+    "30": {
+      "horizon": 30,
+      "n_origins": 60,
+      "first_origin": "5699",
+      "last_origin": "5758",
+      "metrics": {
+        "rmse": 8044.133822806754,
+        "mae": 6358.433143367299,
+        "mape_pct": 8.34643396044752,
+        "smape_pct": 8.810341956075236,
+        "dir_acc": 0.55,
+        "dir_acc_rw_momentum": 0.48333333333333334,
+        "dir_edge_vs_rw": 0.06666666666666671,
+        "rmse_naive_rw": 6567.219491846939,
+        "mae_naive_rw": 5308.149676583137,
+        "rmse_skill_vs_rw": -0.22489187894410612,
+        "r2_oos_vs_rw": -0.5003601151032229
+      },
+      "interval_coverage_p10_p90": 0.8166666666666667,
+      "median_interval_width_pct": 36.10411806351794
+    }
+  },
+  "warnings": [],
+  "aggregate": {
+    "mean_rmse": 4296.383690663429,
+    "mean_mae": 3493.9626217797363,
+    "mean_dir_acc": 0.46666666666666673,
+    "mean_dir_acc_rw_momentum": 0.5,
+    "mean_rmse_skill_vs_rw": -0.14108255045839244
+  },
+  "runtime_seconds": 8.986446857452393
+}

@@ -1,0 +1,108 @@
+{
+  "status": "ok",
+  "generated_at": "2026-10-29T14:23:59+00:00",
+  "mode": "real",
+  "stub": false,
+  "model": "chronos-bolt",
+  "requested_model": "chronos-bolt",
+  "model_id": "amazon/chronos-bolt-small",
+  "git_commit": "d7034cb",
+  "python": "3.13.5",
+  "data": {
+    "source": "data_ingestion/csv/PriceUSD.csv",
+    "n_obs": 5789,
+    "start": "2010-07-18",
+    "end": "2026-05-23"
+  },
+  "config": {
+    "context_len": 256,
+    "horizons": [
+      1,
+      7,
+      30
+    ],
+    "n_origins": 300,
+    "step": 5,
+    "batch_size": 16,
+    "device": "cpu",
+    "quantiles": [
+      0.1,
+      0.5,
+      0.9
+    ]
+  },
+  "horizons": {
+    "1": {
+      "horizon": 1,
+      "n_origins": 300,
+      "first_origin": "4292",
+      "last_origin": "5787",
+      "metrics": {
+        "rmse": 1770.888504677051,
+        "mae": 1172.66584061735,
+        "mape_pct": 2.1381656542539544,
+        "smape_pct": 2.1336820148688105,
+        "dir_acc": 0.53,
+        "dir_acc_rw_momentum": 0.46,
+        "dir_edge_vs_rw": 0.07,
+        "rmse_naive_rw": 1653.447127683012,
+        "mae_naive_rw": 1070.8856100441142,
+        "rmse_skill_vs_rw": -0.07102820224956963,
+        "r2_oos_vs_rw": -0.1471014100139454
+      },
+      "interval_coverage_p10_p90": 0.8666666666666667,
+      "median_interval_width_pct": 8.123517672441176
+    },
+    "7": {
+      "horizon": 7,
+      "n_origins": 300,
+      "first_origin": "4286",
+      "last_origin": "5781",
+      "metrics": {
+        "rmse": 4212.735262736634,
+        "mae": 2907.7470361354685,
+        "mape_pct": 5.339553499606787,
+        "smape_pct": 5.265281139729443,
+        "dir_acc": 0.5366666666666666,
+        "dir_acc_rw_momentum": 0.5033333333333333,
+        "dir_edge_vs_rw": 0.033333333333333326,
+        "rmse_naive_rw": 4014.722265480351,
+        "mae_naive_rw": 2826.307340898256,
+        "rmse_skill_vs_rw": -0.049321717459474446,
+        "r2_oos_vs_rw": -0.10107606673210068
+      },
+      "interval_coverage_p10_p90": 0.7966666666666666,
+      "median_interval_width_pct": 17.840701658901693
+    },
+    "30": {
+      "horizon": 30,
+      "n_origins": 300,
+      "first_origin": "4263",
+      "last_origin": "5758",
+      "metrics": {
+        "rmse": 9041.349316233594,
+        "mae": 6613.976204026592,
+        "mape_pct": 12.636890390155667,
+        "smape_pct": 12.465589263701858,
+        "dir_acc": 0.5266666666666666,
+        "dir_acc_rw_momentum": 0.4533333333333333,
+        "dir_edge_vs_rw": 0.0733333333333333,
+        "rmse_naive_rw": 8731.452732646596,
+        "mae_naive_rw": 6105.913786191003,
+        "rmse_skill_vs_rw": -0.03549198433249323,
+        "r2_oos_vs_rw": -0.07224364961684437
+      },
+      "interval_coverage_p10_p90": 0.77,
+      "median_interval_width_pct": 38.13072847606622
+    }
+  },
+  "warnings": [],
+  "aggregate": {
+    "mean_rmse": 5008.324361215759,
+    "mean_mae": 3564.7963602598034,
+    "mean_dir_acc": 0.5311111111111111,
+    "mean_dir_acc_rw_momentum": 0.47222222222222227,
+    "mean_rmse_skill_vs_rw": -0.0519473013471791
+  },
+  "runtime_seconds": 260.58124709129333
+}

@@ -1,0 +1,33 @@
+series_id: credit_mortgage
+horizons: [1, 3, 12]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 72
+  step: 6
+  embargo: 0
+costs_bps: [10, 20]
+var:
+  p: [1, 2, 3, 4]
+ridge:
+  alpha: [0.01, 0.1, 1.0, 10.0, 100.0]
+random_forest:
+  n_estimators: [100, 200]
+  max_depth: [4, 8, null]
+gradient_boosting:
+  max_depth: [3, 5]
+  learning_rate: [0.05, 0.1]
+lstm:
+  window_grid: [6, 12]
+  hidden_grid: [8, 16]
+  lr_grid: [0.001]
+  max_epochs: 25
+  patience: 6
+models:
+  - var
+  - panel_model
+  - mortgage_contract
+  - random_forest
+  - gradient_boosting
+  - lstm
+  - pko_internal

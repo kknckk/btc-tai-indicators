@@ -1,0 +1,35 @@
+series_id: wig20
+horizons: [1, 7, 30]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 504
+  step: 21
+  embargo: 0
+costs_bps: [10, 20]
+models:
+  - har_rv
+  - realized_vol
+  - external_factors
+  - stochastic_vol
+  - sentiment
+  - random_forest
+  - gradient_boosting
+ridge:
+  alpha: [0.01, 0.1, 1.0, 10.0, 100.0]
+har_rv:
+  features: [rv_d, rv_w, rv_m, wig20_l1, wig20_l5]
+realized_vol:
+  features: [rv_sum_5, rv_sum_22, bipower_5, wig20_vol21, wig20_l1]
+external_factors:
+  features: [wig20_l1, wig20_l5, usdpln_lr_l1, eurpln_lr_l1, oil_lr_l1, gold_lr_l1]
+stochastic_vol:
+  phi: [0.85, 0.9, 0.95]
+sentiment:
+  features: [wig20_l1, sentiment_fear, sentiment_stress, sentiment_momentum, ret_z21]
+random_forest:
+  n_estimators: [100, 200]
+  max_depth: [4, 8, null]
+gradient_boosting:
+  max_depth: [3, 5]
+  learning_rate: [0.05, 0.1]

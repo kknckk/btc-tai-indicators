@@ -1,0 +1,33 @@
+series_id: wheat
+horizons: [1, 7, 30]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 504
+  step: 21
+  embargo: 0
+costs_bps: [10, 20]
+models:
+  - lstm
+  - arima
+  - xgboost
+lstm:
+  window_grid: [21, 42, 63]
+  hidden_grid: [16, 32, 64]
+  lr_grid: [0.0005, 0.001, 0.002]
+  max_epochs: 40
+  patience: 8
+  layers: 1
+arima:
+  min_hist: 40
+  order_grid:
+    - [1, 0, 1]
+    - [2, 0, 1]
+    - [1, 0, 2]
+xgboost:
+  n_estimators: 200
+  max_depth_grid: [3, 4, 6]
+  learning_rate_grid: [0.03, 0.05, 0.1]
+  subsample: 0.8
+  colsample_bytree: 0.8
+  early_stopping_rounds: 20

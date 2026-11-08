@@ -1,1 +1,6 @@
 *.parquet
+multiasset/
+macro_pl/*.csv
+macro_pl/*.parquet
+macro_pl/raw/
+macro_pl/meta.json

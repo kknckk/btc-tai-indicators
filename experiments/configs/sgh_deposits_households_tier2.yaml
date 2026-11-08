@@ -1,0 +1,32 @@
+series_id: deposits_households
+horizons: [1, 3, 12]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 72
+  step: 6
+  embargo: 0
+costs_bps: [10, 20]
+var:
+  p: [1, 2, 3, 4]
+  p_bvar: [1, 2, 3]
+  alpha: [0.1, 1.0, 10.0, 100.0]
+ridge:
+  alpha: [0.01, 0.1, 1.0, 10.0, 100.0]
+random_forest:
+  n_estimators: [100, 200]
+  max_depth: [4, 8, null]
+gradient_boosting:
+  max_depth: [3, 5]
+  learning_rate: [0.05, 0.1]
+portfolio_model:
+  n_components: 2
+models:
+  - var
+  - bvar
+  - portfolio_model
+  - segmentation_model
+  - pko_internal
+  - random_forest
+  - gradient_boosting
+  - retention_model

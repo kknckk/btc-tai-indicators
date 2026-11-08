@@ -1,0 +1,19 @@
+series_id: credit_corporate
+horizons: [1, 3, 12]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 72
+  step: 6
+  embargo: 0
+costs_bps: [10, 20]
+models:
+  - ardl
+  - dynamic_regression
+  - bank_lending_channel
+ardl:
+  p: [1, 2, 3, 4]
+ridge:
+  alpha: [0.01, 0.1, 1.0, 10.0, 100.0]
+blc:
+  drate_lags: [1, 2, 3]

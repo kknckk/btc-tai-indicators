@@ -99,8 +99,11 @@ def economic_metrics(
     turn = float(pos.diff().abs().fillna(pos.abs()).mean() * ann)
     for bps in (0, *costs_bps):
         r = strategy_returns(pos, nr, bps)
+        r_fin = r.dropna()
+        hit = float((r_fin > 0).mean()) if len(r_fin) else float("nan")
         out[f"{bps}bps"] = {
             "sharpe": sharpe(r, ann), "max_dd": max_drawdown(r),
             "ann_return": float(r.mean() * ann), "turnover_ann": turn,
+            "hit_rate": hit,
         }
     return out

@@ -1,0 +1,108 @@
+{
+  "status": "ok",
+  "generated_at": "2026-10-29T14:28:27+00:00",
+  "mode": "real",
+  "stub": false,
+  "model": "timesfm",
+  "requested_model": "timesfm",
+  "model_id": "google/timesfm-2.5-200m-pytorch",
+  "git_commit": "d7034cb",
+  "python": "3.13.5",
+  "data": {
+    "source": "data_ingestion/csv/PriceUSD.csv",
+    "n_obs": 5789,
+    "start": "2010-07-18",
+    "end": "2026-05-23"
+  },
+  "config": {
+    "context_len": 256,
+    "horizons": [
+      1,
+      7,
+      30
+    ],
+    "n_origins": 300,
+    "step": 5,
+    "batch_size": 16,
+    "device": "cpu",
+    "quantiles": [
+      0.1,
+      0.5,
+      0.9
+    ]
+  },
+  "horizons": {
+    "1": {
+      "horizon": 1,
+      "n_origins": 300,
+      "first_origin": "4292",
+      "last_origin": "5787",
+      "metrics": {
+        "rmse": 1704.7983180377641,
+        "mae": 1152.5202687143328,
+        "mape_pct": 2.0098858614084016,
+        "smape_pct": 2.005158109505632,
+        "dir_acc": 0.48333333333333334,
+        "dir_acc_rw_momentum": 0.46,
+        "dir_edge_vs_rw": 0.023333333333333317,
+        "rmse_naive_rw": 1653.447127683012,
+        "mae_naive_rw": 1070.8856100441142,
+        "rmse_skill_vs_rw": -0.031057050143908027,
+        "r2_oos_vs_rw": -0.06307864065145763
+      },
+      "interval_coverage_p10_p90": 0.59,
+      "median_interval_width_pct": 4.779375726485298
+    },
+    "7": {
+      "horizon": 7,
+      "n_origins": 300,
+      "first_origin": "4286",
+      "last_origin": "5781",
+      "metrics": {
+        "rmse": 4369.52527198323,
+        "mae": 3148.685860298414,
+        "mape_pct": 5.737124390292776,
+        "smape_pct": 5.702759868266246,
+        "dir_acc": 0.43,
+        "dir_acc_rw_momentum": 0.5033333333333333,
+        "dir_edge_vs_rw": -0.0733333333333333,
+        "rmse_naive_rw": 4014.722265480351,
+        "mae_naive_rw": 2826.307340898256,
+        "rmse_skill_vs_rw": -0.08837547980680238,
+        "r2_oos_vs_rw": -0.1845611850446871
+      },
+      "interval_coverage_p10_p90": 0.5433333333333333,
+      "median_interval_width_pct": 10.94677321325166
+    },
+    "30": {
+      "horizon": 30,
+      "n_origins": 300,
+      "first_origin": "4263",
+      "last_origin": "5758",
+      "metrics": {
+        "rmse": 10048.317524139988,
+        "mae": 7187.143766845961,
+        "mape_pct": 13.817714387739722,
+        "smape_pct": 13.778541534612746,
+        "dir_acc": 0.44666666666666666,
+        "dir_acc_rw_momentum": 0.4533333333333333,
+        "dir_edge_vs_rw": -0.006666666666666654,
+        "rmse_naive_rw": 8731.452732646596,
+        "mae_naive_rw": 6105.913786191003,
+        "rmse_skill_vs_rw": -0.1508185214780675,
+        "r2_oos_vs_rw": -0.32438326937696527
+      },
+      "interval_coverage_p10_p90": 0.4866666666666667,
+      "median_interval_width_pct": 24.754916724252936
+    }
+  },
+  "warnings": [],
+  "aggregate": {
+    "mean_rmse": 5374.213704720328,
+    "mean_mae": 3829.449965286236,
+    "mean_dir_acc": 0.4533333333333333,
+    "mean_dir_acc_rw_momentum": 0.47222222222222227,
+    "mean_rmse_skill_vs_rw": -0.09008368380959264
+  },
+  "runtime_seconds": 2775.9127757549286
+}

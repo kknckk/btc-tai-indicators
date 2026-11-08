@@ -17,6 +17,7 @@ import pandas as pd
 
 from evaluation import metrics as M
 from evaluation.dm_test import average_rank, dm_matrix, dm_test
+from evaluation.backtest import buy_hold_position, vol_target_position
 from evaluation.walk_forward import run_walk_forward, sign_position, summarize
 from experiments.baselines import GarchVol, HarRV, NaiveRW, XGBForecaster
 from experiments.config import ROOT, load_config
@@ -28,14 +29,12 @@ MODELS = ["naive", "har_rv", "garch", "xgboost"]
 
 
 def _buy_hold(pred, vol=None):
-    return pd.Series(1.0, index=pred.index)
+    return buy_hold_position(pred, vol)
 
 
 def _vol_target(cfg):
-    def fn(pred, vol):
-        sigma_ann = np.sqrt(vol * cfg["annualization"])
-        return (cfg["vol_target"]["annual_vol"] / sigma_ann).clip(0, cfg["vol_target"]["max_leverage"])
-    return fn
+    vt = cfg["vol_target"]
+    return vol_target_position(vt["annual_vol"], vt["max_leverage"], cfg["annualization"])
 
 
 def _clean(o):
