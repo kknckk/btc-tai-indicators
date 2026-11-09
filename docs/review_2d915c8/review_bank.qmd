@@ -152,6 +152,51 @@ zbudował się dopiero po poprawkach ścieżek i tabeli.
 | Raport Quarto | nie budował się, liczby z kosmosu | buduje się, liczby odtwarzalne z JSON |
 | Odtwarzalność baselines | założenie | potwierdzona rerunem (identyczne liczby) |
 
+# Pełna lista modeli z zlecenia vs faktyczna realizacja
+
+Zlecenie (mail Działu Wewnętrznego z 05.11.2026) wymienia **13 bloków**
+(targetów) z konkretnymi rodzinami modeli „do przetestowania i przegrania
+do Banku". Poniżej pełna lista z uczciwym stanem po obu stronach:
+raport SGH zad. 1.4 (30.10.2026) i repozytorium BTC-TAI na 09.11.2026.
+OZNACZENIA: **tak** = policzone i opisane liczbowo; **część** = część rodzin
+albo inne zadanie; **nie** = brak; u nas dodatkowo rozróżniam kod od wyników.
+
+| # | Target i modele z listy | Raport SGH zad. 1.4 | BTC-TAI (kod / wynik) |
+|---|---|---|---|
+| 1 | **Stopa NBP** — I: reguła Taylora, liniowe forward-looking, ordered logit/probit; II: VAR, BVAR, SVAR, oczekiwania i komunikacja, RF, GB, NLP | **część** — ARIMA/VAR/BVAR/ordered są; brak: Taylor, SVAR, oczekiwania, RF/GB, NLP | kod wszystko; **wyniki:** tier I (Taylor, forward, logit/probit) i tier II (VAR, BVAR, oczekiwania, RF, GB); SVAR/NLP w kolejce GPU (09.11) |
+| 2 | **Obligacje 2/5/7/10Y** — I: Nelson-Siegel, Svensson, Diebold-Li; II: PCA czynników, VAR/BVAR/VARX, makrofinansowe, AFNS, PCA-LSTM, LSTM | **część** — estymacja krzywej DNS + forecasting czynników (AR/VAR/Ridge/PLS/drzewa/PCA); brak NS/Svensson/DL jako modeli prognostycznych, brak AFNS/PCA-LSTM | kod wszystko (TRD-34/35); wyniki: brak (dane MF/SPW wymagają licencji) |
+| 3 | **Kredyty konsumpcyjne** — I: ARDL, ECM, regresje dynamiczne, logit/scorecard; II: VAR, BVAR, czynnikowe, FCI, LASSO, ElasticNet, RF, GB, wewnętrzne | **nie** — blok nie istnieje w raporcie | kod wszystko (TRD-36/37); wyniki: brak (dane nbportal do korekty źródła) |
+| 4 | **Kredyty hipoteczne** — I: ARDL, VECM, regresje dynamiczne, mikroekonometryczne; II: VAR, panelowe, kontraktu, RF, GB, LSTM/RNN, wewnętrzne | **nie** | kod wszystko (TRD-38/39); wyniki: brak |
+| 5 | **Kredyty firmowe** — I: ARDL, regresje dynamiczne, bank lending channel; II: VAR, BVAR, ankieta standardów, FCI, bank-firma, LASSO, RF, GB | **nie** | kod wszystko (TRD-40/41); wyniki: brak |
+| 6 | **Depozyty osób prywatnych** — I: ARDL, ECM, regresje dynamiczne; II: VAR, BVAR, portfelowe, segmentacyjne, wewnętrzne, RF, GB, retencji | **nie** | kod wszystko (TRD-42/43); wyniki: brak |
+| 7 | **Aktywa TFI** — I: flow-performance, regresje panelowe/dynamiczne; II: portfelowe, relatywnej atrakcyjności, segmentacyjne, MIDAS, sentymentu, RF, GB | **nie** | kod wszystko (TRD-44/45); wyniki: brak (IZFiA/Analizy.pl — dane płatne) |
+| 8 | **EUR/PLN, USD/PLN** — I: PatchTST, Stacking (XGB+ARIMA+BiLSTM/GRU), PSO-LSTM; II: VMD-CNN-BiLSTM, Anomaly Transformer z IsolationForest, TFT | **część** — VAR/BVAR/TFT/XGBoost/LSTM; brak wymienionych tier I i AAT/VMD | kod wszystko (TRD-46..49); wyniki: brak (GPU/kolejka) |
+| 9 | **WIG20** — I: GARCH/EGARCH/GJR, event study; II: HAR-RV, realized vol, czynniki zewn., stochastic vol, sentyment, RF, GB | **część** — ARIMA + EGARCH; brak event study, SV, sentymentu | kod wszystko (TRD-50/51); wyniki: brak |
+| 10 | **Pszenica** — I: LSTM, ARIMA, XGBoost; II: SARIMA-LSTM, FEDformer, GWRFR | **nie** — raport nie obejmuje pszenicy | kod wszystko (TRD-52/53); wyniki: brak |
+| 11 | **Ropa** — I: LSTM-SVR, XGBoost, GARCH-MIDAS; II: EMD, stacking, sparse autoencoders | **część** — ARIMA/EGARCH + niedokończone VMD+XGBoost; brak pozostałych | kod wszystko (TRD-54/55); wyniki: brak |
+| 12 | **Złoto** — I: LSTM, GARCH, XGBoost; II: TimeGPT, VAR-LSTM, TVP-VAR | **część** — LSTM/XGBoost/EGARCH; brak TimeGPT/VAR-LSTM/TVP-VAR | kod wszystko (TRD-56/57); wyniki: brak |
+| 13 | **Bitcoin** — I: BiLSTM, XGBoost; II: LSTM, TFT, SVM, HellFormer | **część** — SVR/TFT/XGBoost/PatchTST/LSTM na danych do 03.2025; brak BiLSTM/HellFormer | kod wszystko; **wyniki:** XGBoost + SVM (CPU, na danych do 06.2026); LSTM/TFT/BiLSTM/HellFormer liczą się na GPU w trakcie pisania |
+
+**Bilans:** z 13 bloków zlecenia raport SGH zrealizował **0 w pełni, 7 częściowo,
+6 nie zrealizował wcale** (wszystkie trzy kredyty, depozyty, TFI, pszenica).
+Uwaga symetryczna: nasze wyniki też są częściowe — mamy liczby dla stopy NBP
+i bitcoina, reszta czeka na dane lub GPU. Różnica: rozliczamy się z tej samej
+listy, jawne, z kontrolą przecieku i testami istotności.
+
+# Czego w raporcie SGH nie ma: odniesienie do literatury
+
+Raport zad. 1.4 **nie analizuje ani nie porównuje się z wynikami znanymi
+z literatury dziedziny**. Nie ma sekcji przeglądowej, nie ma cytowań wyników
+z opublikowanych prac (np. dotyczących prognozowania BTC, stopy banku
+centralnego modelami ordered, czy prognoz krzywej rentowności), nie ma
+kotwicenia liczb w opublikowanych porównywaniach. Każda rodzina modeli
+z listy ma w literaturze znane zakresy wyników — bez odniesienia do nich
+nie da się rozstrzygnąć, czy wynik SGH jest „zgodny z oczekiwaniami
+dziedziny", czy symptomem błędu implementacji. Nasze podejście (odtwarzanie
+znanych benchmarków przed dokładaniem nowych modeli) robi dokładnie to
+kotwiczenie — i to jest pozycja, którą powinniśmy zgłosić PKO jako standard
+oceny następnego etapu.
+
 # Co z tego wynika dla współpracy
 
 1. **Nie kupować wyników SGH „z rankingiem".** Jeżeli Bank chce porównać nasze
