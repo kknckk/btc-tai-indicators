@@ -272,6 +272,42 @@ i propozycję — nie tylko krytykę.
 | §7.3, tab. 11 | BA 96,9% kierunku decyzji RPP | 17 prognoz, 1 zmiana stopy, brak opóźnień publikacji CPI — kluczowa liczba bez warunków wiarygodności | Macierz pomyłek + Macro-F1 eksponowane równo z BA (Macro-F1 = 65,6%); cechy z dat publikacji |
 | całość | Brak odniesienia do literatury dziedziny | Nie da się odróżnić wyniku zgodnego z dziedziną od artefaktu implementacji | Rozdział kotwiczący: znane zakresy (np. prognozy BTC i RW; modele koniunktury dla stopy; DNS/AFNS dla krzywej) + odwołania do źródeł |
 
+## §7.4.5–7.4.7 (obligacje) — „najsilniejszy wynik" ma test, ale nie zdjętą selekcję
+
+Dla uczciwości: zdanie „Najsilniejszy wynik uzyskano na horyzoncie 250 dni
+roboczych" **nie jest gołosłowne** — §7.4 deklaruje badanie istotności estymatorem
+HAC i bootstrapm blokowym (5000 replikacji), a tab. 12 precyzuje, że β1 (Ridge
++ filtr potwierdzenia, +36,3% vs RW) jest „statystycznie najlepiej potwierdzonym
+wynikiem". „Najsilniejszy" = największa względna poprawa błędu względem
+Random Walk. To lepiej niż w części BTC. Pozostają jednak cztery zastrzeżenia:
+
+1. **Selekcja post-hoc.** „Najsilniejszy" wybieramy po przeliczeniu wielu
+   wariantów (czynnik × model × horyzont × „filtr potwierdzenia") — szczytowa
+   liczba z przesianego zbioru jest systematycznie zawyżona (winner's curse).
+   Raport sam to de facto przyznaje: „okres out-of-sample był również
+   wykorzystywany podczas rozwoju architektury i selekcji wariantów" (§7.4.7).
+   Konsekwencja: test trzeba prowadzić po selekcji z korektą na liczbę
+   przesianych wariantów (np. Romano-Wolf / MCS po pełnym zbiorze kandydatów),
+   inaczej szczytowe p-wartości nie znaczą tego, co czytelnik myśli.
+2. **Horyzont 250 dni roboczych.** Przy dziennym kroku cele nakładają się na
+   249/250 — błędy są bardzo mocno zależne; HAC daje poprawną wariancję
+   długookresową tylko przy paśmie tego rzędu, a raport nie dokumentuje
+   doboru pasma HAC ani długości bloku bootstrapu względem h=250.
+3. **Przeniesienie na ceny obligacji jest graniczne.** Nawet w raporcie:
+   poprawa czynników β1/β2 jest „statystycznie najmocniejsza", ale poprawa
+   rekonstruowanej krzywej i cen — „słabsza lub graniczna" przy 5%. Dla banku
+   liczy się cena/ryzyko, nie sama β1 — wynik należy komunikować na poziomie
+   cen, a tam jest graniczny.
+4. **Mniejsza próba dla tenorów >10Y** potraktowana jako „diagnostyka
+   ekstrapolacji" — poprawne skądinąd postanowienie, ale oznacza, że
+   tabela zbiorcza (§7.9, tab. 23) +9,7% dla pełnej krzywej nie powinna być
+   czytana jako wynik dla całej krzywej.
+
+Propozycja redakcyjna dla SGH: w §7.4.5 dodać jedno zdanie o liczbie
+przesianych konfiguracji, z których wybrano „najsilniejszy" wynik, oraz
+p-wartość skorygowaną o tę selekcję — bez tego liczba 36,3% jest reklamą
+szczytowa, a nie estymacją.
+
 ## Co raport robi dobrze (dla symetrii)
 
 Kontrakt wdrożeniowy `anchor` + rekonstrukcja poziomu w grafie ONNX (§6.1-6.2)
