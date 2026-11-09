@@ -148,6 +148,10 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
             res_h[m]["skill_vs_naive"] = float(1.0 - mse_m / mse_nv) if mse_nv and mse_nv > 0 else None
         hs = str(h)
         out["horizons"][hs] = res_h
+        # checkpoint po horyzoncie — spot/preemption nie zjada godzin obliczen
+        (RESULTS / "sgh_bitcoin_tier2.partial.json").write_text(
+            json.dumps(_clean(out), indent=2, ensure_ascii=False), encoding="utf-8"
+        )
         t1_name, t1_skill = _best_tier1_skill(hs)
         best_t2, best_t2_skill = None, None
         for m in models:

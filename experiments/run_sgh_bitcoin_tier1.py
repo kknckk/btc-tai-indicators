@@ -127,6 +127,10 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
             res_h[m]["skill_vs_rw"] = float(1.0 - mse_m / mse_rw) if mse_rw and mse_rw > 0 else None
             res_h[m]["skill_vs_naive"] = float(1.0 - mse_m / mse_nv) if mse_nv and mse_nv > 0 else None
         out["horizons"][str(h)] = res_h
+        # checkpoint po horyzoncie — spot/preemption nie zjada godzin obliczen
+        (RESULTS / f"sgh_bitcoin_tier1.partial.json").write_text(
+            json.dumps(_clean(out), indent=2, ensure_ascii=False), encoding="utf-8"
+        )
     return out
 
 

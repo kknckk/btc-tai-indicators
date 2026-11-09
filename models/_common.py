@@ -109,7 +109,7 @@ class TrainConfig:
     max_epochs: int = 80
     patience: int = 10
     use_amp: bool = False
-    device: str = "cpu"
+    device: str = "auto"  # "auto" = CUDA gdy dostepne, inaczej CPU
 
 
 def train_loop(
@@ -128,7 +128,10 @@ def train_loop(
     available and `cfg.use_amp` is set; otherwise trains in plain fp32
     on CPU.
     """
-    device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
+    _dev = cfg.device
+    if _dev == "auto":
+        _dev = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(_dev if (_dev != "cuda" or torch.cuda.is_available()) else "cpu")
     model.to(device)
 
     train_ds = TensorDataset(

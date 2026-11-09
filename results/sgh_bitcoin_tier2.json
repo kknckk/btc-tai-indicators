@@ -63,6 +63,174 @@
         },
         "skill_vs_rw": -1296.4557466090087,
         "skill_vs_naive": -672.279884448999
+      },
+      "lstm": {
+        "metrics": {
+          "n_obs": 4787,
+          "start": "2013-04-14",
+          "end": "2026-05-22",
+          "point": {
+            "rmse": 1065.1686451067278,
+            "mae": 519.8546476284293,
+            "mape_price_pct": 2.4448414366928706,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 1134584.242518502,
+            "mse_rw": 1134584.242518502,
+            "mse_naive": 2186420.357222434
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.0714496341281845,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7819795826807862,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            },
+            "10bps": {
+              "sharpe": 1.0713309689549275,
+              "max_dd": -0.8452439398750756,
+              "ann_return": 0.7819033345086532,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            },
+            "20bps": {
+              "sharpe": 1.0712121537808035,
+              "max_dd": -0.8452439398750761,
+              "ann_return": 0.7818270863365204,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            }
+          }
+        },
+        "n_folds": 160,
+        "first_test": "2013-04-14",
+        "last_test": "2026-05-22",
+        "runtime_s": 1054.0,
+        "dm_mse_vs_naive": {
+          "stat": -13.211859000342276,
+          "p": 3.608911445420945e-39
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.48107680265114006
+      },
+      "tft": {
+        "metrics": {
+          "n_obs": 4787,
+          "start": "2013-04-14",
+          "end": "2026-05-22",
+          "point": {
+            "rmse": 1065.1686451067278,
+            "mae": 519.8546476284293,
+            "mape_price_pct": 2.4448414366928706,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 1134584.242518502,
+            "mse_rw": 1134584.242518502,
+            "mse_naive": 2186420.357222434
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.0714496341281845,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7819795826807862,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            },
+            "10bps": {
+              "sharpe": 1.0713309689549275,
+              "max_dd": -0.8452439398750756,
+              "ann_return": 0.7819033345086532,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            },
+            "20bps": {
+              "sharpe": 1.0712121537808035,
+              "max_dd": -0.8452439398750761,
+              "ann_return": 0.7818270863365204,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            }
+          }
+        },
+        "n_folds": 160,
+        "first_test": "2013-04-14",
+        "last_test": "2026-05-22",
+        "runtime_s": 851.9,
+        "dm_mse_vs_naive": {
+          "stat": -13.211859000342276,
+          "p": 3.608911445420945e-39
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.48107680265114006
+      },
+      "hellformer": {
+        "metrics": {
+          "n_obs": 4787,
+          "start": "2013-04-14",
+          "end": "2026-05-22",
+          "point": {
+            "rmse": 1065.1686451067278,
+            "mae": 519.8546476284293,
+            "mape_price_pct": 2.4448414366928706,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 1134584.242518502,
+            "mse_rw": 1134584.242518502,
+            "mse_naive": 2186420.357222434
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.0714496341281845,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7819795826807862,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            },
+            "10bps": {
+              "sharpe": 1.0713309689549275,
+              "max_dd": -0.8452439398750756,
+              "ann_return": 0.7819033345086532,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            },
+            "20bps": {
+              "sharpe": 1.0712121537808035,
+              "max_dd": -0.8452439398750761,
+              "ann_return": 0.7818270863365204,
+              "turnover_ann": 0.07624817213285982,
+              "hit_rate": 0.5272613327762691
+            }
+          }
+        },
+        "n_folds": 160,
+        "first_test": "2013-04-14",
+        "last_test": "2026-05-22",
+        "runtime_s": 1621.0,
+        "dm_mse_vs_naive": {
+          "stat": -13.211859000342276,
+          "p": 3.608911445420945e-39
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.48107680265114006
       }
     },
     "7": {
@@ -121,6 +289,174 @@
         },
         "skill_vs_rw": -193.78506381930598,
         "skill_vs_naive": -168.5605509108174
+      },
+      "lstm": {
+        "metrics": {
+          "n_obs": 4775,
+          "start": "2013-04-20",
+          "end": "2026-05-16",
+          "point": {
+            "rmse": 2752.6518123272112,
+            "mae": 1437.880073055579,
+            "mape_price_pct": 7.014224185688267,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 7577091.99990828,
+            "mse_rw": 7577091.99990828,
+            "mse_naive": 8704290.832029428
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.0415258402449956,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7498418005604478,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            },
+            "10bps": {
+              "sharpe": 1.041407621336356,
+              "max_dd": -0.8452439398750756,
+              "ann_return": 0.7497653607698718,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            },
+            "20bps": {
+              "sharpe": 1.0412892517437897,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7496889209792957,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            }
+          }
+        },
+        "n_folds": 160,
+        "first_test": "2013-04-20",
+        "last_test": "2026-05-16",
+        "runtime_s": 1081.7,
+        "dm_mse_vs_naive": {
+          "stat": -5.656391673775158,
+          "p": 1.6360131417920154e-08
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.12949921525753283
+      },
+      "tft": {
+        "metrics": {
+          "n_obs": 4775,
+          "start": "2013-04-20",
+          "end": "2026-05-16",
+          "point": {
+            "rmse": 2752.6518123272112,
+            "mae": 1437.880073055579,
+            "mape_price_pct": 7.014224185688267,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 7577091.99990828,
+            "mse_rw": 7577091.99990828,
+            "mse_naive": 8704290.832029428
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.0415258402449956,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7498418005604478,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            },
+            "10bps": {
+              "sharpe": 1.041407621336356,
+              "max_dd": -0.8452439398750756,
+              "ann_return": 0.7497653607698718,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            },
+            "20bps": {
+              "sharpe": 1.0412892517437897,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7496889209792957,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            }
+          }
+        },
+        "n_folds": 160,
+        "first_test": "2013-04-20",
+        "last_test": "2026-05-16",
+        "runtime_s": 713.9,
+        "dm_mse_vs_naive": {
+          "stat": -5.656391673775158,
+          "p": 1.6360131417920154e-08
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.12949921525753283
+      },
+      "hellformer": {
+        "metrics": {
+          "n_obs": 4775,
+          "start": "2013-04-20",
+          "end": "2026-05-16",
+          "point": {
+            "rmse": 2752.6518123272112,
+            "mae": 1437.880073055579,
+            "mape_price_pct": 7.014224185688267,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 7577091.99990828,
+            "mse_rw": 7577091.99990828,
+            "mse_naive": 8704290.832029428
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.0415258402449956,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7498418005604478,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            },
+            "10bps": {
+              "sharpe": 1.041407621336356,
+              "max_dd": -0.8452439398750756,
+              "ann_return": 0.7497653607698718,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            },
+            "20bps": {
+              "sharpe": 1.0412892517437897,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7496889209792957,
+              "turnover_ann": 0.07643979057591622,
+              "hit_rate": 0.5271204188481675
+            }
+          }
+        },
+        "n_folds": 160,
+        "first_test": "2013-04-20",
+        "last_test": "2026-05-16",
+        "runtime_s": 1539.2,
+        "dm_mse_vs_naive": {
+          "stat": -5.656391673775158,
+          "p": 1.6360131417920154e-08
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.12949921525753283
       }
     },
     "30": {
@@ -179,30 +515,198 @@
         },
         "skill_vs_rw": -40.90007412816225,
         "skill_vs_naive": -39.30381365234178
+      },
+      "lstm": {
+        "metrics": {
+          "n_obs": 4729,
+          "start": "2013-05-13",
+          "end": "2026-04-23",
+          "point": {
+            "rmse": 5963.995619595863,
+            "mae": 3247.2955116320186,
+            "mape_price_pct": 15.978053768844411,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 35569243.750558645,
+            "mse_rw": 35569243.750558645,
+            "mse_naive": 36977988.30370696
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.059308960283198,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7586167896011452,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            },
+            "10bps": {
+              "sharpe": 1.0591878189295305,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7585396062642875,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            },
+            "20bps": {
+              "sharpe": 1.0590665214246986,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7584624229274298,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            }
+          }
+        },
+        "n_folds": 158,
+        "first_test": "2013-05-13",
+        "last_test": "2026-04-23",
+        "runtime_s": 980.5,
+        "dm_mse_vs_naive": {
+          "stat": -3.8346404267808714,
+          "p": 0.00012738437179337102
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.03809684133106539
+      },
+      "tft": {
+        "metrics": {
+          "n_obs": 4729,
+          "start": "2013-05-13",
+          "end": "2026-04-23",
+          "point": {
+            "rmse": 5963.995619595863,
+            "mae": 3247.2955116320186,
+            "mape_price_pct": 15.978053768844411,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 35569243.750558645,
+            "mse_rw": 35569243.750558645,
+            "mse_naive": 36977988.30370696
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.059308960283198,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7586167896011452,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            },
+            "10bps": {
+              "sharpe": 1.0591878189295305,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7585396062642875,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            },
+            "20bps": {
+              "sharpe": 1.0590665214246986,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7584624229274298,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            }
+          }
+        },
+        "n_folds": 158,
+        "first_test": "2013-05-13",
+        "last_test": "2026-04-23",
+        "runtime_s": 822.7,
+        "dm_mse_vs_naive": {
+          "stat": -3.8346404267808714,
+          "p": 0.00012738437179337102
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.03809684133106539
+      },
+      "hellformer": {
+        "metrics": {
+          "n_obs": 4729,
+          "start": "2013-05-13",
+          "end": "2026-04-23",
+          "point": {
+            "rmse": 5963.995619595863,
+            "mae": 3247.2955116320186,
+            "mape_price_pct": 15.978053768844411,
+            "r2_oos_vs_rw": 0.0,
+            "dir_acc": null
+          },
+          "vs_benchmarks": {
+            "mse_model": 35569243.750558645,
+            "mse_rw": 35569243.750558645,
+            "mse_naive": 36977988.30370696
+          },
+          "economic": {
+            "0bps": {
+              "sharpe": 1.059308960283198,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7586167896011452,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            },
+            "10bps": {
+              "sharpe": 1.0591878189295305,
+              "max_dd": -0.8452439398750755,
+              "ann_return": 0.7585396062642875,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            },
+            "20bps": {
+              "sharpe": 1.0590665214246986,
+              "max_dd": -0.8452439398750757,
+              "ann_return": 0.7584624229274298,
+              "turnover_ann": 0.07718333685768661,
+              "hit_rate": 0.5275956861915838
+            }
+          }
+        },
+        "n_folds": 158,
+        "first_test": "2013-05-13",
+        "last_test": "2026-04-23",
+        "runtime_s": 1365.4,
+        "dm_mse_vs_naive": {
+          "stat": -3.8346404267808714,
+          "p": 0.00012738437179337102
+        },
+        "dm_mse_vs_rw": {
+          "stat": null,
+          "p": null
+        },
+        "skill_vs_rw": 0.0,
+        "skill_vs_naive": 0.03809684133106539
       }
     }
   },
   "tier1_comparison": {
     "1": {
-      "best_tier1_model": "xgboost",
-      "best_tier1_skill_vs_naive": -152.66986285997518,
-      "best_tier2_model": "svm",
-      "best_tier2_skill_vs_naive": -672.279884448999,
-      "tier2_beats_tier1_skill": false
+      "best_tier1_model": null,
+      "best_tier1_skill_vs_naive": null,
+      "best_tier2_model": "lstm",
+      "best_tier2_skill_vs_naive": 0.48107680265114006,
+      "tier2_beats_tier1_skill": null
     },
     "7": {
-      "best_tier1_model": "xgboost",
-      "best_tier1_skill_vs_naive": -55.500526735530755,
-      "best_tier2_model": "svm",
-      "best_tier2_skill_vs_naive": -168.5605509108174,
-      "tier2_beats_tier1_skill": false
+      "best_tier1_model": null,
+      "best_tier1_skill_vs_naive": null,
+      "best_tier2_model": "lstm",
+      "best_tier2_skill_vs_naive": 0.12949921525753283,
+      "tier2_beats_tier1_skill": null
     },
     "30": {
-      "best_tier1_model": "xgboost",
-      "best_tier1_skill_vs_naive": -20.085305026922114,
-      "best_tier2_model": "svm",
-      "best_tier2_skill_vs_naive": -39.30381365234178,
-      "tier2_beats_tier1_skill": false
+      "best_tier1_model": null,
+      "best_tier1_skill_vs_naive": null,
+      "best_tier2_model": "lstm",
+      "best_tier2_skill_vs_naive": 0.03809684133106539,
+      "tier2_beats_tier1_skill": null
     }
   }
 }
