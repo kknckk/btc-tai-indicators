@@ -569,11 +569,24 @@ modelować na zwrotach, nie na poziomie — dokładnie tak, jak przewiduje
 kontrakt wdrożeniowy Banku (model przewiduje zmianę, poziom wynika z
 aktualnej ceny).
 
-**Bitcoin — wynik sieci BiLSTM.** BiLSTM (z tier I listy, liczony na GPU)
-na wszystkich trzech horyzontach osiąga dokładnie ten sam wynik co reguła
-naiwna (skill 0,0000) — sieć uczy się powielać wczorajszą cenę. To
-kolejna, niezależna linia dowodu, że na poziomie ceny nie ma wykrywalnej
-przewagi.
+**Bitcoin — wynik sieci BiLSTM (i pozostałych sieci).** BiLSTM (z tier I
+listy, liczony na GPU) na wszystkich trzech horyzontach osiąga dokładnie
+ten sam wynik co reguła naiwna (skill 0,0000) — sieć uczy się powielać
+wczorajszą cenę. To samo pokazują pozostałe trzy architektury z listy:
+LSTM, TFT i HellFormer — wszystkie zbiegają do reguły naiwnej (skill
+0,0000 na wszystkich horyzontach). Cztery niezależne architektury
+sieciowe dają identyczną odpowiedź: na poziomie ceny optymum leży
+dokładnie w „jutro = dziś". To druga, niezależna od XGBoost/SVM linia
+dowodu, że poziom nie jest zadaniem z wykrywalną przewagą.
+
+**Stopa NBP — SVAR i NLP komunikatów RPP (domknięcie tier II).**
+SVAR jest wyraźnie słabszy od reguły naiwnej na wszystkich horyzontach
+(skill −109% / −256% / −698% dla h=1/3/12 miesięcy). Model NLP na
+tekstach komunikatów RPP jest słabszy na krótkich horyzontach
+(−33 348% na miesiącu, −4 487% na kwartale) i zbliża się do reguły
+naiwnej na roku (−260%) — wciąż gorszy. Czyli pełny obraz tier II:
+poza prostymi modelami ordered nic nie bije reguły naiwnej, a im więcej
+złożoności, tym gorzej — powtórzenie wzorca z literatury makro.
 
 **Bitcoin — benchmarki i ocena ekonomiczna.** Na zadaniu zwrotów
 (właściwym) cztery modele bazowe (reguła naiwna, HAR-RV, GJR-GARCH,
@@ -587,9 +600,10 @@ bez treningu na ok. 300 punktach startowych, również przegrywają z regułą
 naiwną (skill od −3,5% do −15,1%), a ich przedziały ufności przed naszą
 kalibracją były źle ustawione (pokrycie 49–87% przy deklarowanych 80%).
 
-**W kolejce** (maszyna liczy w trakcie pisania): LSTM, TFT i HellFormer dla
-bitcoina oraz SVAR i NLP komunikatów RPP dla stopy NBP. Wyniki będą
-dopisane po zakończeniu i przejściu przez testy.
+**GPU domknięte** (wyniki w tabelach): cztery sieci bitcoinowe (BiLSTM,
+LSTM, TFT, HellFormer) i modele NBP tier II (SVAR, NLP komunikatów RPP).
+Pozostałe w kolejce: tylko obszary wymagające danych zewnętrznych
+(obligacje — licencje, kredyty — korekta źródła, TFI — dane płatne).
 
 ## Wytrenowane i ocenione modele — dokładna lista
 
@@ -598,14 +612,13 @@ dopisane po zakończeniu i przejściu przez testy.
 | Bitcoin, log-zwrot, benchmarki | reguła naiwna, HAR-RV, GJR-GARCH, XGBoost | ~160 powtórzeń symulacji „jak na żywo", okno 2013–2026, testy DM + backtest z kosztami 10/20 pb; wynik: modele nierozróżnialne z naiwną (h=1/7), XGBoost gorszy (h=30), po kosztach wygrywa kup-i-trzymaj |
 | Bitcoin, sieci | ModernTCN (235 tys. parametrów), PatchTST (101 tys.), 3 ziarna | wynik poniżej reguły naiwnej (R² poza próbą od −0,28 do −0,85) |
 | Bitcoin, modele fundamentowe | Chronos-Bolt, TimesFM 2.5 (zero-shot, bez treningu) | ~300 punktów startowych; wynik poniżej naiwnej o 3,5–15,1%; przedziały ufności źle skalibrowane przed naszą poprawką |
-| Bitcoin, poziom (eksperyment kontrolny) | XGBoost, SVM, BiLSTM | katastrofalnie słabe lub tożsame z naiwną (BiLSTM: 0,0000) — potwierdzenie, że poziom nie jest właściwym celem |
+| Bitcoin, poziom (eksperyment kontrolny) | XGBoost, SVM, BiLSTM, LSTM, TFT, HellFormer | drzewiaste katastrofalnie słabe; wszystkie cztery sieci (BiLSTM, LSTM, TFT, HellFormer) tożsame z naiwną (skill 0,0000 na h=1/7/30) — potwierdzenie, że poziom nie jest właściwym celem |
 | Stopa NBP, tier I | reguła Taylora, liniowy wyprzedzający, ordered logit, ordered probit | 312 obserwacji miesięcznych, ~40 powtórzeń; ordered probit +14,4% vs naiwna (h=1) |
-| Stopa NBP, tier II | VAR, BVAR (prior Minnesota), oczekiwania+komunikacja, las losowy, gradient boosting | wszystkie ≤ reguła naiwna na krótkich horyzontach |
+| Stopa NBP, tier II | VAR, BVAR (prior Minnesota), oczekiwania+komunikacja, las losowy, gradient boosting, SVAR, NLP komunikatów RPP | wszystkie ≤ reguła naiwna na krótkich horyzontach; SVAR i NLP gorsze wszędzie |
 
-W trakcie liczenia na GPU (maszyna pracuje równolegle z pisaniem tego
-dokumentu): LSTM / TFT / HellFormer dla bitcoina, SVAR i NLP dla NBP.
-W kodzie gotowe, bez przebiegów: pozostałe obszary listy (obligacje,
-kredyty ×3, depozyty, TFI, EUR/USD-PLN, WIG20, pszenica, ropa, złoto).
+Pozostałe obszary listy (obligacje, kredyty ×3, depozyty, TFI, EUR/USD-PLN,
+WIG20, pszenica, ropa, złoto): kod gotowy, oczekują na dane albo na
+następne okno obliczeniowe.
 
 ## Ograniczenia własnej pracy — uczciwie
 
