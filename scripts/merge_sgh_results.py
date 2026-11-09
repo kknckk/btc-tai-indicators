@@ -40,8 +40,8 @@ def recompute_tier1_comparison(out: dict, runner) -> None:
     Kopiowanie tego bloku z pliku czastkowego (np. GPU z 3 z 4 modeli)
     falszowaloby wniosek 'nailepszy model tier II' — patrz review f4e01bf.
     """
-    if "tier1_comparison" not in out and not hasattr(runner, "_best_tier1_skill"):
-        return
+    if not hasattr(runner, "_best_tier1_skill"):
+        return  # runner nie ma pojecia o tier1 — nie ma co przeliczac
     comp: dict = {}
     import math
 
