@@ -1,8 +1,6 @@
 ---
-title: "Modele prognostyczne dla rynków — recenzja prac i stan przygotowania"
-subtitle: "Odpowiedź na raport SGH (zadanie 1.4, projekt FENG) i przegląd własnych wyników BTC-TAI"
-author: "Krzysztof Kanciak"
-date: "2026-11-08"
+title: "Modele prognostyczne"
+subtitle: "recenzja raportu SGH (zadanie 1.4) i opis własnych wyników"
 lang: pl
 format:
   docx:
@@ -13,69 +11,48 @@ format:
     theme: cosmo
 ---
 
-# O czym jest ten dokument
+# Najważniejsze
 
-SGH zbudowało dla Banku i przetestowało ok. 190 wariantów modeli prognostycznych
-(waluty, stopa NBP, obligacje, WIG20, ropa, złoto, bitcoin) i opisało to w raporcie
-z 30.10.2026. Równolegle rozwijamy własny system prognoz (projekt BTC-TAI),
-w którym — dla odmiany od podejścia SGH — każdy wynik musi przejść przez automatyczny
-harness sprawdzający, czy model nie „podgląda przyszłości".
-
-Ten dokument odpowiada na trzy pytania:
-
-1. Co z raportu SGH naprawdę wynika, a czego się z niego dowiedzieć nie da?
-2. Czy nasze własne modele i procedury spełniają standard, który sami postulowaliśmy SGH?
-3. Co trzeba zrobić, zanim cokolwiek pokażemy jako „gotowe"?
-
-Wszystkie liczby w tekście są odtwarzalne z repozytorium `kknckk/btc-tai-indicators`
-(commit `2d915c8` i poprawki do niego). Pojęcia statystyczne wyjaśniamy w słowniku
-na końcu, na pierwszych stronach używamy ich oszczędnie.
-
-# Najważniejsze w 5 punktach
-
-1. **Raport SGH udowadnia, że potok technologiczny działa** (dane wchodzą, modele się
-   liczą, Bank ma sposób ich odbioru). **Nie udowadnia, że dowolny model przewiduje
-   rynek lepiej niż reguła „jutro będzie jak dziś".** Najmocniejszy wynik dotyczy
-   prognozowania zmienności (nie cen), i to wobec bardzo słabego punktu odniesienia.
-2. **Wynik dla bitcoina (+1,8% błędu mniej od reguły naiwnej na 30 dni) pochodzi
-   z danych kończących się 31.03.2025** — ponad półtora roku przed datą raportu.
-   Nie wiadomo, czy przetrwał zmianę koniunktury. Raport tego nie sprawdził.
-3. **Nasz własny, świeżo zbudowany mechanizm oceny (walk-forward z blokadą
-   przecieku, testy istotności, koszty transakcyjne) jest mocniejszy niż protokół
-   opisany przez SGH** — ale w momencie tej recenzji sam miał cztery wady, które
-   namierzyliśmy i naprawiliśmy (sekcja D).
-4. **Po kosztach transakcyjnych żaden z naszych modeli bitcoinowych nie bije kup-i-trzymaj**,
+1. Raport SGH wskazuje, że potok technologiczny działa (dane wchodzą, modele się
+   liczą itp.), ale nie udowadnia, że dowolny model przewiduje rynek lepiej niż
+   reguła „jutro będzie jak dziś".
+2. Najmocniejszy wynik dotyczy prognozowania zmienności (nie cen), i to wobec
+   słabego punktu odniesienia.
+3. Wynik dla bitcoina (+1,8% błędu mniej od reguły naiwnej na 30 dni) pochodzi
+   z danych kończących się 31.03.2025. Trudno poweidzieć dlaczego. Może nie
+   przetrwał zmiany koniunktury? Raport tego nie sprawdził.
+4. Mój własny zbudowany mechanizm oceny (walk-forward z blokadą przecieku,
+   testy istotności, koszty transakcyjne) jest mocniejszy niż protokół opisany
+   przez SGH — ale w momencie tej recenzji naprawiam jeszcze wady.
+5. Po kosztach transakcyjnych żaden z modeli bitcoinowych nie bije kup-i-trzymaj,
    a model XGBoost na horyzoncie 30 dni jest obiektywnie gorszy — system testów
-   statystycznych go odrzucił (p=0,006). To wynik negatywny, ale uczciwy
-   i zgodny z literaturą: bitcoin jest bardzo trudny do prognozowania.
-5. **Bloki kredytowe (konsumpcyjne i hipoteczne) nie są wykonane ani przez SGH
-   (brak w raporcie), ani przez nas (kod gotowy, brak liczb).** Jeśli Bank ich
-   potrzebuje w kolejnym etapie, to jest pierwszy punkt do uzupełnienia.
+   statystycznych go odrzucił (p=0,006). To wynik negatywny i zgodny z literaturą -
+   bitcoin jest trudny do prognozowania.
+6. Bloki kredytowe (konsumpcyjne i hipoteczne) nie są wykonane ani przez SGH
+   (brak w raporcie), ani przeze mnie.
 
 # Co raport SGH mówi naprawdę
 
-Raport opisuje duże, głównie udane przedsięwzięcie inżynierskie. Trzy zastrzeżenia
-metryczne, warte pamiętania przy każdej rozmowie o jego wynikach:
+Trzy zastrzeżenia metryczne, warte pamiętania przy każdej rozmowie o jego wynikach:
 
-- **Małe przewagi bez testu istotności.** Z ~190 wariantów wygrywające wypisz-
-  najlepsze mogą być po prostu szczęśliwym rzutem kostką. Raport podaje rankingi
-  bez sprawdzenia, czy różnice są istotne statystycznie. (Analoogia: ktoś rzuca
-  monetą 100 razy, wygrywa 53, i ogłasza, że „ma system".)
-- **Pętla czasowa nie do końca zamknięta.** W części danych (panel miesięczny NBP)
-  modele uczyły się na liczbach, które w dniu prognozy jeszcze nie były publicznie
-  znane (inflacja publikowana jest z opóźnieniem). To pomaga wynikom.
-  Efektowny wynik 96,9% trafności kierunku decyzji RPP oparty jest na zaledwie
-  17 przypadkach, z których tylko jeden zawierał zmianę stopy.
-- **Wygasanie danych.** Część szeregów zewnętrznych kończy się w maju 2026, a test
-  trwa dłużej — modele w tych miejscach korzystają ze „starych wiadomości"
-  ostatnio dostępnej wartości.
+1. Małe albo bardzo przewagi bez testu istotności. Z około 190 wariantów
+   wygrywające najlepsze mogą być po prostu szczęśliwym rzutem kostką.
+   Raport podaje rankingi bez sprawdzenia, czy różnice są istotne statystycznie!
+2. W części danych (panel miesięczny NBP) modele uczyły się na liczbach, które
+   w dniu prognozy jeszcze nie były publicznie znane (inflacja publikowana
+   jest z opóźnieniem). Efektowny wynik 96,9% trafności kierunku decyzji RPP
+   oparty jest na zaledwie 17 przypadkach, z których tylko jeden zawierał zmianę
+   stopy – nieszczęsliwy dobór próby.
+3. Część szeregów zewnętrznych kończy się w maju 2026, a test trwa dłużej —
+   modele w tych miejscach korzystają ze „starych wiadomości" ostatnio dostępnej
+   wartości.
 
 Żadne z tych zastrzeżeń nie dyskwalifikuje raportu jako dokumentacji etapu.
 Wszystkie razem dyskwalifikują go jako podstawę decyzji o wdrożeniu konkretnego modelu.
 
-# Co zbudowaliśmy i sprawdziliśmy u siebie
+# Moje podejście — założenia
 
-Nasz system liczenia prognoze (BTC i 34 planowane serie makro) ma trójwarstwowy
+Mój system liczenia prognoz (BTC i 34 planowane serie makro) ma trójwarstwowy
 kontroler jakości:
 
 1. **Blokada podglądania przyszłości** — każdy model uczony jest wyłącznie na tym,
@@ -141,7 +118,7 @@ z języka R, a tabela podsumowująca TSFM podawała liczby pomieszane między
 horyzontami i uśrednione wartości oznaczone jako wyniki per horyzont. Raport
 zbudował się dopiero po poprawkach ścieżek i tabeli.
 
-## Stan po poprawkach (08.11.2026)
+## Stan po poprawkach
 
 | Obszar | Przed | Po |
 |---|---|---|
@@ -152,190 +129,7 @@ zbudował się dopiero po poprawkach ścieżek i tabeli.
 | Raport Quarto | nie budował się, liczby z kosmosu | buduje się, liczby odtwarzalne z JSON |
 | Odtwarzalność baselines | założenie | potwierdzona rerunem (identyczne liczby) |
 
-# Pełna lista modeli z zlecenia vs faktyczna realizacja
-
-Zlecenie (mail Działu Wewnętrznego z 05.11.2026) wymienia **13 bloków**
-(targetów) z konkretnymi rodzinami modeli „do przetestowania i przegrania
-do Banku". Poniżej pełna lista z uczciwym stanem po obu stronach:
-raport SGH zad. 1.4 (30.10.2026) i repozytorium BTC-TAI na 09.11.2026.
-OZNACZENIA: **tak** = policzone i opisane liczbowo; **część** = część rodzin
-albo inne zadanie; **nie** = brak; u nas dodatkowo rozróżniam kod od wyników.
-
-| # | Target i modele z listy | Raport SGH zad. 1.4 | BTC-TAI (kod / wynik) |
-|---|---|---|---|
-| 1 | **Stopa NBP** — I: reguła Taylora, liniowe forward-looking, ordered logit/probit; II: VAR, BVAR, SVAR, oczekiwania i komunikacja, RF, GB, NLP | **część** — ARIMA/VAR/BVAR/ordered są; brak: Taylor, SVAR, oczekiwania, RF/GB, NLP | kod wszystko; **wyniki:** tier I (Taylor, forward, logit/probit) i tier II (VAR, BVAR, oczekiwania, RF, GB); SVAR/NLP w kolejce GPU (09.11) |
-| 2 | **Obligacje 2/5/7/10Y** — I: Nelson-Siegel, Svensson, Diebold-Li; II: PCA czynników, VAR/BVAR/VARX, makrofinansowe, AFNS, PCA-LSTM, LSTM | **część** — estymacja krzywej DNS + forecasting czynników (AR/VAR/Ridge/PLS/drzewa/PCA); brak NS/Svensson/DL jako modeli prognostycznych, brak AFNS/PCA-LSTM | kod wszystko (TRD-34/35); wyniki: brak (dane MF/SPW wymagają licencji) |
-| 3 | **Kredyty konsumpcyjne** — I: ARDL, ECM, regresje dynamiczne, logit/scorecard; II: VAR, BVAR, czynnikowe, FCI, LASSO, ElasticNet, RF, GB, wewnętrzne | **nie** — blok nie istnieje w raporcie | kod wszystko (TRD-36/37); wyniki: brak (dane nbportal do korekty źródła) |
-| 4 | **Kredyty hipoteczne** — I: ARDL, VECM, regresje dynamiczne, mikroekonometryczne; II: VAR, panelowe, kontraktu, RF, GB, LSTM/RNN, wewnętrzne | **nie** | kod wszystko (TRD-38/39); wyniki: brak |
-| 5 | **Kredyty firmowe** — I: ARDL, regresje dynamiczne, bank lending channel; II: VAR, BVAR, ankieta standardów, FCI, bank-firma, LASSO, RF, GB | **nie** | kod wszystko (TRD-40/41); wyniki: brak |
-| 6 | **Depozyty osób prywatnych** — I: ARDL, ECM, regresje dynamiczne; II: VAR, BVAR, portfelowe, segmentacyjne, wewnętrzne, RF, GB, retencji | **nie** | kod wszystko (TRD-42/43); wyniki: brak |
-| 7 | **Aktywa TFI** — I: flow-performance, regresje panelowe/dynamiczne; II: portfelowe, relatywnej atrakcyjności, segmentacyjne, MIDAS, sentymentu, RF, GB | **nie** | kod wszystko (TRD-44/45); wyniki: brak (IZFiA/Analizy.pl — dane płatne) |
-| 8 | **EUR/PLN, USD/PLN** — I: PatchTST, Stacking (XGB+ARIMA+BiLSTM/GRU), PSO-LSTM; II: VMD-CNN-BiLSTM, Anomaly Transformer z IsolationForest, TFT | **część** — VAR/BVAR/TFT/XGBoost/LSTM; brak wymienionych tier I i AAT/VMD | kod wszystko (TRD-46..49); wyniki: brak (GPU/kolejka) |
-| 9 | **WIG20** — I: GARCH/EGARCH/GJR, event study; II: HAR-RV, realized vol, czynniki zewn., stochastic vol, sentyment, RF, GB | **część** — ARIMA + EGARCH; brak event study, SV, sentymentu | kod wszystko (TRD-50/51); wyniki: brak |
-| 10 | **Pszenica** — I: LSTM, ARIMA, XGBoost; II: SARIMA-LSTM, FEDformer, GWRFR | **nie** — raport nie obejmuje pszenicy | kod wszystko (TRD-52/53); wyniki: brak |
-| 11 | **Ropa** — I: LSTM-SVR, XGBoost, GARCH-MIDAS; II: EMD, stacking, sparse autoencoders | **część** — ARIMA/EGARCH + niedokończone VMD+XGBoost; brak pozostałych | kod wszystko (TRD-54/55); wyniki: brak |
-| 12 | **Złoto** — I: LSTM, GARCH, XGBoost; II: TimeGPT, VAR-LSTM, TVP-VAR | **część** — LSTM/XGBoost/EGARCH; brak TimeGPT/VAR-LSTM/TVP-VAR | kod wszystko (TRD-56/57); wyniki: brak |
-| 13 | **Bitcoin** — I: BiLSTM, XGBoost; II: LSTM, TFT, SVM, HellFormer | **część** — SVR/TFT/XGBoost/PatchTST/LSTM na danych do 03.2025; brak BiLSTM/HellFormer | kod wszystko; **wyniki:** XGBoost + SVM (CPU, na danych do 06.2026); LSTM/TFT/BiLSTM/HellFormer liczą się na GPU w trakcie pisania |
-
-**Bilans:** z 13 bloków zlecenia raport SGH zrealizował **0 w pełni, 7 częściowo,
-6 nie zrealizował wcale** (wszystkie trzy kredyty, depozyty, TFI, pszenica).
-Uwaga symetryczna: nasze wyniki też są częściowe — mamy liczby dla stopy NBP
-i bitcoina, reszta czeka na dane lub GPU. Różnica: rozliczamy się z tej samej
-listy, jawne, z kontrolą przecieku i testami istotności.
-
-# Czego w raporcie SGH nie ma: odniesienie do literatury
-
-Raport zad. 1.4 **nie analizuje ani nie porównuje się z wynikami znanymi
-z literatury dziedziny**. Nie ma sekcji przeglądowej, nie ma cytowań wyników
-z opublikowanych prac (np. dotyczących prognozowania BTC, stopy banku
-centralnego modelami ordered, czy prognoz krzywej rentowności), nie ma
-kotwicenia liczb w opublikowanych porównywaniach. Każda rodzina modeli
-z listy ma w literaturze znane zakresy wyników — bez odniesienia do nich
-nie da się rozstrzygnąć, czy wynik SGH jest „zgodny z oczekiwaniami
-dziedziny", czy symptomem błędu implementacji. Nasze podejście (odtwarzanie
-znanych benchmarków przed dokładaniem nowych modeli) robi dokładnie to
-kotwiczenie — i to jest pozycja, którą powinniśmy zgłosić PKO jako standard
-oceny następnego etapu.
-
-# Co z tego wynika dla współpracy
-
-1. **Nie kupować wyników SGH „z rankingiem".** Jeżeli Bank chce porównać nasze
-   podejście z SGH, jedyny uczciwy sposób to wspólny backtest na tych samych
-   chwilach prognozy, z tym samym stanem wiedzy w dniu prognozy, i parowanym
-   testem różnic. Proponowaliśmy to PKO od początku; nasz harness jest teraz
-   do tego gotowy.
-2. **Nasza przewaga to nie model, tylko dane i procedura.** Mamy świeższe dane
-   bitcoinowe (do 06.2026 vs 03.2025 u SGH) oraz cechy on-chain z kontrolą
-   momentu ich dostępności. Jeżeli ta przewaga nie przełoży się na wynik
-   w uczciwym teście — powiemy to wprost, jak mówimy dziś o XGBoost na h=30.
-3. **Bloki kredytowe wymagają decyzji o danych.** Kredyty konsumpcyjne/hipoteczne
-   czekają na weryfikację źródeł (statystyka monetarna NBP przez nbportal —
-   obecny adres wymaga korekty). Bez pełnych przebiegów walk-forward nie ma
-   czego „przegrać do Banku".
-4. **Decyzja o statusie produkcyjnym dopiero za bramką integracji.** Raport SGH
-   sam to zaznacza: test integracyjny ≠ akceptacja modelu. Nasze modele również
-   są w etapie badawczym — i mają z tego powodu jaśniejszy wynik negatywny niż
-   niejeden wynik dodatni z raportu SGH.
-
-# Uwagi do raportu zad. 1.4 — rozdział po rozdziale
-
-Zestawienie wszystkich uwag z naszej recenzji (w tym tych z wcześniejszych wersji
-tego dokumentu) z odniesieniem do rozdziałów raportu SGH. Każda uwaga ma tezę
-i propozycję — nie tylko krytykę.
-
-## §5.3 (benchmark i metryki) — tu brakuje analizy istotności i obrony wyborów
-
-1. **MAPE jako metryka główna poziomu.** Dla szeregów z wartościami bliskimi zera
-   (stopa referencyjna przy 0,10 w 2020-21) MAPE rozsadza lub nasyca miernik;
-   jest też asymetryczna (inne kary za zawyżenie i zaniżenie). Proponowane:
-   MASE (błąd skalowany błędem reguły naiwnej — Hyndman & Koehler 2006) albo
-   RMSSE jak w zawodach M5; MAPE zostawić pomocniczo.
-2. **Benchmark naiwny ŷ(t+h)=y(t) jest prawidłowym minimum**, ale raport nie uzasadnia,
-   dlaczego nie ma benchmarków konkurencyjnych z literatury: dla zmienności
-   HAR-RV (Corsi 2009) i GARCH(1,1), dla poziomów — dryf i średnia krocząca
-   (a ta ostatnia w naszym harnessie jest osobnym baseline'em i czasem wygrywa).
-3. **Zmienność liczona jako MAE względem kwadratu pojedynczego dziennego zwrotu.**
-   Kwadrat zwrotu jest bardzo głośnym przybliżeniem wariancji warunkowej —
-   ranking modeli jest wobec takiego proxy kruche. Proponowane: funkcja straty
-   QLIKE (odporna na szumnie proxy, Patton 2011) jako miara porównawcza nawet
-   przy braku danych intradziennych.
-4. **Nakładające się cele h=30 przy dziennym kroku** — kolejne prognozy dzielą
-   29/30 okna, więc błędy nie są niezależne. Każde zestawienie „n prognoz" jest
-   sztucznie precyzyjne. Proponowane: testy z korektą (DM z h-1 autokowariancji
-   i poprawką Harvey-Leybourne-Newbold) albo bootstrap blokowy; my te reguły
-   zaimplementowaliśmy — i sami poprawialiśmy własny błąd w tym punkcie (D2).
-5. **Analiza istotności — tak, powinna być tu.** §5.3 opisuje metryki, ale żaden
-   rozdział nie opisuje protokołu decyzji „model A lepszy od B". Proponowany tekst
-   do §5.3: „Dla każdego porównania podajemy test Diebolda-Mariano na parowanych
-   błędach z korektą na autokorelację horyzontu; dla rankingu całego zestawu
-   modeli używamy Model Confidence Set (Hansen-Lunde-Nason) z bootstrap
-   blokowym; przy 190 kombinacjach raportujemy kontrolę wielokrotności."
-6. **Trzy ziarna** modeli losowych to za mało, by ocenić rozrzut — raport sam
-   pokazuje LSTM EUR/PLN z rozstrzałem między ziarnami rzędu setek procent
-   (§7.1). Proponowane: ≥10 ziaren i raportowanie mediany z rozpiętością,
-   albo jeden zamrożony protokół ziaren z jawna notą, że nie ocenia wariancji.
-
-## Decyzje projektowe bez uzasadnienia (i jakie podejście byłoby uzasadnione)
-
-| Gdzie | Decyzja | Problem | Podejście uzasadnione |
-|---|---|---|---|
-| §4.2, tab. 3 | Podział 70/15/15 | Nie ma źródła ani weryfikacji wrażliwości na proporcje; jedno cięcie = jeden reżim w teście | Walk-forward jako podstawowa oś ewaluacji (to mają w §5.1 — należy przenieść ciężar dowodowy tam), cięcie kalibracyjne opisać jako wstępne |
-| §4.2 | Osobna siatka dat per wskaźnik | Rankingi między wskaźnikami porównują modele×okresy, nie modele | Wspólny kalendarz testu per częstotliwość; co najmniej dodatkowe zestawienie na wspólnym najnowszym oknie |
-| §5.2 | Małe ustalone siatki hiperparametrów | Nie wiadomo, skąd wartości siatki; brak analizy wrażliwości | Jednostronnicowa tableca literaturowych wartości startowych + walidacja wrażliwości (np. ±1 poziom siatki) |
-| §5.3 | Benchmarki zmienności: średnia z 5 ostatnich obserwacji | Bez uzasadnienia; niżej niż standard dziedziny | HAR-RV i/lub GARCH(1,1) jako benchmarki obowiązkowe |
-| §5.3 | Proxy zmienności = kwadrat zwrotu | Znane z literatury jako bardzo głośne; bez odnotowania kosztu | QLIKE jako strata rankingowa; nota o ograniczeniu proxy |
-| §5.1 | h=30 dziennie, brak korekty zależności błędów | Przedziały istotności zawyżone | DM-HLN / blokowy bootstrap (my to mamy w `evaluation/`) |
-| §4.1-4.2 | Dane BTC kończą się 31.03.2025 przy raporcie z 30.10.2026 | Decyzja o zakresie bez uzasadnienia ani planu odświeżenia jako bramy wniosków | Zamrożona próba + obowiązkowy test na oknie późniejszym przed wnioskami o przewadze |
-| §6.5/tab. 5-6 | Horyzonty obligacji 91/365 w artefaktach vs 60/250 w eksperymentach lokalnych | Dwie pary horyzontów bez mapowania — nie da się porównać wyników 1:1 | Jeden zestaw horyzontów i jawna tabela decyzji „dlaczego takie" |
-| §6.1/tab. 2 i 5 | Cechy BTC lokalnie (S&P, VIX, DXY, UST10Y, złoto) vs przekazane cechy z `RISK_SCORE` | Dwa różne zestawy cech pod tym samym targetem bez mapy wersji | Manifest wersji cech (nazwa, źródło, timestamp dostępności) — wzorzec `pko-fr` już to przewiduje, trzeba z tego korzystać |
-| §7.8 | Wniosek „SVR/TFT biją naiwną" bez testu | +0,7/+1,8 pkt proc. MAPE na pojedynczym cięciu to hipoteza, nie wynik | DM/MCS na parowanych błędach; raportowanie jako hipoteza do sprawdzenia na świeżych danych |
-| §7.3, tab. 11 | BA 96,9% kierunku decyzji RPP | 17 prognoz, 1 zmiana stopy, brak opóźnień publikacji CPI — kluczowa liczba bez warunków wiarygodności | Macierz pomyłek + Macro-F1 eksponowane równo z BA (Macro-F1 = 65,6%); cechy z dat publikacji |
-| całość | Brak odniesienia do literatury dziedziny | Nie da się odróżnić wyniku zgodnego z dziedziną od artefaktu implementacji | Rozdział kotwiczący: znane zakresy (np. prognozy BTC i RW; modele koniunktury dla stopy; DNS/AFNS dla krzywej) + odwołania do źródeł |
-
-## §7.4.5–7.4.7 (obligacje) — „najsilniejszy wynik" ma test, ale nie zdjętą selekcję
-
-Dla uczciwości: zdanie „Najsilniejszy wynik uzyskano na horyzoncie 250 dni
-roboczych" **nie jest gołosłowne** — §7.4 deklaruje badanie istotności estymatorem
-HAC i bootstrapm blokowym (5000 replikacji), a tab. 12 precyzuje, że β1 (Ridge
-+ filtr potwierdzenia, +36,3% vs RW) jest „statystycznie najlepiej potwierdzonym
-wynikiem". „Najsilniejszy" = największa względna poprawa błędu względem
-Random Walk. To lepiej niż w części BTC. Pozostają jednak cztery zastrzeżenia:
-
-1. **Selekcja post-hoc.** „Najsilniejszy" wybieramy po przeliczeniu wielu
-   wariantów (czynnik × model × horyzont × „filtr potwierdzenia") — szczytowa
-   liczba z przesianego zbioru jest systematycznie zawyżona (winner's curse).
-   Raport sam to de facto przyznaje: „okres out-of-sample był również
-   wykorzystywany podczas rozwoju architektury i selekcji wariantów" (§7.4.7).
-   Konsekwencja: test trzeba prowadzić po selekcji z korektą na liczbę
-   przesianych wariantów (np. Romano-Wolf / MCS po pełnym zbiorze kandydatów),
-   inaczej szczytowe p-wartości nie znaczą tego, co czytelnik myśli.
-2. **Horyzont 250 dni roboczych.** Przy dziennym kroku cele nakładają się na
-   249/250 — błędy są bardzo mocno zależne; HAC daje poprawną wariancję
-   długookresową tylko przy paśmie tego rzędu, a raport nie dokumentuje
-   doboru pasma HAC ani długości bloku bootstrapu względem h=250.
-3. **Przeniesienie na ceny obligacji jest graniczne.** Nawet w raporcie:
-   poprawa czynników β1/β2 jest „statystycznie najmocniejsza", ale poprawa
-   rekonstruowanej krzywej i cen — „słabsza lub graniczna" przy 5%. Dla banku
-   liczy się cena/ryzyko, nie sama β1 — wynik należy komunikować na poziomie
-   cen, a tam jest graniczny.
-4. **Mniejsza próba dla tenorów >10Y** potraktowana jako „diagnostyka
-   ekstrapolacji" — poprawne skądinąd postanowienie, ale oznacza, że
-   tabela zbiorcza (§7.9, tab. 23) +9,7% dla pełnej krzywej nie powinna być
-   czytana jako wynik dla całej krzywej.
-
-Propozycja redakcyjna dla SGH: w §7.4.5 dodać jedno zdanie o liczbie
-przesianych konfiguracji, z których wybrano „najsilniejszy" wynik, oraz
-p-wartość skorygowaną o tę selekcję — bez tego liczba 36,3% jest reklamą
-szczytowa, a nie estymacją.
-
-## Co raport robi dobrze (dla symetrii)
-
-Kontrakt wdrożeniowy `anchor` + rekonstrukcja poziomu w grafie ONNX (§6.1-6.2)
-jest poprawnie postawiony i pokrywa się z naszym wnioskiem z obserwacji poziomowych
-modeli BTC; rozdzielenie zadań (poziom/zmienność/kierunek/DNS) jest właściwe;
-jawne przyznanie ograniczeń kalibracji (§5.4) i statusu „zaliczenie integracji ≠
-akceptacja produkcyjna" (§6.6) to dobre praktyki komunikacji ryzyka modelowego.
-
-# Nasze wytrenowane modele — dokładna lista (stan 09.11.2026)
-
-Z liczbami (walk-forward, OOS):
-
-| Grupa | Modele | Protokół |
-|---|---|---|
-| BTC, log-zwrot, baselines | naive (RW), HAR-RV, GARCH(GJR), XGBoost | ~160 foldów OOS 2013-2026, DM + backtest kosztowy 10/20 pb; wynik: wszystkie nieodróżnialne od RW na poziomie strat (MCS), po kosztach wygrywa kup-i-trzymaj |
-| BTC, sieci | ModernTCN, PatchTST (3 ziarna: 42/43/44) | R² OOS −0,28..−0,85 — gorzej od RW |
-| BTC, TSFM zero-shot | Chronos-Bolt, TimesFM 2.5 | 300 originów; skill vs RW ujemny (−3,5..−15,1%); pokrycia przedziałów przed kalibracją 48,7-86,7% |
-| Stopa NBP, tier I | reguła Taylora, forward-linear (Ridge), ordered logit, ordered probit | 312 mies., WF 40 foldów; ordered probit h=1: skill +14,4% vs RW, +74% vs naive (DM-p vs naive 0,0001) |
-| Stopa NBP, tier II | VAR, BVAR (Minnesota-lite), oczekiwania+komunikacja, Random Forest, Gradient Boosting | jak wyżej; wszystkie ≤ RW na krótkich horyzontach |
-| Bitcoin, poziom (tier I/II) | XGBoost, SVM (RBF) | celowe porównanie poziomowe: katastrofalnie słabe (skill vs RW −20..−1296) — potwierdza konieczność modelowania zwrotów |
-
-W treningu na GPU w czasie pisania (wyniki zostaną dopisane po zakończeniu):
-BiLSTM (tier I BTC), LSTM / TFT / HellFormer (tier II BTC), SVAR i RPP-NLP
-(tier II NBP). W kodzie gotowe, bez przebiegów: pozostałe 11 bloków (obligacje,
-kredyty ×3, depozyty, TFI, FX, WIG20, pszenica, ropa, złoto) — patrz tabela
-realizacji listy wyżej.
-
-# Pierwsze liczby z naszego systemu (08.11.2026)
+# Pierwsze liczby z naszego systemu
 
 Pierwsze produkcyjne przebiegi programu SGH — stopa referencyjna NBP (tier I i II)
 i bitcoin z cechami on-chain (tier I: XGBoost, tier II: SVM) — policzone w naszym
@@ -356,9 +150,9 @@ z RW na krótkich horyzontach — dokładnie tak, jak sugeruje literatura makro
 **Bitcoin — co nie działa:** modele trenowane na poziom ceny (XGBoost, SVM)
 dają błędy o rzędy wielkości gorsze od reguły naiwnej — bo nie potrafią
 ekstrapolować poza zakres treningowy, gdy BTC rośnie. To jest spójne z obserwacją
-SGH o drzewach na złocie i z naszą wcześniejszą konkluzją: **BTC trzeba modelować
-na zwrotach (lub log-zwrotach), nie na poziomie** — i to jest techniczny powód,
-dla którego kontrakt `anchor + rekonstrukcja poziomu w grafie ONNX`, proponowany
+SGH o drzewach na złocie i z naszą wcześniejszą konkluzją: BTC trzeba modelować
+na zwrotach (lub log-zwrotach), nie na poziomie — i to jest techniczny powód,
+dla którego kontrakt anchor + rekonstrukcja poziomu w grafie ONNX, proponowany
 przez Bank, jest właściwą architekturą.
 
 **Rozbieżność warta rozmowy z SGH:** raport SGH podaje dla BTC wynik SVR +1,8%
@@ -367,6 +161,167 @@ więc ich SVR musiał być skonstruowany inaczej (najpewniej na zwrotach albo
 z inną normalizacją). Bez uzgodnienia wspólnej definicji celu tych liczb nie da
 się stawiać obok siebie — jest to kolejny argument za wspólnym, zamrożonym
 protokołem testu (priorytet P0 od początku współpracy).
+
+# Pełna lista modeli z zlecenia vs faktyczna realizacja
+
+Zlecenie (mail Działu Wewnętrznego z 05.11.2026) wymienia 13 bloków (targetów)
+z konkretnymi rodzinami modeli „do przetestowania i przegrania do Banku". Poniżej
+pełna lista z uczciwym stanem po obu stronach: raport SGH zad. 1.4 (30.10.2026)
+i repozytorium BTC-TAI na 09.11.2026. OZNACZENIA: **tak** = policzone i opisane
+liczbowo; **część** = część rodzin albo inne zadanie; **nie** = brak; u nas
+dodatkowo rozróżniam kod od wyników.
+
+| # | Target i modele z listy | Raport SGH zad. 1.4 | BTC-TAI (kod / wynik) |
+|---|---|---|---|
+| 1 | **Stopa NBP** — I: reguła Taylora, liniowe forward-looking, ordered logit/probit; II: VAR, BVAR, SVAR, oczekiwania i komunikacja, RF, GB, NLP | **część** — ARIMA/VAR/BVAR/ordered są; brak: Taylor, SVAR, oczekiwania, RF/GB, NLP | kod wszystko; **wyniki:** tier I (Taylor, forward, logit/probit) i tier II (VAR, BVAR, oczekiwania, RF, GB); SVAR/NLP w kolejce GPU (09.11) |
+| 2 | **Obligacje 2/5/7/10Y** — I: Nelson-Siegel, Svensson, Diebold-Li; II: PCA czynników, VAR/BVAR/VARX, makrofinansowe, AFNS, PCA-LSTM, LSTM | **część** — estymacja krzywej DNS + forecasting czynników (AR/VAR/Ridge/PLS/drzewa/PCA); brak NS/Svensson/DL jako modeli prognostycznych, brak AFNS/PCA-LSTM | kod wszystko (TRD-34/35); wyniki: brak (dane MF/SPW wymagają licencji) |
+| 3 | **Kredyty konsumpcyjne** — I: ARDL, ECM, regresje dynamiczne, logit/scorecard; II: VAR, BVAR, czynnikowe, FCI, LASSO, ElasticNet, RF, GB, wewnętrzne | **nie** — blok nie istnieje w raporcie | kod wszystko (TRD-36/37); wyniki: brak (dane nbportal do korekty źródła) |
+| 4 | **Kredyty hipoteczne** — I: ARDL, VECM, regresje dynamiczne, mikroekonometryczne; II: VAR, panelowe, kontraktu, RF, GB, LSTM/RNN, wewnętrzne | **nie** | kod wszystko (TRD-38/39); wyniki: brak |
+| 5 | **Kredyty firmowe** — I: ARDL, regresje dynamiczne, bank lending channel; II: VAR, BVAR, ankieta standardów, FCI, bank-firma, LASSO, RF, GB | **nie** | kod wszystko (TRD-40/41); wyniki: brak |
+| 6 | **Depozyty osób prywatnych** — I: ARDL, ECM, regresje dynamiczne; II: VAR, BVAR, portfelowe, segmentacyjne, wewnętrzne, RF, GB, retencji | **nie** | kod wszystko (TRD-42/43); wyniki: brak |
+| 7 | **Aktywa TFI** — I: flow-performance, regresje panelowe/dynamiczne; II: portfelowe, relatywnej atrakcyjności, segmentacyjne, MIDAS, sentymentu, RF, GB | **nie** | kod wszystko (TRD-44/45); wyniki: brak (IZFiA/Analizy.pl — dane płatne) |
+| 8 | **EUR/PLN, USD/PLN** — I: PatchTST, Stacking (XGB+ARIMA+BiLSTM/GRU), PSO-LSTM; II: VMD-CNN-BiLSTM, Anomaly Transformer z IsolationForest, TFT | **część** — VAR/BVAR/TFT/XGBoost/LSTM; brak wymienionych tier I i AAT/VMD | kod wszystko (TRD-46..49); wyniki: brak (GPU/kolejka) |
+| 9 | **WIG20** — I: GARCH/EGARCH/GJR, event study; II: HAR-RV, realized vol, czynniki zewn., stochastic vol, sentyment, RF, GB | **część** — ARIMA + EGARCH; brak event study, SV, sentymentu | kod wszystko (TRD-50/51); wyniki: brak |
+| 10 | **Pszenica** — I: LSTM, ARIMA, XGBoost; II: SARIMA-LSTM, FEDformer, GWRFR | **nie** — raport nie obejmuje pszenicy | kod wszystko (TRD-52/53); wyniki: brak |
+| 11 | **Ropa** — I: LSTM-SVR, XGBoost, GARCH-MIDAS; II: EMD, stacking, sparse autoencoders | **część** — ARIMA/EGARCH + niedokończone VMD+XGBoost; brak pozostałych | kod wszystko (TRD-54/55); wyniki: brak |
+| 12 | **Złoto** — I: LSTM, GARCH, XGBoost; II: TimeGPT, VAR-LSTM, TVP-VAR | **część** — LSTM/XGBoost/EGARCH; brak TimeGPT/VAR-LSTM/TVP-VAR | kod wszystko (TRD-56/57); wyniki: brak |
+| 13 | **Bitcoin** — I: BiLSTM, XGBoost; II: LSTM, TFT, SVM, HellFormer | **część** — SVR/TFT/XGBoost/PatchTST/LSTM na danych do 03.2025; brak BiLSTM/HellFormer | kod wszystko; **wyniki:** XGBoost + SVM (CPU, na danych do 06.2026); LSTM/TFT/BiLSTM/HellFormer liczą się na GPU w trakcie pisania |
+
+**Bilans:** z 13 bloków zlecenia raport SGH zrealizował 0 w pełni, 7 częściowo,
+6 nie zrealizował wcale (wszystkie trzy kredyty, depozyty, TFI, pszenica).
+Uwaga symetryczna: nasze wyniki też są częściowe — mamy liczby dla stopy NBP
+i bitcoina, reszta czeka na dane lub GPU. Różnica: rozliczamy się z tej samej
+listy, jawne, z kontrolą przecieku i testami istotności.
+
+# Czego w raporcie SGH nie ma: odniesienie do literatury
+
+Raport zad. 1.4 nie analizuje ani nie porównuje się z wynikami znanymi
+z literatury dziedziny. Nie ma sekcji przeglądowej, nie ma cytowań wyników
+z opublikowanych prac (np. dotyczących prognozowania BTC, stopy banku
+centralnego modelami ordered, czy prognoz krzywej rentowności), nie ma
+kotwicenia liczb w opublikowanych porównywaniach. Każda rodzina modeli
+z listy ma w literaturze znane zakresy wyników — bez odniesienia do nich
+nie da się rozstrzygnąć, czy wynik SGH jest „zgodny z oczekiwaniami
+dziedziny", czy symptomem błędu implementacji. Moje podejście (odtwarzanie
+znanych benchmarków przed dokładaniem nowych modeli) robi dokładnie to
+kotwiczenie — i to jest pozycja, którą zgłaszam PKO jako standard oceny
+następnego etapu.
+
+# Uwagi do raportu zad. 1.4 — rozdział po rozdziale
+
+Zestawienie wszystkich uwag z recenzji z odniesieniem do rozdziałów raportu SGH.
+Każda uwaga ma tezę i propozycję — nie tylko krytykę.
+
+## §5.3 (benchmark i metryki) — tu brakuje analizy istotności i obrony wyborów
+
+1. **MAPE jako metryka główna poziomu.** Dla szeregów z wartościami bliskimi zera
+   (stopa referencyjna przy 0,10 w 2020-21) MAPE rozsadza lub nasyca miernik;
+   jest też asymetryczna (inne kary za zawyżenie i zaniżenie). Proponowane:
+   MASE (błąd skalowany błędem reguły naiwnej — Hyndman & Koehler 2006) albo
+   RMSSE jak w zawodach M5; MAPE zostawić pomocniczo.
+2. **Benchmark naiwny ŷ(t+h)=y(t) jest prawidłowym minimum**, ale raport nie uzasadnia,
+   dlaczego nie ma benchmarków konkurencyjnych z literatury: dla zmienności
+   HAR-RV (Corsi 2009) i GARCH(1,1), dla poziomów — dryf i średnia krocząca
+   (a ta ostatnia w naszym harnessie jest osobnym baseline'em i czasem wygrywa).
+3. **Zmienność liczona jako MAE względem kwadratu pojedynczego dziennego zwrotu.**
+   Kwadrat zwrotu jest bardzo głośnym przybliżeniem wariancji warunkowej —
+   ranking modeli jest wobec takiego proxy kruche. Proponowane: funkcja straty
+   QLIKE (odporna na szum proxy, Patton 2011) jako miara porównawcza nawet
+   przy braku danych intradziennych.
+4. **Nakładające się cele h=30 przy dziennym kroku** — kolejne prognozy dzielą
+   29/30 okna, więc błędy nie są niezależne. Każde zestawienie „n prognoz" jest
+   sztucznie precyzyjne. Proponowane: testy z korektą (DM z h-1 autokowariancji
+   i poprawką Harvey-Leybourne-Newbold) albo bootstrap blokowy.
+5. **Analiza istotności powinna być tu.** §5.3 opisuje metryki, ale żaden
+   rozdział nie opisuje protokołu decyzji „model A lepszy od B". Proponowany tekst
+   do §5.3: „Dla każdego porównania podajemy test Diebolda-Mariano na parowanych
+   błędach z korektą na autokorelację horyzontu; dla rankingu całego zestawu
+   modeli używamy Model Confidence Set (Hansen-Lunde-Nason) z bootstrap
+   blokowym; przy 190 kombinacjach raportujemy kontrolę wielokrotności."
+6. **Trzy ziarna** modeli losowych to za mało, by ocenić rozrzut — raport sam
+   pokazuje LSTM EUR/PLN z rozstrzałem między ziarnami rzędu setek procent
+   (§7.1). Proponowane: ≥10 ziaren i raportowanie mediany z rozpiętością,
+   albo jeden zamrożony protokół ziaren z jawna notą, że nie ocenia wariancji.
+
+## Decyzje projektowe bez uzasadnienia (i jakie podejście byłoby uzasadnione)
+
+| Gdzie | Decyzja | Problem | Podejście uzasadnione |
+|---|---|---|---|
+| §4.2, tab. 3 | Podział 70/15/15 | bez źródła ani weryfikacji wrażliwości na proporcje; jedno cięcie = jeden reżim w teście | walk-forward jako podstawowa oś ewaluacji (jest w §5.1 — przenieść tam ciężar dowodowy), cięcie 70/15/15 opisać jako samą kalibrację wstępną |
+| §4.2 | osobna siatka dat per wskaźnik | rankingi między wskaźnikami porównują modele×okresy, nie modele | wspólny kalendarz testu per częstotliwość; minimum: dodatkowe zestawienie na wspólnym najnowszym oknie |
+| §5.2 | małe ustalone siatki hiperparametrów | nie wiadomo skąd wartości; brak analizy wrażliwości | wartości startowe z literatury + walidacja wrażliwości (±1 poziom siatki) |
+| §5.3 | benchmark zmienności: średnia z 5 ostatnich obserwacji | bez uzasadnienia; poniżej standardu dziedziny | HAR-RV i/lub GARCH(1,1) jako benchmarki obowiązkowe |
+| §5.3 | proxy zmienności = kwadrat zwrotu | w literaturze znane jako bardzo głośne; koszt nie odnotowany | QLIKE jako strata rankingowa + nota o ograniczeniu proxy |
+| §5.1 | h=30 dziennie, brak korekty zależności błędów | przedziały istotności zawyżone | DM-HLN / blokowy bootstrap |
+| §4.1-4.2 | dane BTC kończą się 31.03.2025 przy raporcie z 30.10.2026 | brak uzasadnienia zakresu i bramki odświeżenia | zamrożona próba + obowiązkowy test na oknie późniejszym przed wnioskiem o przewadze |
+| §6.5/tab. 5-6 | horyzonty obligacji 91/365 w artefaktach vs 60/250 w eksperymentach | dwa zestawy horyzontów bez mapowania — wyniki nieporównywalne 1:1 | jeden zestaw horyzontów + tabela decyzji „dlaczego takie" |
+| §6.1/tab. 2 i 5 | cechy BTC lokalnie (S&P, VIX, DXY, UST10Y, złoto) vs przekazane z `RISK_SCORE` | dwa zestawy cech pod tym samym targetem bez mapy wersji | manifest wersji cech (nazwa, źródło, timestamp dostępności) w duchu `pko-fr` |
+| §7.8 | „SVR/TFT biją naiwną" bez testu | +0,7/+1,8 pkt MAPE na pojedynczym cięciu to hipoteza, nie wynik | DM/MCS na parowanych błędach; raportować jako hipotezę do sprawdzenia na świeżych danych |
+| §7.3, tab. 11 | BA 96,9% kierunku decyzji RPP | 17 prognoz, 1 zmiana stopy, CPI bez opóźnienia publikacji | macierz pomyłek + Macro-F1 (65,6%) eksponowane równo z BA; cechy z dat publikacji |
+| całość | brak odniesienia do literatury dziedziny | nie da się odróżnić wyniku zgodnego z dziedziną od artefaktu implementacji | rozdział kotwiczący ze znanymi zakresami + odwołania do źródeł |
+
+## §7.4.5–7.4.7 (obligacje) — „najsilniejszy wynik" ma test, ale nie zdjętą selekcję
+
+Zdanie „Najsilniejszy wynik uzyskano na horyzoncie 250 dni roboczych" nie jest
+gołosłowne — §7.4 deklaruje badanie istotności estymatorem HAC i bootstrapm
+blokowym (5000 replikacji), a tab. 12 precyzuje, że β1 (Ridge + filtr
+potwierdzenia, +36,3% vs RW) jest „statystycznie najlepiej potwierdzonym
+wynikiem". „Najsilniejszy" = największa względna poprawa błędu względem
+Random Walk. To lepiej niż w części BTC. Pozostają cztery zastrzeżenia:
+
+1. **Selekcja post-hoc.** „Najsilniejszy" wybieramy po przeliczeniu wielu
+   wariantów (czynnik × model × horyzont × „filtr potwierdzenia") — szczytowa
+   liczba z przesianego zbioru jest systematycznie zawyżona (winner's curse).
+   Raport sam to de facto przyznaje: „okres out-of-sample był również
+   wykorzystywany podczas rozwoju architektury i selekcji wariantów" (§7.4.7).
+   Konsekwencja: test trzeba prowadzić po selekcji z korektą na liczbę
+   przesianych wariantów (np. Romano-Wolf / MCS po pełnym zbiorze kandydatów),
+   inaczej szczytowe p-wartości nie znaczą tego, co czytelnik myśli.
+2. **Horyzont 250 dni roboczych.** Przy dziennym kroku cele nakładają się na
+   249/250 — błędy są bardzo mocno zależne; HAC daje poprawną wariancję
+   długookresową tylko przy paśmie tego rzędu, a raport nie dokumentuje
+   doboru pasma HAC ani długości bloku bootstrapu względem h=250.
+3. **Przeniesienie na ceny obligacji jest graniczne.** Nawet w raporcie:
+   poprawa czynników β1/β2 jest „statystycznie najmocniejsza", ale poprawa
+   rekonstruowanej krzywej i cen — „słabsza lub graniczna" przy 5%. Dla banku
+   liczy się cena/ryzyko, nie sama β1 — wynik należy komunikować na poziomie
+   cen, a tam jest graniczny.
+4. **Mniejsza próba dla tenorów >10Y** potraktowana jako „diagnostyka
+   ekstrapolacji" — poprawne postanowienie, ale oznacza, że tabela zbiorcza
+   (§7.9, tab. 23) +9,7% dla pełnej krzywej nie powinna być czytana jako
+   wynik dla całej krzywej.
+
+Propozycja redakcyjna dla SGH: w §7.4.5 dodać jedno zdanie o liczbie
+przesianych konfiguracji, z których wybrano „najsilniejszy" wynik, oraz
+p-wartość skorygowaną o tę selekcję — bez tego liczba 36,3% jest reklamą
+szczytową, a nie estymacją.
+
+## Co raport robi dobrze (dla symetrii)
+
+Kontrakt wdrożeniowy anchor + rekonstrukcja poziomu w grafie ONNX (§6.1-6.2)
+jest poprawnie postawiony i pokrywa się z wnioskiem z obserwacji poziomowych
+modeli BTC; rozdzielenie zadań (poziom/zmienność/kierunek/DNS) jest właściwe;
+jawne przyznanie ograniczeń kalibracji (§5.4) i statusu „zaliczenie integracji ≠
+akceptacja produkcyjna" (§6.6) to dobre praktyki komunikacji ryzyka modelowego.
+
+# Nasze wytrenowane modele — dokładna lista (stan 09.11.2026)
+
+Z liczbami (walk-forward, OOS):
+
+| Grupa | Modele | Protokół |
+|---|---|---|
+| BTC, log-zwrot, baselines | naive (RW), HAR-RV, GARCH(GJR), XGBoost | ~160 foldów OOS 2013-2026, DM + backtest kosztowy 10/20 pb; wynik: wszystkie nieodróżnialne od RW (MCS), po kosztach wygrywa kup-i-trzymaj |
+| BTC, sieci | ModernTCN, PatchTST (3 ziarna: 42/43/44) | R² OOS −0,28..−0,85 — gorzej od RW |
+| BTC, TSFM zero-shot | Chronos-Bolt, TimesFM 2.5 | 300 originów; skill vs RW ujemny (−3,5..−15,1%); pokrycia przedziałów przed kalibracją 48,7-86,7% |
+| Stopa NBP, tier I | reguła Taylora, forward-linear (Ridge), ordered logit, ordered probit | 312 mies., WF 40 foldów; ordered probit h=1: skill +14,4% vs RW, +74% vs naive (DM-p vs naive 0,0001) |
+| Stopa NBP, tier II | VAR, BVAR (Minnesota-lite), oczekiwania+komunikacja, Random Forest, Gradient Boosting | jak wyżej; wszystkie ≤ RW na krótkich horyzontach |
+| Bitcoin, poziom (tier I/II) | XGBoost, SVM (RBF) | celowe porównanie poziomowe: katastrofalnie słabe (skill vs RW −20..−1296) — potwierdza konieczność modelowania zwrotów |
+
+W treningu na GPU w czasie pisania (wyniki zostaną dopisane po zakończeniu):
+BiLSTM (tier I BTC), LSTM / TFT / HellFormer (tier II BTC), SVAR i RPP-NLP
+(tier II NBP). W kodzie gotowe, bez przebiegów: pozostałe 11 bloków (obligacje,
+kredyty ×3, depozyty, TFI, FX, WIG20, pszenica, ropa, złoto) — patrz tabela
+realizacji listy wyżej.
 
 # Następne kroki
 
@@ -377,7 +332,7 @@ protokołem testu (priorytet P0 od początku współpracy).
 | P1 | wspólny backtest z PKO na zamrożonym protokole (jedne chwile prognozy, jedna tabela cech) |
 | P2 | kalibracja przedziałów i ocena ekonomiczna dla wszystkich serii SGH |
 
-# Słownik pojęć (dla czytającego bez przygotowania statystycznego)
+# Słownik pojęć
 
 - **Walk-forward** — symulacja „jakbyśmy prognozowali naprawdę": model uczy się do
   dnia T, prognozuje dalej; potem przesuwamy okno i powtarzamy. Wynik to zestaw
