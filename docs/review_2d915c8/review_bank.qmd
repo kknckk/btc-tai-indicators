@@ -35,9 +35,15 @@ format:
 
 Trzy zastrzeżenia metryczne, warte pamiętania przy każdej rozmowie o jego wynikach:
 
-1. Małe albo bardzo przewagi bez testu istotności. Z około 190 wariantów
-   wygrywające najlepsze mogą być po prostu szczęśliwym rzutem kostką.
-   Raport podaje rankingi bez sprawdzenia, czy różnice są istotne statystycznie!
+1. **Małe albo bardzo przewagi bez testu istotności.** Raport przetestował około
+   190 wariantów (model × cechy × horyzont). Kiedy przesiewa się tyle kandydatów,
+   wygrywający „najlepszy" wariant może wygrać samym przypadkiem — tak jak przy
+   190 rzutach kostką gdzieś padnie seria szóstek, mimo że kostka jest uczciwa.
+   Żeby wynik był dowodem (a nie szczęściem), trzeba policzyć, czy przewaga jest
+   istotna statystycznie — raport tego nigdzie nie robi dla poziomów cen.
+   Rozdział „Czy wynik +1,8% jest istotny statystycznie" poniżej pokazuje to
+   liczbowo: na ich własnym oknie testowym poprawa 1,8% jest o rząd wielkości
+   poniżej granicy wykrywalności.
 2. W części danych (panel miesięczny NBP) modele uczyły się na liczbach, które
    w dniu prognozy jeszcze nie były publicznie znane (inflacja publikowana
    jest z opóźnieniem). Efektowny wynik 96,9% trafności kierunku decyzji RPP
@@ -49,6 +55,68 @@ Trzy zastrzeżenia metryczne, warte pamiętania przy każdej rozmowie o jego wyn
 
 Żadne z tych zastrzeżeń nie dyskwalifikuje raportu jako dokumentacji etapu.
 Wszystkie razem dyskwalifikują go jako podstawę decyzji o wdrożeniu konkretnego modelu.
+
+# Czy wynik +1,8% dla bitcoina jest istotny statystycznie? Pełna analiza
+
+Najbardziej eksponowana liczba raportu SGH brzmi: SVR bije regułę naiwną
+o +1,8% (MAPE) na horyzoncie 30 dni, TFT o +0,7% (§7.8, tab. 22). Poniżej
+najpierw przepis, jak taki wynik dowodzi się poprawnie, a potem nasza analiza —
+policzona na naszych danych, ale dokładnie w oknie testowym raportu SGH —
+dlaczego tej wielkości nie da się na tej próbie uznać za istotną.
+
+## Jak się dowodzi istotności prognozy (protokół krok po kroku)
+
+1. **Parowanie błędów.** Dwa modele A i B prognozują w tych samych chwilach.
+   Liczymy błąd każdej prognozy obu modeli i tworzymy szereg różnic
+   d(t) = błąd(A,t) − błąd(B,t). Pytanie „czy A jest lepszy" zamienia się
+   w pytanie, czy średnia z d(t) jest istotnie różna od zera.
+2. **Korekta na nakładanie celów.** Przy horyzoncie 30 dni i kroku dziennym dwie
+   sąsiednie prognozy dzielą 29 z 30 dni celu — błędy nie są niezależne. Test
+   musi używać wariancji długookresowej z autokowariancjami do rzędu h−1
+   (test Diebolda–Mariano z poprawką Harvey–Leybourne–Newbold, 1997) albo
+   bootstrapu blokowego z blokiem ≥ 30.
+3. **Korekta na przesiewanie.** Gdy z ~190 wariantów raportujemy najlepszy,
+   zwykły poziom 5% przestaje obowiązywać: prawdopodobieństwo fałszywego
+   „zwycięzcy" rośnie z liczbą kandydatów. Poprawne narzędzia: procedura
+   Romano–Wolf albo Model Confidence Set (Hansen–Lunde–Nason 2011), który
+   zamiast zwycięzcy podaje zbiór modeli nieodróżnialnych.
+4. **Zamrożenie protokołu przed odczytem wyniku.** Reguły 1–3 ustalane przed
+   policzeniem wyników, inaczej test traci sens (p-hacking).
+
+## Nasza analiza: ile danych trzeba, żeby „+1,8%" cokolwiek znaczyło
+
+Policzone na naszym panelu BTC/USD, w dokładnym oknie testowym raportu SGH
+(01.09.2023–31.03.2025, 578 dni, horyzont 30 dni; skrypt i liczby odtwarzalne
+z repozytorium):
+
+| Wielkość | Wartość |
+|---|---|
+| Średni błąd bezwzględny reguły naiwnej (30 dni) | 11,73% |
+| Rozrzut parowanych różnic błędów (model vs naiwna) | 0,0863 (jednostki log-zwrotu) |
+| Dni w oknie testowym SGH | 578 |
+| **Efektywna liczba niezależnych obserwacji** (578 / nakładanie 30) | **~19** |
+| Błąd standardowy średniej różnicy błędów | 0,0197 |
+| **Próg wykrywalności przy ufności 95%** | **±32,9% błędu** |
+| Deklarowana przez SGH poprawa | **+1,8%** |
+
+Konkluzja: przy oknie, którym dysponował SGH, różnica błędów musiałaby wynosić
+**około jedną trzecią**, żeby dało się ją odróżnić od zera na poziomie 5%.
+Ich wynik 1,8% jest **o rząd wielkości poniżej progu wykrywalności** — nawet
+gdyby SVR naprawdę był lepszy, ta próba jest za mała, żeby to udowodnić.
+
+Ile danych byłoby potrzebne do takiego wyniku? Dla 1,8% poprawy przy tej
+samej zmienności różnic: **~6 400 niezależnych bloków 30-dniowych ≈ 193 000 dni
+≈ 530 lat historii bitcoina.** Bitcoin ma ok. 15 lat. Innymi słowy: poprawy
+rzędu 1,8% na tym horyzoncie i tym rynku **nie da się** empirycznie wykazać
+jako istotnej na żadnej istniejącej historii. Wynik taki można zgłaszać
+wyłącznie jako hipotezę roboczą do sprawdzenia na przyszłych danych —
+raport opisuje go jako wynik. Uwaga: ta analiza jest jeszcze optymistyczna dla
+SGH, bo pomija wielokrotność testów (punkt 3 protokołu); z jej uwzględnieniem
+próg rośnie jeszcze bardziej.
+
+Dla pełnego obrazu — ta sama zasada dotyczy nas: żaden z naszych modeli nie
+odróżnił się istotnie od reguły naiwnej na horyzontach 1 i 7 dni, i my to
+raportujemy wprost, zamiast szukać „najlepszej liczby" w zestawie.
 
 # Moje podejście — założenia
 
@@ -64,18 +132,97 @@ kontroler jakości:
 3. **Ocena ekonomiczna** — prognoza musi się bronić po kosztach transakcyjnych
    (10/20 punktów bazowych na obrót), nie tylko w metryce błędu.
 
-Stan na dzień recenzji: warstwa 1 i 2 istnieją jako kod i testy; warstwa 3 policzona
-dla bitcoina (wynik: wszystkie strategie modelowe przegrywają z kup-i-trzymaj,
-Sharpe 0,74–1,03 wobec 1,04–1,07 dla B&H). Wyniki TSFM (modele transformerowe
-chronos/TimesFM) również przegrywają z regułą naiwną, a ich przedziały ufności
-są źle skalibrowane (za wąskie lub za szerokie — przed naszą kalibracją).
+Stan na dzień 09.11.2026: warstwa 1 i 2 istnieją jako kod i testy; warstwa 3
+policzona dla bitcoina (wynik: wszystkie strategie modelowe przegrywają z
+kup-i-trzymaj, Sharpe 0,74–1,03 wobec 1,04–1,07 dla B&H). Wyniki TSFM (modele
+transformerowe chronos/TimesFM) również przegrywają z regułą naiwną, a ich
+przedziały ufności są źle skalibrowane (za wąskie lub za szerokie — przed naszą
+kalibracją). Od wersji z 08.11 doszły pierwsze produkcyjne wyniki z programu
+SGH: stopa NBP (tier I/II), bitcoin (XGBoost, SVM — CPU; BiLSTM — GPU) —
+szczegóły w rozdziale „Pierwsze liczby z naszego systemu".
+
+## Jak dokładnie wyglądał eksperyment: podejście, literatura, założenia, koszty
+
+### Na czym polegało podejście
+
+Zamiast wymyślać własne architektury, najpierw **odtwarzamy modele, których
+wyniki są znane z literatury** — replikacja przed innowacją. Każda rodzina
+z listy zlecenia ma opublikowane wyniki, często z pełnymi protokołami.
+Odtworzenie ich w naszym harnessie daje dwie rzeczy naraz:
+
+1. **Kontrolę negatywną pipeline'u** — jeśli nasza implementacja HAR-RV nie
+   odtwarza znanych rzędów wielkości, wiemy, że błąd leży po naszej stronie,
+   zanim zaufamy nowym modelom.
+2. **Uczciwą punktację nowości** — nowy model musi bić odtworzony benchmark
+   literaturowy, nie tylko regułę naiwną.
+
+### Jakie pozycje literatury odtwarzamy
+
+| Rodzina (zlecenie) | Pozycja / standard | Rola w naszym systemie |
+|---|---|---|
+| Zmienność | HAR-RV (Corsi 2009) | benchmark zmienności — standard dziedziny |
+| Zmienność | GJR-GARCH (Glosten–Jagannathan–Runkle 1993), dystr. t | asymetryczna zmienność |
+| Poziom BTC | XGBoost (Chen–Guestrin 2016; zastosowania do BTC) | baseline nieliniowy |
+| Sieci głębokie | PatchTST (Nie i in. 2023), ModernTCN (2023) | odtworzone architektury z published results |
+| Modele fundamentowe | Chronos (Amazon 2024), TimesFM (Google 2024) | zero-shot, bez treningu |
+| Stopa NBP tier I | reguła Taylora (1993), ordered logit/probit (standard prognoz RPP) | proste, rozpoznawalne |
+| Stopa NBP tier II | VAR (Sims 1980), BVAR prior Minnesota, SVAR, NLP komunikatów | modele makro |
+| Obligacje | Nelson–Siegel (1987), Diebold–Li (2006) | dekompozycja krzywej |
+| Istotność | Diebold–Mariano (1995) + Harvey–Leybourne–Newbold (1997); MCS (Hansen–Lunde–Nason 2011) | testy pary i zbioru |
+| Przedziały | Conformal / CQR (Romano–Patterson–Candès 2019) | kalibracja ufności |
+
+### Założenia przyjęte w eksperymencie
+
+- **Cel prognozy**: log-zwrot (dla stopy NBP — poziom, bo tak zdefiniowany jest
+  benchmark). Porównanie poziomowe BTC (XGBoost, SVM, BiLSTM) prowadzimy
+  celowo na poziomie, jako kontrolowany eksperyment pokazujący, dlaczego
+  poziom jest złym celem (patrz „Pierwsze liczby").
+- **Dane**: panel BTC/USD dzienny 2009-01-03…2026-06-12, 5 788 obserwacji,
+  113 kolumn (w sieciach 9 cech on-chain: AdrActCnt, TxCntSec, FeeTotUSD,
+  FeeMeanUSD, HashRate, NUPL, MVRV_Z, RevUSD + zwrot). Stopa NBP: 312
+  obserwacji miesięcznych (2000-01…2025-12) + panel makro 19 cech
+  (HICP Eurostat jako substytut CPI, wskaźnik koniunktury ESI Eurostat
+  jako substytut komercyjnego PMI, kursy, obligacje).
+- **Protokół walk-forward**: okno rozszerzane; pierwszy trening min. 1000
+  obserwacji; krok originów 30 dni; szczelina (purge) = horyzont, embargo 0;
+  horyzonty 1/7/30 dni (BTC) i 1/3/12 miesięcy (NBP); 160/160/158 foldów (BTC),
+  ~40 foldów (NBP).
+- **Randomizacja**: 3 ziarna (42/43/44) dla sieci; modele deterministyczne
+  bez ziaren.
+- **Hiperparametry**: małe siatki stałe albo early stopping na walidacji
+  wewnętrznej folda (XGBoost: 400 drzew, lr 0,03, głębokość 3, early stop 30).
+
+### Złożoność obliczeniowa, wolumeny, GPU, koszty
+
+| Etap | Skala | Sprzęt | Czas |
+|---|---|---|---|
+| Baselines (RW, HAR-RV, GJR-GARCH, XGBoost) | ~478 fitów walk-forward (3 horyzonty) | CPU EPYC | ~4,5 min łącznie |
+| Sieci ModernTCN (235 tys. param.) / PatchTST (101 tys.) | 15 fitów × 3 horyzonty × 3 ziarna | CPU | ~1,9 h na ziarno |
+| TSFM zero-shot (Chronos-bolt, TimesFM 2.5) | ~300 originów × 3 horyzonty × 2 modele | wnioskowanie | rzędy minut na model |
+| Kalibracja CQR + ocena ekonomiczna | te same predykcje | CPU | minuty |
+| Stopa NBP tier I/II (9 modeli) | ~40 fitów × 3 horyzonty × 9 modeli | CPU | minuty |
+| BTC tier I (XGBoost) | 160 fitów × 3 horyzonty | CPU | ~9 min |
+| BTC sieci: BiLSTM / LSTM / TFT / HellFormer | ~478 fitów × 3-4 modele + siatka | **GPU** L4 24 GB | 17 min za horyzont (BiLSTM) |
+
+Dlaczego w ogóle GPU: sieci uczą się od nowa w każdym z ~160 foldów na horyzont,
+więc koszt treningu mnoży się przez 160. Na współdzielonym CPU jeden fit BiLSTM
+przekracza 7 minut — pełna siatka nie zamknęłaby się w dniach. Na akceleratorze
+(NVIDIA L4, maszyna g2-standard-4: 4 vCPU / 16 GB RAM, instancja spot w GCP)
+fit trwa sekundy. Koszt spot ~0,2–0,45 USD/h; cały dzisiejszy pakiet GPU
+(wszystkie horyzonty BiLSTM + kolejka LSTM/TFT/HellFormer + SVAR/NLP) to
+łącznie **poniżej 5 USD**. Maszynę spot chmurze odebrało dwa razy — przebiegi
+były chronione checkpointami per horyzont, strata zerowa. Alternatywa
+(własne V100 w sieci WAT) odpadła ze względu na czas konfiguracji tunelu;
+GCP wygrywa prostotą przy jednorazowych przebiegach.
 
 # Wady własne wykryte i naprawione (sekcja D)
 
 Sami krytykując SGH za brak testów istotności, musieliśmy uczciwie sprawdzić,
-czy nasz system tym testom podlega poprawnie. Review wykazało pięć defektów;
-wszystkie opisane niżej zostały naprawione w tym samym dniu (patrz „Stan po
-poprawkach"). Pokazujemy je, bo to dowód, że kontrola działa w obie strony.
+czy nasz system tym testom podlega poprawnie. Review wykazało pięć defektów —
+**wszystkie pięć zostało naprawionych (08.11.2026) i naprawy są podtrzymane przez
+kolejne commity** (sekcja poniżej pokazuje stan na 09.11, nie wersję „w toku").
+Pokazujemy je, bo to dowód, że kontrola działa w obie strony — nie jako listę
+otwartych spraw.
 
 **D1. Zepsuty test kalibracji przedziałów.**
 Po polsku: sprawdziliśmy, czy nasz test jednostkowy właściwie ocenia przedziały
@@ -118,42 +265,56 @@ z języka R, a tabela podsumowująca TSFM podawała liczby pomieszane między
 horyzontami i uśrednione wartości oznaczone jako wyniki per horyzont. Raport
 zbudował się dopiero po poprawkach ścieżek i tabeli.
 
-## Stan po poprawkach
+## Stan po poprawkach (aktualny na 09.11.2026)
 
-| Obszar | Przed | Po |
+| Obszar | Przed | Po (aktualnie) |
 |---|---|---|
-| Testy harnessu | 13 passed / 1 failed | 15 passed (test CQR przepisany) |
+| Testy harnessu | 13 passed / 1 failed | 15 passed; pełna suita projektu: 29 passed |
 | Test istotności DM w MCS | zawsze h=1 | h = horyzont prognozy; bootstrap bloku ≥ h |
 | economic.md (obrót) | 16,62 × 6 komórek (błąd) | zgodne z baselines.json, regenerowane skryptem |
 | MCS | „not computed" | policzony dla wszystkich 3 horyzontów; h=30 wykłucza XGBoost (p=0,006) |
 | Raport Quarto | nie budował się, liczby z kosmosu | buduje się, liczby odtwarzalne z JSON |
-| Odtwarzalność baselines | założenie | potwierdzona rerunem (identyczne liczby) |
+| Odtwarzalność baselines | założenie | potwierdzona rerunem (identyczne liczby bit w bit) |
 
-# Pierwsze liczby z naszego systemu
+Od napraw (08.11) minęły kolejne commity (seria wyników SGH, konfiguracje GPU,
+ten dokument) — każdy przechodzi pełną suitę i niezależne review przed
+publikacją; żadna naprawa nie cofnęła się.
+
+# Pierwsze liczby z naszego systemu (stan 09.11.2026)
 
 Pierwsze produkcyjne przebiegi programu SGH — stopa referencyjna NBP (tier I i II)
-i bitcoin z cechami on-chain (tier I: XGBoost, tier II: SVM) — policzone w naszym
-harnessie (walk-forward, blokada przecieku, testy istotności). Pozostałe modele
-głębokie (BiLSTM/LSTM/TFT/HellFormer) oraz SVAR i NLP dla NBP są w kolejce GPU —
-wymagają karty graficznej; na CPU liczą się zbyt wolno, aby uczciwie zamknąć
-siatkę hiperparametrów.
+i bitcoin z cechami on-chain (tier I: XGBoost, tier II: SVM, plus na GPU: BiLSTM).
+Wszystkie policzone w naszym harnessie (walk-forward, blokada przecieku, testy
+istotności). W kolejce GPU w trakcie pisania: LSTM / TFT / HellFormer (BTC) oraz
+SVAR i NLP komunikatów RPP (NBP) — wyniki zostaną dopisane po zakończeniu.
 
 **Stopa NBP — co działa:** najlepiej wypadają proste modele kategorii zmiany stopy
-(ordered logit/probit): na horyzoncie 1 miesiąca błąd o **14% mniejszy niż reguła
-„jutro jak dziś"** (ordered probit; vs benchmark naiwny przesuwający średnią — o 74%),
-na 3 miesiącach o **29% mniejszy od RW**. Test istotności jest ostrożny: różnicę
-względem RW uznaje za nierozstrzygniętą (DM-p 0,42-0,60), względem średniej
-kroczącej za istotną (p<0,001). Złożone modele VAR/BVAR/lasy/boosting przegrywają
-z RW na krótkich horyzontach — dokładnie tak, jak sugeruje literatura makro
-(proste > złożone przy małej liczbie obserwacji).
+(ordered logit/probit): na horyzoncie 1 miesiąca błąd o **14,4% mniejszy niż reguła
+„jutro jak dziś"** (ordered probit; vs benchmark naiwny przesuwający średnią —
+o 74%), na 3 miesiącach o **28,5% mniejszy od RW**. Test istotności jest ostrożny:
+różnicę względem RW uznaje za nierozstrzygniętą (DM-p 0,42-0,60), względem
+średniej kroczącej za istotną (p<0,001). Złożone modele tier II przegrywają z RW
+na krótkich horyzontach — dokładnie tak, jak sugeruje literatura makro
+(proste > złożone przy małej liczbie obserwacji). Dokładne liczby
+(skill względem RW, dodatni = lepiej): ordered logit/probit +9,8% / +14,4% (h=1),
++29,3% / +28,5% (h=3), +1,3% / +1,0% (h=12); Taylor −9,4%, forward-linear −16,7%
+(h=1); tier II h=1 wszystkie ujemne (VAR −98%, BVAR −1173%, las losowy −1649%).
 
-**Bitcoin — co nie działa:** modele trenowane na poziom ceny (XGBoost, SVM)
-dają błędy o rzędy wielkości gorsze od reguły naiwnej — bo nie potrafią
-ekstrapolować poza zakres treningowy, gdy BTC rośnie. To jest spójne z obserwacją
-SGH o drzewach na złocie i z naszą wcześniejszą konkluzją: BTC trzeba modelować
-na zwrotach (lub log-zwrotach), nie na poziomie — i to jest techniczny powód,
-dla którego kontrakt anchor + rekonstrukcja poziomu w grafie ONNX, proponowany
-przez Bank, jest właściwą architekturą.
+**Bitcoin — co nie działa (i dlaczego):** modele trenowane na poziom ceny
+(XGBoost, SVM) dają błędy o rzędy wielkości gorsze od reguły naiwnej — skille
+względem RW: XGBoost −295 / −64 / −21 na h=1/7/30, SVM −1296 / −194 / −41.
+Powodem jest brak ekstrapolacji poza zakres treningowy, gdy BTC rośnie. To jest
+spójne z obserwacją SGH o drzewach na złocie i z naszą wcześniejszą konkluzją:
+BTC trzeba modelować na zwrotach (lub log-zwrotach), nie na poziomie — i to jest
+techniczny powód, dla którego kontrakt anchor + rekonstrukcja poziomu w grafie
+ONNX, proponowany przez Bank, jest właściwą architekturą.
+
+**Bitcoin — BiLSTM na GPU, wynik-diagnostyka:** BiLSTM (tier I z listy zlecenia)
+na wszystkich trzech horyzontach osiągnął skill względem RW **dokładnie 0,0000** —
+siec zbiegła do skopiowania reguły naiwnej. To nie porażka obliczeniowa, tylko
+informacja o zadaniu: na poziomowym celu optymum MSE leży dokładnie w „jutro =
+dziś" i dobrze wytrenowana siec to optimum odnajduje. Druga, niezależna od
+XGBoost/SVM linia dowodu, że poziom nie jest zadaniem z wykrywalną przewagą.
 
 **Rozbieżność warta rozmowy z SGH:** raport SGH podaje dla BTC wynik SVR +1,8%
 (mierzony MAPE). Nasz poziomowy SVR daje kilkaset razy większy błąd niż RW —
@@ -313,15 +474,26 @@ Z liczbami (walk-forward, OOS):
 | BTC, log-zwrot, baselines | naive (RW), HAR-RV, GARCH(GJR), XGBoost | ~160 foldów OOS 2013-2026, DM + backtest kosztowy 10/20 pb; wynik: wszystkie nieodróżnialne od RW (MCS), po kosztach wygrywa kup-i-trzymaj |
 | BTC, sieci | ModernTCN, PatchTST (3 ziarna: 42/43/44) | R² OOS −0,28..−0,85 — gorzej od RW |
 | BTC, TSFM zero-shot | Chronos-Bolt, TimesFM 2.5 | 300 originów; skill vs RW ujemny (−3,5..−15,1%); pokrycia przedziałów przed kalibracją 48,7-86,7% |
+| Bitcoin, poziom, BiLSTM (GPU) | BiLSTM wg TRD-58, siatka hiperparametrów, 158-160 fitów/horyzont | **skill vs RW = 0,0000 na h=1/7/30** — siec zbiega do reguły naiwnej (diagnostyka zadania poziomowego) |
 | Stopa NBP, tier I | reguła Taylora, forward-linear (Ridge), ordered logit, ordered probit | 312 mies., WF 40 foldów; ordered probit h=1: skill +14,4% vs RW, +74% vs naive (DM-p vs naive 0,0001) |
 | Stopa NBP, tier II | VAR, BVAR (Minnesota-lite), oczekiwania+komunikacja, Random Forest, Gradient Boosting | jak wyżej; wszystkie ≤ RW na krótkich horyzontach |
 | Bitcoin, poziom (tier I/II) | XGBoost, SVM (RBF) | celowe porównanie poziomowe: katastrofalnie słabe (skill vs RW −20..−1296) — potwierdza konieczność modelowania zwrotów |
 
 W treningu na GPU w czasie pisania (wyniki zostaną dopisane po zakończeniu):
-BiLSTM (tier I BTC), LSTM / TFT / HellFormer (tier II BTC), SVAR i RPP-NLP
-(tier II NBP). W kodzie gotowe, bez przebiegów: pozostałe 11 bloków (obligacje,
+LSTM / TFT / HellFormer (tier II BTC), SVAR i RPP-NLP (tier II NBP). W kodzie
+gotowe, bez przebiegów: pozostałe 11 bloków (obligacje,
 kredyty ×3, depozyty, TFI, FX, WIG20, pszenica, ropa, złoto) — patrz tabela
 realizacji listy wyżej.
+
+# Załącznik: mapa uwag recenzenckich z pliku docx → odpowiedzi w treści
+
+| Gdzie w dokumencie | Uwaga | Jak uwzględniono |
+|---|---|---|
+| „wygrywające wypisz- najlepsze…" | „Nie rozumiem…" | zdanie przepisane: analogia 190 rzutów kostką, jednoznaczne pytanie „czy przewaga jest istotna" (rozdział „Co raport SGH mówi naprawdę", p. 1) |
+| zdanie o ~190 wariantach | „Rozszerz… napisz jak dowieść istotności albo wykaż jej brak" | nowy rozdział „Czy wynik +1,8% dla bitcoina jest istotny statystycznie?": protokół dowodzenia krok po kroku + pełna analiza liczbowa na oknie SGH (wynik: 1,8% o rząd wielkości pod progiem; do udowodnienia potrzeba ~530 lat danych) |
+| nagłówek „założenia" | „Koniecznie wskaż na czym polegało podejście, literatura, założenia, eksperyment, złożoność, wolumeny, GPU" | nowy podrozdział „Jak dokładnie wyglądał eksperyment": mapa odtwarzanej literatury (10 pozycji z rolami), założenia explicite, tabela protokołu (foldy, purge, ziarna), tabela złożoności (fit'y, parametry, czasy, GPU L4, koszt <5 USD) |
+| „Stan na dzień recenzji…" | „Chyba mamy już nowe wyniki" | stan zaktualizowany do 09.11.2026; nowe wyniki SGH (NBP tier I/II dokładnie, BTC XGB/SVM, BiLSTM GPU = 0,0000) w „Pierwsze liczby z naszego systemu" i „Nasze wytrenowane modele" |
+| „Wady własne wykryte…" | „Też już nieaktualne" | sekcja D przeframowana jako opis napraw zakończonych; „Stan po poprawkach" zaktualizowany (29 passed, rerun bit w bit, podtrzymanie przez kolejne commity) |
 
 # Następne kroki
 
@@ -350,6 +522,8 @@ realizacji listy wyżej.
   wielodniowych musi uwzględniać, że błędy sąsiadujących dni się pokrywają.
 - **MCS (Model Confidence Set)** — zamiast ogłaszać jednego „zwycięzcę", podaje
   zestaw modeli, których nie da się od siebie odróżnić przy danym poziomie ufności.
+- **Istotność statystyczna** — odpowiedź na pytanie „czy ta różnica mogła powstać
+  przypadkiem?". Bez sprawdzenia tego liczba w tabeli nie jest dowodem.
 - **Kalibracja przedziałów (conformal/CQR)** — naprawianie przedziałów „80%
   pewności", żeby realnie trafiały 80% przypadków, z użyciem wyłącznie przeszłości.
 - **Sharpe / MaxDD / turnover** — ocena ekonomiczna: zysk per ryzyko, najgłębsza
