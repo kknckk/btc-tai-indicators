@@ -21,9 +21,9 @@ Modele: LSTM (okna tabularne), TFT (variable selection + BiLSTM + attention), SV
 
 ## Tier II vs tier I (skill vs naive)
 
-- h=1: najlepszy tier II `lstm` (skill 0.4811) vs tier I `None` (skill n/a) — tier II lepszy: **n/a (brak tier I)**
-- h=7: najlepszy tier II `lstm` (skill 0.1295) vs tier I `None` (skill n/a) — tier II lepszy: **n/a (brak tier I)**
-- h=30: najlepszy tier II `lstm` (skill 0.0381) vs tier I `None` (skill n/a) — tier II lepszy: **n/a (brak tier I)**
+- h=1: najlepszy tier II `lstm` (skill 0.4811) vs tier I `bilstm` (skill 0.4811) — tier II lepszy: **nie**
+- h=7: najlepszy tier II `lstm` (skill 0.1295) vs tier I `bilstm` (skill 0.1295) — tier II lepszy: **nie**
+- h=30: najlepszy tier II `lstm` (skill 0.0381) vs tier I `bilstm` (skill 0.0381) — tier II lepszy: **nie**
 
 Skill = 1 − MSE_model/MSE_benchmark. Większa złożoność (deep/TFT/transformer/SVM) nie gwarantuje poprawy względem tier I; sekcja powyżej porównuje najlepszy skill vs naive.
 

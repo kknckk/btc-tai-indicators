@@ -31,11 +31,42 @@ def merge(base: dict, extra: dict) -> dict:
         cur.update(block)
         horizons[h] = cur
     out["horizons"] = horizons
-    if extra.get("tier1_comparison"):
-        comp = dict(base.get("tier1_comparison", {}))
-        comp.update(extra["tier1_comparison"])
-        out["tier1_comparison"] = comp
     return out
+
+
+def recompute_tier1_comparison(out: dict, runner) -> None:
+    """Po scaleniu przelicza tier1_comparison z PELNEGO zbioru modeli tier2.
+
+    Kopiowanie tego bloku z pliku czastkowego (np. GPU z 3 z 4 modeli)
+    falszowaloby wniosek 'nailepszy model tier II' — patrz review f4e01bf.
+    """
+    if "tier1_comparison" not in out and not hasattr(runner, "_best_tier1_skill"):
+        return
+    comp: dict = {}
+    import math
+
+    for hs, block in out.get("horizons", {}).items():
+        t1_name, t1_skill = runner._best_tier1_skill(hs)
+        best_t2, best_t2_skill = None, None
+        for m, row in block.items():
+            sk = row.get("skill_vs_naive")
+            if sk is None or not math.isfinite(sk):
+                continue
+            if best_t2_skill is None or sk > best_t2_skill:
+                best_t2_skill, best_t2 = float(sk), m
+        comp[hs] = {
+            "best_tier1_model": t1_name,
+            "best_tier1_skill_vs_naive": t1_skill,
+            "best_tier2_model": best_t2,
+            "best_tier2_skill_vs_naive": best_t2_skill,
+            "tier2_beats_tier1_skill": (
+                None
+                if t1_skill is None or best_t2_skill is None
+                else bool(best_t2_skill > t1_skill)
+            ),
+        }
+    if comp:
+        out["tier1_comparison"] = comp
 
 
 def main() -> None:
@@ -46,6 +77,7 @@ def main() -> None:
     base = json.loads(args.base.read_text(encoding="utf-8"))
     extra = json.loads(args.extra.read_text(encoding="utf-8"))
     out = merge(base, extra)
+    recompute_tier1_comparison(out, importlib.import_module(RUNNER_BY_NAME[args.base.stem]))
     args.base.write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     md_path = args.base.with_suffix(".md")
     module = importlib.import_module(RUNNER_BY_NAME[args.base.stem])

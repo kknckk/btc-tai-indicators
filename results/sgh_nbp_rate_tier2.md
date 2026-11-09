@@ -30,9 +30,9 @@ Modele: VAR, BVAR (ridge/Minnesota-lite), SVAR (Cholesky, fallback VAR), oczekiw
 
 ## Tier II vs tier I (skill vs naive)
 
-- h=1: najlepszy tier II `svar` (skill 0.3752) vs tier I `ordered_probit` (skill 0.7440) — tier II lepszy: **nie**
-- h=3: najlepszy tier II `svar` (skill -0.1169) vs tier I `ordered_logit` (skill 0.7784) — tier II lepszy: **nie**
-- h=12: najlepszy tier II `rpp_nlp` (skill -0.7828) vs tier I `ordered_logit` (skill 0.5113) — tier II lepszy: **nie**
+- h=1: najlepszy tier II `expectations_comm` (skill 0.6058) vs tier I `ordered_probit` (skill 0.7440) — tier II lepszy: **nie**
+- h=3: najlepszy tier II `expectations_comm` (skill 0.6011) vs tier I `ordered_logit` (skill 0.7784) — tier II lepszy: **nie**
+- h=12: najlepszy tier II `expectations_comm` (skill 0.5516) vs tier I `ordered_logit` (skill 0.5113) — tier II lepszy: **tak**
 
 Skill = 1 − MSE_model/MSE_benchmark. Złożoność (VAR/ML/NLP) nie gwarantuje poprawy względem tier I; sekcja powyżej porównuje najlepszy skill vs naive w każdym horyzoncie.
 

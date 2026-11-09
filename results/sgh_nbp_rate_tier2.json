@@ -1194,23 +1194,23 @@
     "1": {
       "best_tier1_model": "ordered_probit",
       "best_tier1_skill_vs_naive": 0.7439894045099358,
-      "best_tier2_model": "svar",
-      "best_tier2_skill_vs_naive": 0.37517015714537894,
+      "best_tier2_model": "expectations_comm",
+      "best_tier2_skill_vs_naive": 0.6058283183605597,
       "tier2_beats_tier1_skill": false
     },
     "3": {
       "best_tier1_model": "ordered_logit",
       "best_tier1_skill_vs_naive": 0.7784257923204436,
-      "best_tier2_model": "svar",
-      "best_tier2_skill_vs_naive": -0.11694009500421254,
+      "best_tier2_model": "expectations_comm",
+      "best_tier2_skill_vs_naive": 0.6010766784316294,
       "tier2_beats_tier1_skill": false
     },
     "12": {
       "best_tier1_model": "ordered_logit",
       "best_tier1_skill_vs_naive": 0.5112692316653333,
-      "best_tier2_model": "rpp_nlp",
-      "best_tier2_skill_vs_naive": -0.7827581606151717,
-      "tier2_beats_tier1_skill": false
+      "best_tier2_model": "expectations_comm",
+      "best_tier2_skill_vs_naive": 0.5516287618907776,
+      "tier2_beats_tier1_skill": true
     }
   }
 }

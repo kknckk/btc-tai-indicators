@@ -55,5 +55,27 @@ def get_paper_results(paper_id: str):
                 return old_res["paper3"]
                 
         raise HTTPException(status_code=404, detail=f"Brak wyników dla {paper_id}.")
-        
+
     return results[key]
+
+
+def _group_results(filename: str, label: str):
+    results = load_json_results(filename)
+    if not results:
+        raise HTTPException(status_code=404, detail=f"Brak wyników grupy {label}.")
+    return results
+
+
+@router.get("/econometrics")
+def get_econometrics_results():
+    return _group_results("econometrics_results.json", "econometrics")
+
+
+@router.get("/strategies")
+def get_strategy_results():
+    return _group_results("strategy_results.json", "strategies")
+
+
+@router.get("/ml")
+def get_ml_results():
+    return _group_results("ml_results.json", "ml")
