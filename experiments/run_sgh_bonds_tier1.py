@@ -192,7 +192,7 @@ def main(argv: list[str] | None = None) -> None:
     json_path = RESULTS / "sgh_bonds_pl_tier1.json"
     json_path.write_text(json.dumps(_clean(out), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     write_md(out, RESULTS / "sgh_bonds_pl_tier1.md")
-    logger.info("Wrote %s and %s", json_path, RESULTS / "sgh_bonds_pl_tier1.md")
+    logger.info("Wrote %s and %s", json_path, json_path.with_suffix(".md"))
 
 
 if __name__ == "__main__":

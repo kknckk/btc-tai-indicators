@@ -35,10 +35,21 @@ def fetch_nbp_full(code: str) -> pd.Series:
     while cur <= today:
         end = min(cur + timedelta(days=89), today)
         try:
-            ch = ma._fetch_nbp(code, start=cur, end=end)
+            ch = None
+            last_err = None
+            for _ in range(3):  # retry per chunk — brak cichej luki
+                try:
+                    ch = ma._fetch_nbp(code, start=cur, end=end)
+                    break
+                except Exception as e:
+                    last_err = e
+                    time.sleep(1.5)
+            if ch is None:
+                raise RuntimeError(f"NBP {code} {cur}..{end}: 3x fail ({last_err})")
             chunks.append(ch)
-        except Exception as e:  # dluga historia; pojedynczy chunk nie moze zabic calego
-            print(f"  NBP {code} {cur}..{end}: WARN {str(e)[:80]}")
+        except Exception as e:
+            print(f"  NBP {code} {cur}..{end}: FAIL {str(e)[:80]}")
+            raise
         cur = end + timedelta(days=1)
         time.sleep(0.2)  # grzecznosc wobec API
     if not chunks:
@@ -62,20 +73,30 @@ def fetch_wig20_biznesradar() -> pd.Series:
     s = requests.Session()
     s.headers.update({"User-Agent": "Mozilla/5.0"})
     rows: list[tuple[pd.Timestamp, float]] = []
-    page, max_pages = 1, 400
+    page, max_pages, consec_http_err = 1, 400, 0
     while page <= max_pages:
         url = f"https://www.biznesradar.pl/notowania-historyczne/WIG20,{page}"
-        t = s.get(url, timeout=30).text
-        tr = re.findall(r'<tr[^>]*>(.*?)</tr>', t, re.S)
+        resp = s.get(url, timeout=30)
+        if resp.status_code != 200:
+            consec_http_err += 1
+            if consec_http_err >= 3:
+                raise RuntimeError(
+                    f"biznesradar HTTP {resp.status_code} x{consec_http_err} przy page={page} — odmowa przerwania z niekompletnym cache"
+                )
+            time.sleep(2.0)
+            continue
+        consec_http_err = 0
+        t = resp.text
+        tr = re.findall(r"<tr[^>]*>(.*?)</tr>", t, re.S)
         got = 0
         for row in tr:
-            cells = [c.strip() for c in re.findall(r'<t[dh][^>]*>([^<]*)</t[dh]>', row)]
+            cells = [c.strip() for c in re.findall(r"<t[dh][^>]*>([^<]*)</t[dh]>", row)]
             if len(cells) >= 5 and re.match(r"\d{2}\.\d{2}\.\d{4}", cells[0]):
                 dt = pd.to_datetime(cells[0], format="%d.%m.%Y")
                 close = float(cells[4].replace(" ", "").replace(",", "."))
                 rows.append((dt, close))
                 got += 1
-        if got == 0:  # koniec paginacji
+        if got == 0:  # status 200 bez wierszy tabeli = rzeczywisty koniec paginacji
             break
         page += 1
         time.sleep(0.3)
