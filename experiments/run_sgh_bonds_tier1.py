@@ -95,6 +95,7 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
                     costs_bps=costs,
                     seed=cfg["seed"],
                     max_folds=max_folds,
+            model_name=name,
                     target=spec,
                     series_id=f"{cfg['series_id']}/{tenor}",
                     causal_check=not demo,

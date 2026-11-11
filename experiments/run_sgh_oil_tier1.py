@@ -113,6 +113,7 @@ def run_fixed(
                 costs_bps=costs,
                 seed=cfg["seed"],
                 max_folds=max_folds,
+            model_name=name,
                 target=spec,
                 series_id=cfg["series_id"],
                 causal_check=not demo,

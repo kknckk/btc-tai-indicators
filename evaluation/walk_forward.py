@@ -124,6 +124,7 @@ def run_walk_forward(
     max_folds: Optional[int] = None,
     target: TargetSpec | None = None,
     series_id: str = "btc",
+    model_name: str | None = None,
 ) -> dict:
     """Expanding walk-forward evaluation. Returns a dict with per-origin predictions (``frame``),
     ``folds`` (boundaries + model diagnostics) and ``metrics`` (point, vol, economic).
@@ -180,7 +181,11 @@ def run_walk_forward(
             info["diagnostics"] = model.diagnostics()
         folds.append(info)
         if k % 20 == 0:
-            logger.info("h=%d fold %d/%d test %s..%s", h, k + 1, len(starts), info["test_start"], info["test_end"])
+            logger.info(
+                "h=%d %s%s fold %d/%d test %s..%s",
+                h, series_id, f"/{model_name}" if model_name else "",
+                k + 1, len(starts), info["test_start"], info["test_end"],
+            )
 
     pred = pd.concat(preds)
     vol_pred = pd.concat(vols) if vols else None
