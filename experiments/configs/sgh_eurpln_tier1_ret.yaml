@@ -1,0 +1,49 @@
+series_id: eurpln
+target_kind: log_return
+results_stem: sgh_eurpln_tier1_ret
+horizons: [1, 7, 30]
+seed: 42
+val_frac: 0.2
+walk_forward:
+  min_train: 504
+  step: 21
+  embargo: 0
+costs_bps: [10, 20]
+models:
+  - patchtst
+  - stacking
+  - pso_lstm
+patchtst:
+  window: 128
+  patch_len: 16
+  stride: 16
+  d_model: 64
+  nhead: 4
+  num_layers: 2
+  dim_feedforward: 128
+  dropout: 0.1
+  channel_independent: true
+  lr: 0.001
+  batch_size: 64
+  max_epochs: 80
+  patience: 10
+  val_fraction: 0.15
+stacking:
+  ridge_alpha: 1.0
+  xgb:
+    n_estimators: 200
+    max_depth: 4
+    learning_rate: 0.05
+    val_fraction: 0.15
+    early_stopping_rounds: 20
+  gru:
+    window: 42
+    hidden: 32
+    max_epochs: 40
+    patience: 8
+pso_lstm:
+  n_particles: 8
+  n_iters: 4
+  gru:
+    max_epochs: 35
+    patience: 6

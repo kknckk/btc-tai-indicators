@@ -42,8 +42,8 @@ def _load_cfg(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def _target(h: int) -> TargetSpec:
-    return TargetSpec(kind="level", price_col=PRICE_COL, horizon=h, unit="day", naive_window=1)
+def _target(h: int, cfg: dict | None = None) -> TargetSpec:
+    return TargetSpec(kind=(cfg or {}).get("target_kind", "level"), price_col=PRICE_COL, horizon=h, unit="day", naive_window=1)
 
 
 def _clean(obj):
@@ -101,7 +101,7 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
         "tier1_comparison": {},
     }
     for h in cfg["horizons"]:
-        spec = _target(h)
+        spec = _target(h, cfg)
         res_h: dict = {}
         frames: dict[str, pd.DataFrame] = {}
         for name in MODELS:
@@ -241,9 +241,9 @@ def main(argv: list[str] | None = None) -> None:
         panel = build_usdpln_daily_panel(use_cache_only=args.cache_only)
     out = run_fixed(cfg, panel, max_folds=args.max_folds, demo=args.demo)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    json_path = RESULTS / "sgh_usdpln_tier2.json"
+    json_path = RESULTS / (cfg.get("results_stem", "sgh_usdpln_tier2") + ".json")
     json_path.write_text(json.dumps(_clean(out), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    write_md(out, RESULTS / "sgh_usdpln_tier2.md")
+    write_md(out, RESULTS / (cfg.get("results_stem", "sgh_usdpln_tier2") + ".md"))
     logger.info("Wrote %s and %s", json_path, RESULTS / "sgh_usdpln_tier2.md")
 
 

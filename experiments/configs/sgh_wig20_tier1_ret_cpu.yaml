@@ -1,0 +1,47 @@
+costs_bps:
+- 10
+- 20
+egarch:
+  dist_grid:
+  - normal
+  - t
+  mean_lags_grid:
+  - 0
+  - 1
+event_study:
+  quantile_grid:
+  - 0.85
+  - 0.9
+  - 0.95
+garch:
+  dist_grid:
+  - normal
+  - t
+  mean_lags_grid:
+  - 0
+  - 1
+gjr_garch:
+  dist_grid:
+  - normal
+  - t
+  mean_lags_grid:
+  - 0
+  - 1
+horizons:
+- 1
+- 7
+- 30
+models:
+- garch
+- egarch
+- gjr_garch
+- event_study
+results_stem: sgh_wig20_tier1_ret_cpu
+seed: 42
+series_id: wig20
+target_kind: log_return
+val_frac: 0.2
+walk_forward:
+  embargo: 0
+  min_train: 504
+  step: 21
