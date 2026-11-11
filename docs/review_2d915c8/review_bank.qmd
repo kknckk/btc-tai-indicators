@@ -323,6 +323,37 @@ Pozostałe obszary listy (obligacje, kredyty ×3, depozyty, TFI, EUR/USD-PLN, WI
 | kalibracja przedziałów i ocena ekonomiczna dla wszystkich serii z listy |
 
 
+# Rozszerzenie na 6 publicznych serii — protokół
+
+Wykonane po stronie własnej (bez usuwania czegokolwiek z dotychczasowego
+ustawienia): do listy obliczeniowej dołożone serie publiczne — EUR/PLN, USD/PLN,
+WIG20, złoto, ropa, pszenica — z celem zdefiniowanym jako **log-zwrot** zamiast
+poziomu (tak jak w Części II dla bitcoina; konsekwencja wniosku o RW-clone na
+poziomach) i z zapisem predykcji per-origin do dalszych testów zbiorczych.
+
+| seria | źródło | początek | nota |
+|---|---|---|---|
+| EUR/PLN, USD/PLN | NBP (API, rekordy dzienne) | pełna dostępna historia | paginacja z retry |
+| WIG20 | biznesradar | 1991-04-16 | **8 448 obserwacji** → 379 foldów (h=1) |
+| złoto, ropa, pszenica | Yahoo Finance | pełna dostępna historia | — |
+
+Cechy wspólnego protokołu na tych seriach:
+
+* ten sam harness walk-forward co dla bitcoina (expanding, purge, embargo,
+  identyczne progi i koszty transakcyjne) — wyniki na 6 seriach są więc
+  wprost porównywalne z wynikami BTC;
+* cele log-zwrotowe (`target_kind` w configach `*_ret_cpu.yaml`); poziom
+  rekonstruowany zgodnie z R5;
+* predykcje per-origin zapisywane do `results/preds_sgh/*.parquet` — to wejście
+  dla zbiorczego Model Confidence Set i testów Diebolda-Mariano (R1)
+  liczonych **razem po wszystkich seriach**, bez ponownego treningu;
+* tier I: rodzina GARCH (GARCH, EGARCH, GJR, event study) na horyzontach
+  1/7/30; tier II: modele ML jak na pozostałych seriach z programu.
+
+Liczby z tych przebiegów trafią do tabeli w Części II po zakończeniu
+bieżącego przebiegu CPU (łącznie z testami DM/MCS zagregowanymi po seriach).
+
+
 # Rekomendacje dla zespołu SGH — jak dokładnie wykonać naprawy
 
 Poniższe działania są sformułowane operacyjnie: co zrobić, w jakiej kolejności,
