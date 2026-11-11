@@ -22,6 +22,7 @@ import yaml
 
 from evaluation.dm_test import dm_test
 from evaluation.targets import TargetSpec
+from evaluation.preds_io import save_pred_frames
 from evaluation.walk_forward import run_walk_forward
 from experiments.config import ROOT
 from experiments.sgh.eurpln_panel import (
@@ -34,6 +35,7 @@ from experiments.sgh.tier2_eurpln import model_factory
 
 logger = logging.getLogger("sgh_eurpln_tier2")
 RESULTS = ROOT / "results"
+PREDS_DIR = ROOT / "results" / "preds_sgh"
 TIER1_MODELS = ("patchtst", "stacking", "pso_lstm")
 MODELS = ("vmd_cnn_bilstm", "anomaly_transformer", "tft")
 
@@ -147,6 +149,7 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
             res_h[m]["skill_vs_naive"] = float(1.0 - mse_m / mse_nv) if mse_nv and mse_nv > 0 else None
         hs = str(h)
         out["horizons"][hs] = res_h
+        save_pred_frames(frames, PREDS_DIR, cfg.get("results_stem", "sgh_eurpln_tier2"), h)
         t1_name, t1_skill = _best_tier1_skill(hs)
         best_t2, best_t2_skill = None, None
         for m in MODELS:

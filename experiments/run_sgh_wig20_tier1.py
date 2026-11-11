@@ -21,6 +21,7 @@ import yaml
 
 from evaluation.dm_test import dm_test
 from evaluation.targets import TargetSpec
+from evaluation.preds_io import save_pred_frames
 from evaluation.walk_forward import run_walk_forward
 from experiments.config import ROOT
 from experiments.sgh.tier1_wig20 import model_factory as wig20_model_factory
@@ -33,6 +34,7 @@ from experiments.sgh.wig20_panel import (
 
 logger = logging.getLogger("sgh_wig20_tier1")
 RESULTS = ROOT / "results"
+PREDS_DIR = ROOT / "results" / "preds_sgh"
 MODELS = ("garch", "egarch", "gjr_garch", "event_study")
 
 
@@ -135,6 +137,7 @@ def run_fixed(cfg: dict, panel: pd.DataFrame, max_folds: int | None = None, demo
             res_h[m]["skill_vs_rw"] = float(1.0 - mse_m / mse_rw) if mse_rw and mse_rw > 0 else None
             res_h[m]["skill_vs_naive"] = float(1.0 - mse_m / mse_nv) if mse_nv and mse_nv > 0 else None
         out["horizons"][str(h)] = res_h
+        save_pred_frames(frames, PREDS_DIR, cfg.get("results_stem", "sgh_wig20_tier1"), h)
     return out
 
 
