@@ -25,3 +25,15 @@ w zaimportowanym module). Pozostałe 4 configi odpalą nowy kod i zapiszą ramki
 7. Zostaw notkę w HANDOFF co zrobiono.
 
 NIE RÓB: nie zmieniać configów, nie ruszać farmy NLFSR, nie wysyłać nic na zewnątrz.
+
+## PILNE (wykryte po configu 1, 12.11 ~01:10 UTC): metryki ret_cpu skopane
+Wyniki `results/sgh_wig20_tier1_ret_cpu.json/.md`: RMSE ~2201 (punkty indeksu!)
+przy celu log-zwrotowym, skill_vs_rw ≈ -1.8e10, DM-p = 0/None. Hipoteza:
+przy `target_kind=log_return` harness/aggregation miesza jednostki — modele
+przewidują zwrot, a metryki/`vs_benchmarks` liczone na rekonstruowanym poziomie;
+benchmark naive (targets.py:105) zwraca h*mean(logret), RW=0 — niespójne skale.
+ZADANIE (priorytet nad checklistą): zdiagnozować gdzie jednostki się mieszają
+(runner wig20 tier1: sekcje DM/skill + evaluation/metrics), naprawić, dodać test
+regresyjny (mała seria syntetyczna: przy poprawnym setupie skill skonczony, RMSE
+w jednostkach zwrotu), dopiero potem rerun configu 1 i reszta checklisty.
+Pliki starego przebiegu zachowaj jako *_BROKEN.json/md (nie usuwaj — ślad audytowy).
