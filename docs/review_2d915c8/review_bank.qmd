@@ -15,8 +15,8 @@ format:
 
 - Raport SGH pokazuje, że potok technologiczny działa (dane wchodzą, modele się liczą, Bank ma sposób ich odbioru), ale nie udowadnia, że dowolny model przewiduje rynek lepiej niż reguła „jutro będzie jak dziś”.
 - Najmocniejszy wynik raportu dotyczy prognozowania zmienności rynku (nie poziomów cen), i to wobec słabego punktu odniesienia.
-- Wynik dla bitcoina (+1,8% mniejszy błąd od reguły naiwnej na 30 dni) pochodzi z danych kończących się 31.03.2025, a policzona przeze mnie granica wykrywalności pokazuje, że tak małej różnicy nie da się na tej próbie odróżnić od przypadku (część I, z liczbami).
-- Z listy zlecenia (14 obszarów, ok. 80 rodzin modeli) raport SGH nie realizuje w pełni żadnego obszaru, częściowo dotyka siedmiu, sześciu nie dotyka wcale — w tym wszystkich trzech obszarów kredytowych. Tabela model po modelu w części I.
+- Wynik dla bitcoina (+1,8% mniejszy błąd od reguły naiwnej na 30 dni) pochodzi z danych kończących się 31.03.2025 i nie przeszedł żadnego testu istotności; przy 549 nakładających się prognozach (orientacyjnie ~18 bloków 30-dniowych) tak mała różnica najpewniej nie odróżnia się od przypadku, ale rozstrzygnąć to może dopiero test na szeregu parowanych strat (część I, rachunek warunkowy).
+- Z listy zlecenia (14 obszarów, ok. 80 rodzin modeli) raport SGH nie realizuje w pełni żadnego obszaru; 8 z 14 obszarów ma w nim reprezentację, 6 nie występuje wcale — w tym wszystkich trzech obszarów kredytowych. Tabela model po modelu w części I.
 - Mój system oceny modeli (prognozy symulowane „jak na żywo”, blokada podglądania przyszłości, testy istotności, koszty transakcyjne) jest mocniejszy niż protokół opisany w raporcie — i wykazał własne wady, które wykrywam i próbuję jeszcze naprawić (część II).
 - (po kosztach transakcyjnych) żaden z modeli bitcoinowych nie ma istotnej przewagi, a model drzewiasty na horyzoncie 30 dni jest obiektywnie gorszy od prostych benchmarków — testy nie przeszły (p=0,006). To wynik negatywny, ale zgodny z literaturą: bitcoin jest trudny do prognozowania.
 Policzono 190 kombinacji modelu, zestawu cech i horyzontu; 188 dało pełny zestaw prognoz (dwa braki dotyczą wariantu dekompozycyjnego dla ropy). Przeprowadzono backtest chronologiczny (symulację prognoz „jak na żywo”) i przygotowano sposób przekazania modeli do infrastruktury Banku (format ONNX, kontrakt „aktualny poziom + prognozowana zmiana”). Raport sam podkreśla, że jego „zaliczenie” oznacza poprawne przejście testu integracyjnego, a nie akceptację jakiegokolwiek modelu do zastosowania —  i to jest uczciwe sformułowanie.
@@ -57,7 +57,7 @@ Lista zlecenia wymienia 14 obszarów predykcji z konkretnymi rodzinami modeli w 
 
 | Obszar z listy | Liczba rodzin z listy | Co raport użył dla tego obszaru | Pokrycie listy |
 |---|---|---|---|
-| Stopa NBP | 11 | ARIMA, VAR, BVAR (poziom); ordered logit/probit (kierunek decyzji) | 4 z 11. Brak: reguły Taylora, modeli wyprzedzających, SVAR, modeli oczekiwań, lasu, boostingu, NLP. Użyta ARIMA nie występuje na liście dla tego obszaru |
+| Stopa NBP | 11 | ARIMA, VAR, BVAR (poziom); ordered logit/probit (kierunek decyzji) | 4 z 11 wymienionych rodzin modeli, 7 brakujących. Brak: reguły Taylora, modeli wyprzedzających, SVAR, modeli oczekiwań, lasu, boostingu, NLP. Użyta ARIMA nie występuje na liście dla tego obszaru |
 | Obligacje 2/5/7/10Y | 11 | estymacja krzywej (DNS) + prognoza jej czynników modelami AR, VAR, Ridge, PLS, drzewa, PCA | częściowo (ok. 2–3 z 11). Nelson–Siegel/Svensson/Diebold–Li służą wyłącznie do wygładzenia danych wejściowych, nie jako modele prognostyczne; brak AFNS, VARX, PCA-LSTM, LSTM na czynnikach |
 | Kredyty konsumpcyjne | 13 | obszar nie występuje w raporcie | 0 z 13 |
 | Kredyty hipoteczne | 11 | brak | 0 z 11 |
@@ -74,7 +74,7 @@ Lista zlecenia wymienia 14 obszarów predykcji z konkretnymi rodzinami modeli w 
 
 Bilans: z ok. 80 pozycji modeli na liście raport realizuje ok. 15 (tj. ~18%).
 
-Żaden z 14 obszarów nie jest zrealizowany w pełni; sześć obszarów — wszystkie trzy kredytowe, depozyty, aktywa TFI i pszenica — w raporcie w ogóle nie występują. Jednocześnie raport prezentuje kilkanaście modeli spoza listy (ARIMA niemal wszędzie, PatchTST dla bitcoina itp.).
+Dwa odrębne liczniki: dla stopy NBP raport pokrywa 4 z 11 wymienionych rodzin modeli (7 brakujących); w skali całego zlecenia 8 z 14 wymienionych obszarów ma reprezentację w raporcie SGH, a 6 nie występuje. Żaden z 14 obszarów nie jest zrealizowany w pełni; sześć obszarów — wszystkie trzy kredytowe, depozyty, aktywa TFI i pszenica — w raporcie w ogóle nie występują. Obecność obszaru nie oznacza pełnej realizacji jego modeli i horyzontów. Lista porównawcza to lista przytoczona w tym dokumencie; sam raport SGH nie zawiera listy TRD ani rozpiski tier I/II, więc do potwierdzenia kompletności zlecenia potrzebna jest pierwotna lista TRD. Jednocześnie raport prezentuje kilkanaście modeli spoza listy (ARIMA niemal wszędzie, PatchTST dla bitcoina itp.).
 
 ### Szczegóły obszar po obszarze
 
@@ -88,7 +88,7 @@ Kredyty konsumpcyjne, hipoteczne, firmowe. W raporcie nie ma żadnego z trzech b
 
 Depozyty, aktywa TFI, pszenica. Również nieobecne w raporcie.
 
-EUR/PLN i USD/PLN. Raport liczy ARIMA, VAR, BVAR, XGBoost, LSTM i TFT. Z listy zlecenia pokryty jest wyłącznie TFT (tier II). Nie ma wymienionych w tier I architektur (PatchTST, stackingu, PSO-LSTM) ani dwóch z trzech tier II (VMD-CNN-BiLSTM, Anomaly Transformer). Ciekawe i warte rozmowy: wyniki VAR/BVAR dla 30 dni notowań są lepsze od reguły naiwnej o ~5–6% (EUR/PLN +6,1%, USD/PLN +5,6% / +5,5%) — to wielkości powyżej diagnozowanej niżej granicy wykrywalności dla danych walutowych, ale nadal bez testu istotności – metodologia.
+EUR/PLN i USD/PLN. Raport liczy ARIMA, VAR, BVAR, XGBoost, LSTM i TFT. Z listy zlecenia pokryty jest wyłącznie TFT (tier II). Nie ma wymienionych w tier I architektur (PatchTST, stackingu, PSO-LSTM) ani dwóch z trzech tier II (VMD-CNN-BiLSTM, Anomaly Transformer). Ciekawe i warte rozmowy: wyniki VAR/BVAR dla 30 dni notowań są lepsze od reguły naiwnej o ~5–6% (EUR/PLN +6,1%, USD/PLN +5,6% / +5,5%). Są to wyniki punktowe z 31 prognoz na kurs (co 30 notowań, więc 30-sesyjne cele nie nakładają się mechanicznie), bez testu istotności. Czy są wykrywalne, zależy od nieznanego rozrzutu parowanych różnic: przy c = sd(d)/średnie APE RW i dwustronnym t₃₀ ≈ 2,042 poprawa g jest istotna, gdy c < g·√31/2,042, tj. dla g = 5,5–6,1% potrzeba c poniżej ok. 0,15–0,17 (przy c = 0,10 próg wynosi ok. 3,7%, przy c = 0,20 ok. 7,3%). Brakuje: przedziałów ufności dla parowanych różnic MAPE, kontroli autokorelacji różnic strat między blokami, korekty na wybór modeli (18 konfiguracji na kurs; oba kursy na tych samych datach, więc nie są niezależnymi replikacjami) oraz analizy wrażliwości po wyłączeniu dwóch prognoz z nieaktualną ceną WTI.
 
 WIG20. ARIMA dla poziomu i EGARCH dla zmienności — z listy pokryta jedna pozycja (EGARCH). Nie ma HAR-RV ani realized volatility, czyli standardowych modeli zmienności indeksu giełdowego.
 
@@ -154,14 +154,13 @@ Najbardziej eksponowana liczba raportu: model SVR dla bitcoina lepszy od reguły
 
 | Wielkość | Wartość |
 |---|---|
-| Średni błąd bezwzględny reguły naiwnej (30 dni) | 11,73% |
-| Rozrzut parowanych różnic błędów między modelami | 0,0863 (jednostki log-zwrotu) |
-| Efektywna liczba niezależnych obserwacji (578 dni / nakładanie 30) | ~19 |
-| Błąd standardowy średniej różnicy | 0,0197 |
-| Próg wykrywalności przy ufności 95% | ±32,9% błędu |
-| Deklarowana w raporcie poprawa | +1,8% |
+| MAPE reguły naiwnej (30 dni, tabela 22 raportu) | 11,246% |
+| MAPE SVR (30 dni) | 11,047% |
+| Liczba par prognoz (momenty prognozy, test 01.09.2023–31.03.2025) | 549 |
+| Orientacyjna liczba bloków bez nakładania (549 / 30) | ~18,3 — nie jest to efektywna liczebność wyznaczona z danych |
+| Deklarowana w raporcie poprawa | +1,8% (= (11,246 − 11,047) / 11,246) |
 
-Czyli: w oknie, którym dysponował SGH, różnica błędów musiałaby wynosić około jednej trzeciej, żeby była wykrywalna. Zgłaszane 1,8% jest o rząd wielkości za małe. Żeby taką poprawę udowodnić statystycznie przy tej zmienności rynku, potrzeba ok. 6 400 niezależnych bloków 30-dniowych — czyli około 530 lat historii bitcoina xD
+Raport nie udostępnia szeregu parowanych strat SVR i RW, więc z dostępnych danych nie da się policzyć ani wariancji długookresowej różnic, ani statystyki DM dla tej pary. Poniższy rachunek jest **warunkowy**, nie jest wynikiem testu DM: *jeżeli* przyjąć odchylenie różnic strat (w skali ułamka MAPE) równe 0,0863 i ~18,3 niezależnych bloków, błąd standardowy średniej różnicy wynosi 0,0863/√18,3 ≈ 0,0202, a dwustronny próg 95% (z = 1,96) to ok. ±35% błędu RW (z t₁₇ ≈ 2,11: ok. ±38%). Przy tej samej, jawnie przyjętej wariancji wykazanie poprawy 1,8% wymagałoby ok. 7 000 niezależnych bloków 30-dniowych, tj. ok. 570 lat danych (wcześniej podawane ~530 lat wynikało z podstawienia 19 bloków i bazy 11,73%). To ilustracja rzędu wielkości zależna od założonej wariancji — bez założonej mocy testu, niestacjonarności rynku i doboru zwycięzcy spośród wielu modeli — a nie empiryczny wniosek. Właściwa ocena wymaga dziennych strat obu modeli, wariancji długookresowej z uwzględnieniem nakładania h=30 i przedziału ufności dla przewagi.
 
 Wniosek: wynik tej wielkości da się zgłaszać wyłącznie jako hipotezę do sprawdzenia na przyszłych danych; raport prezentuje go jako wynik, w rankingach ogólnych nie mówiąc, że nie poddano go żadnemu testowi.
 
@@ -263,7 +262,7 @@ Powodem jest brak ekstrapolacji, gdy cena rośnie. To potwierdza obserwację z  
 
 Bitcoin — wynik sieci BiLSTM (i pozostałych sieci).
 
-BiLSTM (z tier I listy, liczony na GPU) na wszystkich trzech horyzontach osiąga dokładnie ten sam wynik co reguła naiwna (skill 0,0000) — sieć uczy się powielać wczorajszą cenę. To samo pokazują pozostałe trzy architektury z listy: LSTM, TFT i HellFormer — wszystkie zbiegają do reguły naiwnej (skill 0,0000 na wszystkich horyzontach). Cztery niezależne architektury sieciowe dają identyczną odpowiedź: na poziomie ceny optymum leży dokładnie w „jutro = dziś”. To druga, niezależna od XGBoost/SVM linia dowodu, że poziom nie jest zadaniem z wykrywalną przewagą.
+BiLSTM (z tier I listy, liczony na GPU) oraz LSTM, TFT i HellFormer dają na wszystkich trzech horyzontach wyniki identyczne z regułą naiwną (skill 0,0000; MSE modelu równe MSE RW co do ostatniej cyfry). Nie jest to dowód, że sieci „nauczyły się” reguły naiwnej: w kodzie występuje ścieżka zastępcza — `evaluation/walk_forward.py` podaje do `predict()` tylko bieżący blok testowy (najwyżej 30 wierszy), `models/_common.py` zwraca wtedy pusty zbiór okien, gdy blok jest krótszy od okna sieci, a funkcje `predict()` (`experiments/sgh/tier1_bitcoin.py`, `tier1_wheat.py`, `tier2_eurpln.py`, `tier2_bitcoin.py`) zastępują brakującą prognozę bieżącą ceną. Przy oknach 60/63 (`experiments/configs/sgh_bitcoin_tier2_gpu.yaml`) dotyczy to każdej prognozy LSTM, TFT i HellFormera; dla BiLSTM (okno 30/60/90) udział zastąpień wymaga sprawdzenia. Wyniki te trzeba ponownie ocenić z pełnym oknem wejściowym zbudowanym z historii dostępnej w chwili każdej prognozy, podając udział rzeczywistych predykcji sieci i zastąpień RW; dopiero wtedy nadają się do oceny architektur.
 
 Stopa NBP — SVAR i NLP komunikatów RPP (domknięcie tier II).
 
@@ -288,7 +287,7 @@ GPU: cztery sieci bitcoinowe (BiLSTM, LSTM, TFT, HellFormer) i modele NBP tier I
 | Bitcoin, log-zwrot, benchmarki | reguła naiwna, HAR-RV, GJR-GARCH, XGBoost | ~160 powtórzeń symulacji „jak na żywo”, okno 2013–2026, testy DM + backtest z kosztami 10/20 pb; wynik: modele nierozróżnialne z naiwną (h=1/7), XGBoost gorszy (h=30), po kosztach wygrywa kup-i-trzymaj |
 | Bitcoin, sieci | ModernTCN (235 tys. parametrów), PatchTST (101 tys.), 3 ziarna | wynik poniżej reguły naiwnej (R² poza próbą od −0,28 do −0,85) |
 | Bitcoin, modele fundamentowe | Chronos-Bolt, TimesFM 2.5 (zero-shot, bez treningu) | ~300 punktów startowych; wynik poniżej naiwnej o 3,5–15,1%; przedziały ufności źle skalibrowane przed naszą poprawką |
-| Bitcoin, poziom (eksperyment kontrolny) | XGBoost, SVM, BiLSTM, LSTM, TFT, HellFormer | drzewiaste katastrofalnie słabe; wszystkie cztery sieci (BiLSTM, LSTM, TFT, HellFormer) tożsame z naiwną (skill 0,0000 na h=1/7/30) — potwierdzenie, że poziom nie jest właściwym celem |
+| Bitcoin, poziom (eksperyment kontrolny) | XGBoost, SVM, BiLSTM, LSTM, TFT, HellFormer | drzewiaste katastrofalnie słabe; wszystkie cztery sieci (BiLSTM, LSTM, TFT, HellFormer) tożsame z naiwną (skill 0,0000 na h=1/7/30) — skutek ścieżki zastępczej RW przy krótkim bloku testowym, do ponownej oceny z pełnym oknem |
 | Stopa NBP, tier I | reguła Taylora, liniowy wyprzedzający, ordered logit, ordered probit | 312 obserwacji miesięcznych, ~40 powtórzeń; ordered probit +14,4% vs naiwna (h=1) |
 | Stopa NBP, tier II | VAR, BVAR (prior Minnesota), oczekiwania+komunikacja, las losowy, gradient boosting, SVAR, NLP komunikatów RPP | wszystkie ≤ reguła naiwna na krótkich horyzontach; SVAR i NLP gorsze wszędzie |
 
@@ -403,10 +402,11 @@ Wynik zglosic jako „potwierdzone/odrzucone", nie jako kolejny ranking.
 
 **Dlaczego:** wybranie modelu na starym oknie i ocena na starym oknie to
 sprzawnosc w probie, nie umiejetnosc prognozowania. Dodatkowo deklarowana
-wielkosc (+1,8% MAPE) jest o rzad wielkosci ponizej progu wykrywalnosci przy
-tym oknie — nawet gdyby model byl naprawde lepszy, ta proba jest za mala, zeby
-to pokazac (nasz rachunek mocy: ~530 lat danych) — wiec raportowac wyelacznie
-z pelnym testem i korekta wielokrotnosci.
+wielkosc (+1,8% MAPE) przy tym oknie najpewniej nie odroznia sie od przypadku
+— nawet gdyby model byl naprawde lepszy, ta proba moze byc za mala, zeby
+to pokazac (nasz rachunek warunkowy przy jawnie przyjetej wariancji daje
+setki lat danych; to ilustracja, nie wynik testu DM) — wiec raportowac
+wylacznie z pelnym testem na parowanych stratach i korekta wielokrotnosci.
 
 ## R4. Kierunek decyzji RPP: dane z dnia decyzji, pelna proba, pelna macierz
 
@@ -431,9 +431,10 @@ z poziomowymi wylacznie jako eksperyment kontrolny.
 **Dlaczego:** nasze kontrolne przebiegi poziomowe pokazaly jednoznacznie:
 drzewiaste modele katastrofalnie przegrywaja z regula naiwna (brak
 ekstrapolacji przy nowych rekordach — dokladnie to samo obserwuje raport
-w punkcie o zlocie), a cztery niezalezne architektury neuronowe zbiegaja do
-skopiowania reguly naiwinij (skill dokladnie 0,0000). Poziom nie jest
-zadaniem, na ktorym da sie wykazac przewage.
+w punkcie o zlocie). Wyniki czterech architektur neuronowych identyczne
+z regula naiwna (skill dokladnie 0,0000) wynikaja ze sciezki zastepczej RW
+przy krotkim bloku testowym i wymagaja ponownej oceny z pelnym oknem
+wejsciowym, zanim posluza jako argument.
 
 ## R6. Obligacje: raportowanie na rentownosciach obserwowanych
 
@@ -470,6 +471,10 @@ deklaracja ostatniej daty i kontrola „co bylo znane w dniu prognozy"
 rzedu setek procent przy 3 ziarnach; przy 10 ziarnach medianowy wynik jest
 odporny na „szczesliwe" ziarno. Deklaracje swiezosci danych to warunek
 odtwarzalnosci wspolnego backtestu z Bankiem.
+
+## Uwagi z niezależnego audytu liczbowego (sol)
+
+Po niezależnym audycie liczbowym poprawiono: rachunek istotności +1,8% dla BTC (D1: MAPE RW 11,246%, 549 par, próg i lata jako rachunek warunkowy, nie wynik DM), interpretację wyników sieci identycznych z RW jako skutku ścieżki zastępczej (D3), rozdzielenie liczników pokrycia „4 z 11” i „8 z 14” (D5) oraz opis przewag FX jako wyników punktowych z 31 prognoz bez stwierdzenia o przekroczeniu granicy wykrywalności (D7); pełny audyt: [SOL_AUDIT_BANK.md](SOL_AUDIT_BANK.md).
 
 # Publikacje wybrane do odtworzenia
 

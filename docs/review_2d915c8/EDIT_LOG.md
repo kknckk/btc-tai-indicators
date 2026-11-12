@@ -1,0 +1,2 @@
+- 2026-11-12 — review_bank.qmd: korekty wg SOL_AUDIT_BANK.md (D1 istotność BTC: MAPE RW 11,246%, 549 par, próg/lata jako rachunek warunkowy; D3 sieci = RW przez ścieżkę zastępczą; D5 rozdzielone 4/11 i 8/14 + potrzeba listy TRD; D7 FX jako wyniki punktowe z 31 prognoz, warunek c i braki).
+  Spójnie poprawione R3 i R5 oraz wiersz tabeli modeli BTC-poziom; dodano „Uwagi z niezależnego audytu liczbowego (sol)” na końcu Rekomendacji; przerenderowano (review_bank.docx).
