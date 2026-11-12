@@ -1,0 +1,980 @@
+% =====================================================================
+% references_dodatki.bib — uzupełnienia do references.bib (review_bank)
+%
+% Weryfikacja (2026-11-12): każdy DOI w części ZWERYFIKOWANE
+%   (1) rozwiązuje się na https://doi.org/<doi> — HEAD, kod 302,
+%   (2) ma zgodne metadane (tytuł, autorzy, czasopismo, tom, numer, strony)
+%       w Crossref API (api.crossref.org/works) albo — dla DOI arXiv
+%       10.48550/* — w DataCite API (api.datacite.org/dois).
+% Rok = rok wydania numeru drukowanego (Crossref podaje czasem rok
+% publikacji online, np. RFS: 2007 vs tom 21/2008).
+% Strona końcowa uzupełniona ręcznie tam, gdzie Crossref podaje tylko
+% stronę początkową (JSTOR: 10.2307/*, AMS Notices) — oznaczone komentarzem.
+%
+% Żaden klucz nie dubluje kluczy z references.bib.
+% =====================================================================
+
+
+% =====================================================================
+% ZWERYFIKOWANE
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% Zmienność: GARCH, zmienność zrealizowana, HAR, SV, GARCH-MIDAS
+% ---------------------------------------------------------------------
+
+@article{andersenbollerslev1998,
+  author  = {Andersen, Torben G. and Bollerslev, Tim},
+  title   = {Answering the Skeptics: Yes, Standard Volatility Models Do Provide Accurate Forecasts},
+  journal = {International Economic Review},
+  year    = {1998},
+  volume  = {39},
+  number  = {4},
+  pages   = {885--905},
+  doi     = {10.2307/2527343},
+}
+% strona końcowa uzupełniona ręcznie (Crossref: 885)
+
+@article{abdl2003rv,
+  author  = {Andersen, Torben G. and Bollerslev, Tim and Diebold, Francis X. and Labys, Paul},
+  title   = {Modeling and Forecasting Realized Volatility},
+  journal = {Econometrica},
+  year    = {2003},
+  volume  = {71},
+  number  = {2},
+  pages   = {579--625},
+  doi     = {10.1111/1468-0262.00418},
+}
+
+@article{bollerslevpattonquaedvlieg2016harq,
+  author  = {Bollerslev, Tim and Patton, Andrew J. and Quaedvlieg, Rogier},
+  title   = {Exploiting the Errors: A Simple Approach for Improved Volatility Forecasting},
+  journal = {Journal of Econometrics},
+  year    = {2016},
+  volume  = {192},
+  number  = {1},
+  pages   = {1--18},
+  doi     = {10.1016/j.jeconom.2015.10.007},
+}
+
+@article{pattonsheppard2015,
+  author  = {Patton, Andrew J. and Sheppard, Kevin},
+  title   = {Good Volatility, Bad Volatility: Signed Jumps and the Persistence of Volatility},
+  journal = {Review of Economics and Statistics},
+  year    = {2015},
+  volume  = {97},
+  number  = {3},
+  pages   = {683--697},
+  doi     = {10.1162/REST_a_00503},
+}
+
+@article{kimshephardchib1998sv,
+  author  = {Kim, Sangjoon and Shephard, Neil and Chib, Siddhartha},
+  title   = {Stochastic Volatility: Likelihood Inference and Comparison with {ARCH} Models},
+  journal = {Review of Economic Studies},
+  year    = {1998},
+  volume  = {65},
+  number  = {3},
+  pages   = {361--393},
+  doi     = {10.1111/1467-937X.00050},
+}
+% Crossref ma literówkę w nazwisku („Shepherd”); poprawnie: Shephard
+
+@article{englegyselssohn2013garchmidas,
+  author  = {Engle, Robert F. and Ghysels, Eric and Sohn, Bumjean},
+  title   = {Stock Market Volatility and Macroeconomic Fundamentals},
+  journal = {Review of Economics and Statistics},
+  year    = {2013},
+  volume  = {95},
+  number  = {3},
+  pages   = {776--797},
+  doi     = {10.1162/REST_a_00300},
+}
+
+% ---------------------------------------------------------------------
+% Stopa NBP: reguły polityki, dane real-time, modele dyskretne
+% ---------------------------------------------------------------------
+
+@article{claridagaligertler2000,
+  author  = {Clarida, Richard and Gal{\'i}, Jordi and Gertler, Mark},
+  title   = {Monetary Policy Rules and Macroeconomic Stability: Evidence and Some Theory},
+  journal = {The Quarterly Journal of Economics},
+  year    = {2000},
+  volume  = {115},
+  number  = {1},
+  pages   = {147--180},
+  doi     = {10.1162/003355300554692},
+}
+
+@article{orphanides2001realtime,
+  author  = {Orphanides, Athanasios},
+  title   = {Monetary Policy Rules Based on Real-Time Data},
+  journal = {American Economic Review},
+  year    = {2001},
+  volume  = {91},
+  number  = {4},
+  pages   = {964--985},
+  doi     = {10.1257/aer.91.4.964},
+}
+
+@article{croushorestark2001,
+  author  = {Croushore, Dean and Stark, Tom},
+  title   = {A Real-Time Data Set for Macroeconomists},
+  journal = {Journal of Econometrics},
+  year    = {2001},
+  volume  = {105},
+  number  = {1},
+  pages   = {111--130},
+  doi     = {10.1016/S0304-4076(01)00072-0},
+}
+
+@article{hamiltonjorda2002,
+  author  = {Hamilton, James D. and Jord{\`a}, {\`O}scar},
+  title   = {A Model of the Federal Funds Rate Target},
+  journal = {Journal of Political Economy},
+  year    = {2002},
+  volume  = {110},
+  number  = {5},
+  pages   = {1135--1167},
+  doi     = {10.1086/341872},
+}
+
+% ---------------------------------------------------------------------
+% Stopa NBP tier II: BVAR, SVAR, tekst komunikatów
+% ---------------------------------------------------------------------
+
+@article{banburagiannonereichlin2010,
+  author  = {Ba{\'n}bura, Marta and Giannone, Domenico and Reichlin, Lucrezia},
+  title   = {Large {Bayesian} Vector Auto Regressions},
+  journal = {Journal of Applied Econometrics},
+  year    = {2010},
+  volume  = {25},
+  number  = {1},
+  pages   = {71--92},
+  doi     = {10.1002/jae.1137},
+}
+
+@book{kilianlutkepohl2017svar,
+  author    = {Kilian, Lutz and L{\"u}tkepohl, Helmut},
+  title     = {Structural Vector Autoregressive Analysis},
+  publisher = {Cambridge University Press},
+  address   = {Cambridge},
+  year      = {2017},
+  doi       = {10.1017/9781108164818},
+}
+
+@article{hansenmcmahon2016,
+  author  = {Hansen, Stephen and McMahon, Michael},
+  title   = {Shocking Language: Understanding the Macroeconomic Effects of Central Bank Communication},
+  journal = {Journal of International Economics},
+  year    = {2016},
+  volume  = {99},
+  number  = {S1},
+  pages   = {S114--S133},
+  doi     = {10.1016/j.jinteco.2015.12.008},
+}
+
+@article{gentzkowkellytaddy2019,
+  author  = {Gentzkow, Matthew and Kelly, Bryan and Taddy, Matt},
+  title   = {Text as Data},
+  journal = {Journal of Economic Literature},
+  year    = {2019},
+  volume  = {57},
+  number  = {3},
+  pages   = {535--574},
+  doi     = {10.1257/jel.20181020},
+}
+
+@article{primiceri2005tvpvar,
+  author  = {Primiceri, Giorgio E.},
+  title   = {Time Varying Structural Vector Autoregressions and Monetary Policy},
+  journal = {The Review of Economic Studies},
+  year    = {2005},
+  volume  = {72},
+  number  = {3},
+  pages   = {821--852},
+  doi     = {10.1111/j.1467-937X.2005.00353.x},
+}
+
+% ---------------------------------------------------------------------
+% Krzywa rentowności
+% ---------------------------------------------------------------------
+
+@techreport{svensson1994,
+  author      = {Svensson, Lars E. O.},
+  title       = {Estimating and Interpreting Forward Interest Rates: {Sweden} 1992--1994},
+  institution = {National Bureau of Economic Research},
+  type        = {NBER Working Paper},
+  number      = {4871},
+  year        = {1994},
+  doi         = {10.3386/w4871},
+}
+
+@article{dieboldrudebuscharuoba2006,
+  author  = {Diebold, Francis X. and Rudebusch, Glenn D. and Aruoba, S. Bora{\u{g}}an},
+  title   = {The Macroeconomy and the Yield Curve: A Dynamic Latent Factor Approach},
+  journal = {Journal of Econometrics},
+  year    = {2006},
+  volume  = {131},
+  number  = {1-2},
+  pages   = {309--338},
+  doi     = {10.1016/j.jeconom.2005.01.011},
+}
+
+@article{christensendieboldrudebusch2011afns,
+  author  = {Christensen, Jens H. E. and Diebold, Francis X. and Rudebusch, Glenn D.},
+  title   = {The Affine Arbitrage-Free Class of {Nelson--Siegel} Term Structure Models},
+  journal = {Journal of Econometrics},
+  year    = {2011},
+  volume  = {164},
+  number  = {1},
+  pages   = {4--20},
+  doi     = {10.1016/j.jeconom.2011.02.011},
+}
+
+@article{littermanscheinkman1991,
+  author  = {Litterman, Robert B. and Scheinkman, Jos{\'e}},
+  title   = {Common Factors Affecting Bond Returns},
+  journal = {The Journal of Fixed Income},
+  year    = {1991},
+  volume  = {1},
+  number  = {1},
+  pages   = {54--61},
+  doi     = {10.3905/jfi.1991.692347},
+}
+
+@article{duffee2002,
+  author  = {Duffee, Gregory R.},
+  title   = {Term Premia and Interest Rate Forecasts in Affine Models},
+  journal = {The Journal of Finance},
+  year    = {2002},
+  volume  = {57},
+  number  = {1},
+  pages   = {405--443},
+  doi     = {10.1111/1540-6261.00426},
+}
+
+@article{angpiazzesi2003,
+  author  = {Ang, Andrew and Piazzesi, Monika},
+  title   = {A No-Arbitrage Vector Autoregression of Term Structure Dynamics with Macroeconomic and Latent Variables},
+  journal = {Journal of Monetary Economics},
+  year    = {2003},
+  volume  = {50},
+  number  = {4},
+  pages   = {745--787},
+  doi     = {10.1016/S0304-3932(03)00032-1},
+}
+
+% ---------------------------------------------------------------------
+% Kursy walutowe (EUR/PLN, USD/PLN)
+% ---------------------------------------------------------------------
+
+@article{meeserogoff1983,
+  author  = {Meese, Richard A. and Rogoff, Kenneth},
+  title   = {Empirical Exchange Rate Models of the Seventies: Do They Fit Out of Sample?},
+  journal = {Journal of International Economics},
+  year    = {1983},
+  volume  = {14},
+  number  = {1-2},
+  pages   = {3--24},
+  doi     = {10.1016/0022-1996(83)90017-X},
+}
+% Crossref podaje tytuł bez podtytułu („Empirical exchange rate models of the seventies”)
+
+@article{cheungchinnpascual2005,
+  author  = {Cheung, Yin-Wong and Chinn, Menzie D. and Garcia Pascual, Antonio},
+  title   = {Empirical Exchange Rate Models of the Nineties: Are Any Fit to Survive?},
+  journal = {Journal of International Money and Finance},
+  year    = {2005},
+  volume  = {24},
+  number  = {7},
+  pages   = {1150--1175},
+  doi     = {10.1016/j.jimonfin.2005.08.002},
+}
+
+@article{rossi2013fx,
+  author  = {Rossi, Barbara},
+  title   = {Exchange Rate Predictability},
+  journal = {Journal of Economic Literature},
+  year    = {2013},
+  volume  = {51},
+  number  = {4},
+  pages   = {1063--1119},
+  doi     = {10.1257/jel.51.4.1063},
+}
+
+% ---------------------------------------------------------------------
+% WIG20 / akcje: przewidywalność zwrotów, event study, sentyment
+% ---------------------------------------------------------------------
+
+@article{welchgoyal2008,
+  author  = {Welch, Ivo and Goyal, Amit},
+  title   = {A Comprehensive Look at the Empirical Performance of Equity Premium Prediction},
+  journal = {The Review of Financial Studies},
+  year    = {2008},
+  volume  = {21},
+  number  = {4},
+  pages   = {1455--1508},
+  doi     = {10.1093/rfs/hhm014},
+}
+
+@article{campbellthompson2008,
+  author  = {Campbell, John Y. and Thompson, Samuel B.},
+  title   = {Predicting Excess Stock Returns Out of Sample: Can Anything Beat the Historical Average?},
+  journal = {The Review of Financial Studies},
+  year    = {2008},
+  volume  = {21},
+  number  = {4},
+  pages   = {1509--1531},
+  doi     = {10.1093/rfs/hhm055},
+}
+
+@article{brownwarner1985,
+  author  = {Brown, Stephen J. and Warner, Jerold B.},
+  title   = {Using Daily Stock Returns: The Case of Event Studies},
+  journal = {Journal of Financial Economics},
+  year    = {1985},
+  volume  = {14},
+  number  = {1},
+  pages   = {3--31},
+  doi     = {10.1016/0304-405X(85)90042-X},
+}
+% Crossref podaje tytuł bez podtytułu („Using daily stock returns”)
+
+@article{tetlock2007,
+  author  = {Tetlock, Paul C.},
+  title   = {Giving Content to Investor Sentiment: The Role of Media in the Stock Market},
+  journal = {The Journal of Finance},
+  year    = {2007},
+  volume  = {62},
+  number  = {3},
+  pages   = {1139--1168},
+  doi     = {10.1111/j.1540-6261.2007.01232.x},
+}
+
+@article{gukellyxiu2020,
+  author  = {Gu, Shihao and Kelly, Bryan and Xiu, Dacheng},
+  title   = {Empirical Asset Pricing via Machine Learning},
+  journal = {The Review of Financial Studies},
+  year    = {2020},
+  volume  = {33},
+  number  = {5},
+  pages   = {2223--2273},
+  doi     = {10.1093/rfs/hhaa009},
+}
+
+% ---------------------------------------------------------------------
+% Surowce: ropa, złoto, pszenica; dekompozycje
+% ---------------------------------------------------------------------
+
+@incollection{alquistkilianvigfusson2013,
+  author    = {Alquist, Ron and Kilian, Lutz and Vigfusson, Robert J.},
+  title     = {Forecasting the Price of Oil},
+  booktitle = {Handbook of Economic Forecasting},
+  editor    = {Elliott, Graham and Timmermann, Allan},
+  volume    = {2A},
+  publisher = {Elsevier},
+  year      = {2013},
+  pages     = {427--507},
+  doi       = {10.1016/B978-0-444-53683-9.00008-6},
+}
+
+@article{baumeisterkilian2012,
+  author  = {Baumeister, Christiane and Kilian, Lutz},
+  title   = {Real-Time Forecasts of the Real Price of Oil},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2012},
+  volume  = {30},
+  number  = {2},
+  pages   = {326--336},
+  doi     = {10.1080/07350015.2011.648859},
+}
+
+@article{huang1998emd,
+  author  = {Huang, Norden E. and Shen, Zheng and Long, Steven R. and Wu, Manli C. and Shih, Hsing H. and Zheng, Quanan and Yen, Nai-Chyuan and Tung, Chi Chao and Liu, Henry H.},
+  title   = {The Empirical Mode Decomposition and the {Hilbert} Spectrum for Nonlinear and Non-Stationary Time Series Analysis},
+  journal = {Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences},
+  year    = {1998},
+  volume  = {454},
+  number  = {1971},
+  pages   = {903--995},
+  doi     = {10.1098/rspa.1998.0193},
+}
+
+@article{dragomiretskiyzosso2014vmd,
+  author  = {Dragomiretskiy, Konstantin and Zosso, Dominique},
+  title   = {Variational Mode Decomposition},
+  journal = {IEEE Transactions on Signal Processing},
+  year    = {2014},
+  volume  = {62},
+  number  = {3},
+  pages   = {531--544},
+  doi     = {10.1109/TSP.2013.2288675},
+}
+
+@article{baurlucey2010,
+  author  = {Baur, Dirk G. and Lucey, Brian M.},
+  title   = {Is Gold a Hedge or a Safe Haven? An Analysis of Stocks, Bonds and Gold},
+  journal = {Financial Review},
+  year    = {2010},
+  volume  = {45},
+  number  = {2},
+  pages   = {217--229},
+  doi     = {10.1111/j.1540-6288.2010.00244.x},
+}
+
+% ---------------------------------------------------------------------
+% Bitcoin / kryptowaluty
+% ---------------------------------------------------------------------
+
+@article{urquhart2016,
+  author  = {Urquhart, Andrew},
+  title   = {The Inefficiency of {Bitcoin}},
+  journal = {Economics Letters},
+  year    = {2016},
+  volume  = {148},
+  pages   = {80--82},
+  doi     = {10.1016/j.econlet.2016.09.019},
+}
+
+@article{katsiampa2017,
+  author  = {Katsiampa, Paraskevi},
+  title   = {Volatility Estimation for {Bitcoin}: A Comparison of {GARCH} Models},
+  journal = {Economics Letters},
+  year    = {2017},
+  volume  = {158},
+  pages   = {3--6},
+  doi     = {10.1016/j.econlet.2017.06.023},
+}
+
+@article{liutsyvinski2021,
+  author  = {Liu, Yukun and Tsyvinski, Aleh},
+  title   = {Risks and Returns of Cryptocurrency},
+  journal = {The Review of Financial Studies},
+  year    = {2021},
+  volume  = {34},
+  number  = {6},
+  pages   = {2689--2727},
+  doi     = {10.1093/rfs/hhaa113},
+}
+
+@article{jaquartdannweinhardt2021,
+  author  = {Jaquart, Patrick and Dann, David and Weinhardt, Christof},
+  title   = {Short-Term Bitcoin Market Prediction via Machine Learning},
+  journal = {The Journal of Finance and Data Science},
+  year    = {2021},
+  volume  = {7},
+  pages   = {45--66},
+  doi     = {10.1016/j.jfds.2021.03.001},
+}
+
+@article{kehinde2025helformer,
+  author  = {Kehinde, T. O. and Adedokun, Oluyinka J. and Joseph, Akpan and Kabirat, Kareem Morenikeji and Akano, Hammed Adebayo and Olanrewaju, Oludolapo A.},
+  title   = {Helformer: An Attention-Based Deep Learning Model for Cryptocurrency Price Forecasting},
+  journal = {Journal of Big Data},
+  year    = {2025},
+  volume  = {12},
+  number  = {1},
+  doi     = {10.1186/s40537-025-01135-4},
+}
+% „HellFormer” z listy zlecenia = Helformer; Crossref nie podaje numeru artykułu
+
+% ---------------------------------------------------------------------
+% Uczenie maszynowe: drzewa, regularyzacja, czynniki, stacking
+% ---------------------------------------------------------------------
+
+@article{breiman2001rf,
+  author  = {Breiman, Leo},
+  title   = {Random Forests},
+  journal = {Machine Learning},
+  year    = {2001},
+  volume  = {45},
+  number  = {1},
+  pages   = {5--32},
+  doi     = {10.1023/A:1010933404324},
+}
+
+@article{friedman2001gbm,
+  author  = {Friedman, Jerome H.},
+  title   = {Greedy Function Approximation: A Gradient Boosting Machine},
+  journal = {The Annals of Statistics},
+  year    = {2001},
+  volume  = {29},
+  number  = {5},
+  pages   = {1189--1232},
+  doi     = {10.1214/aos/1013203451},
+}
+
+@article{tibshirani1996lasso,
+  author  = {Tibshirani, Robert},
+  title   = {Regression Shrinkage and Selection via the Lasso},
+  journal = {Journal of the Royal Statistical Society: Series B (Methodological)},
+  year    = {1996},
+  volume  = {58},
+  number  = {1},
+  pages   = {267--288},
+  doi     = {10.1111/j.2517-6161.1996.tb02080.x},
+}
+
+@article{zouhastie2005enet,
+  author  = {Zou, Hui and Hastie, Trevor},
+  title   = {Regularization and Variable Selection via the Elastic Net},
+  journal = {Journal of the Royal Statistical Society: Series B (Statistical Methodology)},
+  year    = {2005},
+  volume  = {67},
+  number  = {2},
+  pages   = {301--320},
+  doi     = {10.1111/j.1467-9868.2005.00503.x},
+}
+
+@article{stockwatson2002di,
+  author  = {Stock, James H. and Watson, Mark W.},
+  title   = {Macroeconomic Forecasting Using Diffusion Indexes},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2002},
+  volume  = {20},
+  number  = {2},
+  pages   = {147--162},
+  doi     = {10.1198/073500102317351921},
+}
+
+@article{wolpert1992stacking,
+  author  = {Wolpert, David H.},
+  title   = {Stacked Generalization},
+  journal = {Neural Networks},
+  year    = {1992},
+  volume  = {5},
+  number  = {2},
+  pages   = {241--259},
+  doi     = {10.1016/S0893-6080(05)80023-1},
+}
+
+% ---------------------------------------------------------------------
+% Sieci neuronowe i modele fundamentowe szeregów czasowych
+% ---------------------------------------------------------------------
+
+@article{hochreiterschmidhuber1997lstm,
+  author  = {Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
+  title   = {Long Short-Term Memory},
+  journal = {Neural Computation},
+  year    = {1997},
+  volume  = {9},
+  number  = {8},
+  pages   = {1735--1780},
+  doi     = {10.1162/neco.1997.9.8.1735},
+}
+
+@article{fischerkrauss2018,
+  author  = {Fischer, Thomas and Krauss, Christopher},
+  title   = {Deep Learning with Long Short-Term Memory Networks for Financial Market Predictions},
+  journal = {European Journal of Operational Research},
+  year    = {2018},
+  volume  = {270},
+  number  = {2},
+  pages   = {654--669},
+  doi     = {10.1016/j.ejor.2017.11.054},
+}
+
+@article{lim2021tft,
+  author  = {Lim, Bryan and Ar{\i}k, Sercan {\"O}. and Loeff, Nicolas and Pfister, Tomas},
+  title   = {Temporal Fusion Transformers for Interpretable Multi-Horizon Time Series Forecasting},
+  journal = {International Journal of Forecasting},
+  year    = {2021},
+  volume  = {37},
+  number  = {4},
+  pages   = {1748--1764},
+  doi     = {10.1016/j.ijforecast.2021.03.012},
+}
+
+@inproceedings{zeng2023dlinear,
+  author    = {Zeng, Ailing and Chen, Muxi and Zhang, Lei and Xu, Qiang},
+  title     = {Are Transformers Effective for Time Series Forecasting?},
+  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  year      = {2023},
+  volume    = {37},
+  number    = {9},
+  pages     = {11121--11128},
+  doi       = {10.1609/aaai.v37i9.26317},
+}
+
+@inproceedings{woo2024moirai,
+  author    = {Woo, Gerald and Liu, Chenghao and Kumar, Akshat and Xiong, Caiming and Savarese, Silvio and Sahoo, Doyen},
+  title     = {Unified Training of Universal Time Series Forecasting Transformers},
+  booktitle = {Proceedings of the 41st International Conference on Machine Learning (ICML)},
+  year      = {2024},
+  eprint    = {2402.02592},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2402.02592},
+}
+% DOI = DOI preprintu arXiv (DataCite); wersja ICML (PMLR) nie ma DOI
+
+@article{makridakisspiliotisassimakopoulos2018,
+  author  = {Makridakis, Spyros and Spiliotis, Evangelos and Assimakopoulos, Vassilios},
+  title   = {Statistical and Machine Learning Forecasting Methods: Concerns and Ways Forward},
+  journal = {PLOS ONE},
+  year    = {2018},
+  volume  = {13},
+  number  = {3},
+  pages   = {e0194889},
+  doi     = {10.1371/journal.pone.0194889},
+}
+
+@article{makridakis2020m4,
+  author  = {Makridakis, Spyros and Spiliotis, Evangelos and Assimakopoulos, Vassilios},
+  title   = {The {M4} Competition: 100,000 Time Series and 61 Forecasting Methods},
+  journal = {International Journal of Forecasting},
+  year    = {2020},
+  volume  = {36},
+  number  = {1},
+  pages   = {54--74},
+  doi     = {10.1016/j.ijforecast.2019.04.014},
+}
+
+@article{makridakis2022m5,
+  author  = {Makridakis, Spyros and Spiliotis, Evangelos and Assimakopoulos, Vassilios},
+  title   = {{M5} Accuracy Competition: Results, Findings, and Conclusions},
+  journal = {International Journal of Forecasting},
+  year    = {2022},
+  volume  = {38},
+  number  = {4},
+  pages   = {1346--1364},
+  doi     = {10.1016/j.ijforecast.2021.11.013},
+}
+
+% ---------------------------------------------------------------------
+% Testy porównania prognoz, data snooping
+% ---------------------------------------------------------------------
+
+@article{diebold2015dm20,
+  author  = {Diebold, Francis X.},
+  title   = {Comparing Predictive Accuracy, Twenty Years Later: A Personal Perspective on the Use and Abuse of {Diebold--Mariano} Tests},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2015},
+  volume  = {33},
+  number  = {1},
+  pages   = {1--9},
+  doi     = {10.1080/07350015.2014.983236},
+}
+% Crossref podaje strony „1-1”; zakres 1--9 wg wydania drukowanego
+
+@article{clarkwest2007,
+  author  = {Clark, Todd E. and West, Kenneth D.},
+  title   = {Approximately Normal Tests for Equal Predictive Accuracy in Nested Models},
+  journal = {Journal of Econometrics},
+  year    = {2007},
+  volume  = {138},
+  number  = {1},
+  pages   = {291--311},
+  doi     = {10.1016/j.jeconom.2006.05.023},
+}
+
+@article{giacominiwhite2006,
+  author  = {Giacomini, Raffaella and White, Halbert},
+  title   = {Tests of Conditional Predictive Ability},
+  journal = {Econometrica},
+  year    = {2006},
+  volume  = {74},
+  number  = {6},
+  pages   = {1545--1578},
+  doi     = {10.1111/j.1468-0262.2006.00718.x},
+}
+
+@article{white2000rc,
+  author  = {White, Halbert},
+  title   = {A Reality Check for Data Snooping},
+  journal = {Econometrica},
+  year    = {2000},
+  volume  = {68},
+  number  = {5},
+  pages   = {1097--1126},
+  doi     = {10.1111/1468-0262.00152},
+}
+
+@article{hansen2005spa,
+  author  = {Hansen, Peter Reinhard},
+  title   = {A Test for Superior Predictive Ability},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {2005},
+  volume  = {23},
+  number  = {4},
+  pages   = {365--380},
+  doi     = {10.1198/073500105000000063},
+}
+
+% ---------------------------------------------------------------------
+% Metryki, ocena kierunku, ocena probabilistyczna i przedziałowa
+% ---------------------------------------------------------------------
+
+@article{gneiting2011point,
+  author  = {Gneiting, Tilmann},
+  title   = {Making and Evaluating Point Forecasts},
+  journal = {Journal of the American Statistical Association},
+  year    = {2011},
+  volume  = {106},
+  number  = {494},
+  pages   = {746--762},
+  doi     = {10.1198/jasa.2011.r10138},
+}
+
+@article{pesarantimmermann1992,
+  author  = {Pesaran, M. Hashem and Timmermann, Allan},
+  title   = {A Simple Nonparametric Test of Predictive Performance},
+  journal = {Journal of Business \& Economic Statistics},
+  year    = {1992},
+  volume  = {10},
+  number  = {4},
+  pages   = {461--465},
+  doi     = {10.1080/07350015.1992.10509922},
+}
+
+@article{gneitingraftery2007,
+  author  = {Gneiting, Tilmann and Raftery, Adrian E.},
+  title   = {Strictly Proper Scoring Rules, Prediction, and Estimation},
+  journal = {Journal of the American Statistical Association},
+  year    = {2007},
+  volume  = {102},
+  number  = {477},
+  pages   = {359--378},
+  doi     = {10.1198/016214506000001437},
+}
+
+@article{brier1950,
+  author  = {Brier, Glenn W.},
+  title   = {Verification of Forecasts Expressed in Terms of Probability},
+  journal = {Monthly Weather Review},
+  year    = {1950},
+  volume  = {78},
+  number  = {1},
+  pages   = {1--3},
+  doi     = {10.1175/1520-0493(1950)078<0001:VOFEIT>2.0.CO;2},
+}
+
+@article{epstein1969rps,
+  author  = {Epstein, Edward S.},
+  title   = {A Scoring System for Probability Forecasts of Ranked Categories},
+  journal = {Journal of Applied Meteorology},
+  year    = {1969},
+  volume  = {8},
+  number  = {6},
+  pages   = {985--987},
+  doi     = {10.1175/1520-0450(1969)008<0985:ASSFPF>2.0.CO;2},
+}
+
+@article{christoffersen1998,
+  author  = {Christoffersen, Peter F.},
+  title   = {Evaluating Interval Forecasts},
+  journal = {International Economic Review},
+  year    = {1998},
+  volume  = {39},
+  number  = {4},
+  pages   = {841--862},
+  doi     = {10.2307/2527341},
+}
+% strona końcowa uzupełniona ręcznie (Crossref: 841)
+
+@article{kupiec1995,
+  author  = {Kupiec, Paul H.},
+  title   = {Techniques for Verifying the Accuracy of Risk Measurement Models},
+  journal = {The Journal of Derivatives},
+  year    = {1995},
+  volume  = {3},
+  number  = {2},
+  pages   = {73--84},
+  doi     = {10.3905/jod.1995.407942},
+}
+
+@inproceedings{gibbscandes2021aci,
+  author    = {Gibbs, Isaac and Cand{\`e}s, Emmanuel},
+  title     = {Adaptive Conformal Inference Under Distribution Shift},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2021},
+  volume    = {34},
+  eprint    = {2106.00170},
+  archivePrefix = {arXiv},
+  doi       = {10.48550/arXiv.2106.00170},
+}
+% DOI = DOI preprintu arXiv (DataCite)
+
+% ---------------------------------------------------------------------
+% Protokół walk-forward, przeuczenie backtestu, ocena ekonomiczna
+% ---------------------------------------------------------------------
+
+@article{tashman2000,
+  author  = {Tashman, Leonard J.},
+  title   = {Out-of-Sample Tests of Forecasting Accuracy: An Analysis and Review},
+  journal = {International Journal of Forecasting},
+  year    = {2000},
+  volume  = {16},
+  number  = {4},
+  pages   = {437--450},
+  doi     = {10.1016/S0169-2070(00)00065-0},
+}
+
+@article{bergmeirbenitez2012,
+  author  = {Bergmeir, Christoph and Ben{\'i}tez, Jos{\'e} M.},
+  title   = {On the Use of Cross-Validation for Time Series Predictor Evaluation},
+  journal = {Information Sciences},
+  year    = {2012},
+  volume  = {191},
+  pages   = {192--213},
+  doi     = {10.1016/j.ins.2011.12.028},
+}
+
+@article{baileyborweinlopezdepradozhu2014,
+  author  = {Bailey, David H. and Borwein, Jonathan M. and L{\'o}pez de Prado, Marcos and Zhu, Qiji Jim},
+  title   = {Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance},
+  journal = {Notices of the American Mathematical Society},
+  year    = {2014},
+  volume  = {61},
+  number  = {5},
+  pages   = {458--471},
+  doi     = {10.1090/noti1105},
+}
+% strona końcowa uzupełniona ręcznie (Crossref: 458)
+
+@article{baileylopezdeprado2014dsr,
+  author  = {Bailey, David H. and L{\'o}pez de Prado, Marcos},
+  title   = {The Deflated {Sharpe} Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality},
+  journal = {The Journal of Portfolio Management},
+  year    = {2014},
+  volume  = {40},
+  number  = {5},
+  pages   = {94--107},
+  doi     = {10.3905/jpm.2014.40.5.094},
+}
+
+@article{ledoitwolf2008sharpe,
+  author  = {Ledoit, Oliver and Wolf, Michael},
+  title   = {Robust Performance Hypothesis Testing with the {Sharpe} Ratio},
+  journal = {Journal of Empirical Finance},
+  year    = {2008},
+  volume  = {15},
+  number  = {5},
+  pages   = {850--859},
+  doi     = {10.1016/j.jempfin.2008.03.002},
+}
+
+@article{harveyliuzhu2016,
+  author  = {Harvey, Campbell R. and Liu, Yan and Zhu, Heqing},
+  title   = {\ldots and the Cross-Section of Expected Returns},
+  journal = {The Review of Financial Studies},
+  year    = {2016},
+  volume  = {29},
+  number  = {1},
+  pages   = {5--68},
+  doi     = {10.1093/rfs/hhv059},
+}
+
+@article{houxuezhang2020,
+  author  = {Hou, Kewei and Xue, Chen and Zhang, Lu},
+  title   = {Replicating Anomalies},
+  journal = {The Review of Financial Studies},
+  year    = {2020},
+  volume  = {33},
+  number  = {5},
+  pages   = {2019--2133},
+  doi     = {10.1093/rfs/hhy131},
+}
+
+% ---------------------------------------------------------------------
+% Kredyty, depozyty, TFI (obszary nieobecne w raporcie SGH)
+% ---------------------------------------------------------------------
+
+@article{pesaranshinsmith2001ardl,
+  author  = {Pesaran, M. Hashem and Shin, Yongcheol and Smith, Richard J.},
+  title   = {Bounds Testing Approaches to the Analysis of Level Relationships},
+  journal = {Journal of Applied Econometrics},
+  year    = {2001},
+  volume  = {16},
+  number  = {3},
+  pages   = {289--326},
+  doi     = {10.1002/jae.616},
+}
+
+@article{englegranger1987,
+  author  = {Engle, Robert F. and Granger, C. W. J.},
+  title   = {Co-Integration and Error Correction: Representation, Estimation, and Testing},
+  journal = {Econometrica},
+  year    = {1987},
+  volume  = {55},
+  number  = {2},
+  pages   = {251--276},
+  doi     = {10.2307/1913236},
+}
+% strona końcowa uzupełniona ręcznie (Crossref: 251)
+
+@article{johansen1991,
+  author  = {Johansen, S{\o}ren},
+  title   = {Estimation and Hypothesis Testing of Cointegration Vectors in {Gaussian} Vector Autoregressive Models},
+  journal = {Econometrica},
+  year    = {1991},
+  volume  = {59},
+  number  = {6},
+  pages   = {1551--1580},
+  doi     = {10.2307/2938278},
+}
+% strona końcowa uzupełniona ręcznie (Crossref: 1551)
+
+@article{lownmorgan2006,
+  author  = {Lown, Cara S. and Morgan, Donald P.},
+  title   = {The Credit Cycle and the Business Cycle: New Findings Using the Loan Officer Opinion Survey},
+  journal = {Journal of Money, Credit and Banking},
+  year    = {2006},
+  volume  = {38},
+  number  = {6},
+  pages   = {1575--1597},
+  doi     = {10.1353/mcb.2006.0086},
+}
+
+@techreport{hatzius2010fci,
+  author      = {Hatzius, Jan and Hooper, Peter and Mishkin, Frederic S. and Schoenholtz, Kermit L. and Watson, Mark W.},
+  title       = {Financial Conditions Indexes: A Fresh Look after the Financial Crisis},
+  institution = {National Bureau of Economic Research},
+  type        = {NBER Working Paper},
+  number      = {16150},
+  year        = {2010},
+  doi         = {10.3386/w16150},
+}
+
+@article{sirritufano1998,
+  author  = {Sirri, Erik R. and Tufano, Peter},
+  title   = {Costly Search and Mutual Fund Flows},
+  journal = {The Journal of Finance},
+  year    = {1998},
+  volume  = {53},
+  number  = {5},
+  pages   = {1589--1622},
+  doi     = {10.1111/0022-1082.00066},
+}
+
+@article{ghyselssinkovalkanov2007midas,
+  author  = {Ghysels, Eric and Sinko, Arthur and Valkanov, Rossen},
+  title   = {{MIDAS} Regressions: Further Results and New Directions},
+  journal = {Econometric Reviews},
+  year    = {2007},
+  volume  = {26},
+  number  = {1},
+  pages   = {53--90},
+  doi     = {10.1080/07474930600972467},
+}
+
+
+% =====================================================================
+% DO PÓŹNIEJSZEGO POTWIERDZENIA
+% (DOI brak albo nie przeszedł weryfikacji — nie cytować w qmd,
+%  dopóki DOI nie zostanie potwierdzony na doi.org)
+% =====================================================================
+
+% MacKinlay (1997): kandydat DOI 10.2307/2729691 zwraca 404 na doi.org;
+% JEL z 1997 r. prawdopodobnie nie ma DOI (tylko stabilny link JSTOR).
+% Zastępczo dla event study: brownwarner1985 (zweryfikowany wyżej).
+@article{mackinlay1997eventstudy,
+  author  = {MacKinlay, A. Craig},
+  title   = {Event Studies in Economics and Finance},
+  journal = {Journal of Economic Literature},
+  year    = {1997},
+  volume  = {35},
+  number  = {1},
+  pages   = {13--39},
+  note    = {DOI niepotwierdzony},
+}
