@@ -37,3 +37,10 @@ ZADANIE (priorytet nad checklistą): zdiagnozować gdzie jednostki się mieszaj�
 regresyjny (mała seria syntetyczna: przy poprawnym setupie skill skonczony, RMSE
 w jednostkach zwrotu), dopiero potem rerun configu 1 i reszta checklisty.
 Pliki starego przebiegu zachowaj jako *_BROKEN.json/md (nie usuwaj — ślad audytowy).
+
+## AKTUALIZACJA 13.11 ~16:25 UTC
+- Config 4/5 (oil tier1) ZAKOŃCZONY BŁĘDEM: RC=1 — ValueError: Input X contains NaN
+  (SVR w lstm_svr; źródło: ujemne ceny WTI 2020 → log NaN w cechach).
+  WYMAGA: fix (imputer lub dropna w feature_fn dla oil) + re-run configu 4.
+- Config 5/5 (wheat tier1) w toku.
+- configs 1-3 zakończone RC=0 (json+md w results/, ramki parquet w preds_sgh).
