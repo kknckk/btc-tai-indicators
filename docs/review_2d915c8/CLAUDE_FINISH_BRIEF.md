@@ -44,3 +44,11 @@ Pliki starego przebiegu zachowaj jako *_BROKEN.json/md (nie usuwaj — ślad aud
   WYMAGA: fix (imputer lub dropna w feature_fn dla oil) + re-run configu 4.
 - Config 5/5 (wheat tier1) w toku.
 - configs 1-3 zakończone RC=0 (json+md w results/, ramki parquet w preds_sgh).
+
+## BATCH ZAKOŃCZONY 14.11 07:18 UTC (exit 0, 67 h)
+- RC=0: wig20_tier1, wig20_tier2, gold_tier1, wheat_tier1. RC=1: oil_tier1 (NaN w SVR — fix + rerun).
+- Wyniki: results/sgh_{wig20_tier1,wig20_tier2,gold_tier1,wheat_tier1}_ret_cpu.{json,md}
+- Ramki: results/preds_sgh/ = 39 parquet (wig20 tier2: 21, gold: 9, wheat: 9; wig20 tier1 bez ramek — rerun).
+- PIERWSZE zadanie: fix mieszania jednostek w metrykach (diagnoza w sekcji PILNE powyżej),
+  potem przeliczenie wszystkich serii Z RAMEK (preds_sgh) i DM/MCS zbiorczy, rerun configu 1
+  i ropy, dopisanie liczb do qmd per config, render, review, push.
